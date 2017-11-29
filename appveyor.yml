@@ -1,0 +1,22 @@
+version: 1.0.0-ci{build}
+
+environment:
+  CPPUTEST_HOME: C:\cpputest
+  Configuration: Release
+  matrix:
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - Platform: MSVC64
+    PlatformToolset: v141
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+install:
+- cmd: git submodule update --init --recursive
+- ps: ci\appveyor_ci_install_cpputest.ps1
+
+build_script:
+- ps: ci\appveyor_ci_build.ps1
+
+test_script:
+- ps: ci\appveyor_ci_test.ps1
