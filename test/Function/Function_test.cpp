@@ -1174,6 +1174,217 @@ TEST( Function, ReferenceToConstTemplateClassReturnNoParameters )
 }
 
 /*
+ * Check mock generation of a function without parameters and returning pointer to typedef for const void value.
+ */
+TEST( Function, ConstVoidTypedefPointerReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    ClangTestHelper clangTest( "typedef const void Type1;\n"
+                               "Type1* function1();" );
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "Type1 * function1()\n{\n"
+                  "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning pointer to const typedef for void value.
+ */
+TEST( Function, VoidTypedefConstPointerReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    ClangTestHelper clangTest( "typedef void Type1;\n"
+                               "const Type1* function1();" );
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "const Type1 * function1()\n{\n"
+                  "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning pointer to typedef for non-const primitive type value.
+ */
+TEST( Function, PrimitiveTypeTypedefPointerReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s Type1;\n"
+                "Type1* function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type1 * function1()\n{\n"
+                      "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning pointer to typedef for const primitive type value.
+ */
+TEST( Function, ConstPrimitiveTypeTypedefPointerReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef const %s Type1;\n"
+                "Type1* function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type1 * function1()\n{\n"
+                      "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning pointer to const typedef for primitive type value.
+ */
+TEST( Function, PrimitiveTypeTypedefConstPointerReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s Type1;\n"
+                "const Type1* function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "const Type1 * function1()\n{\n"
+                      "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
  * Check mock generation of a function without parameters and returning a typedef for a pointer to non-const primitive type.
  */
 TEST( Function, PointerToPrimitiveTypeTypedefReturnNoParameters )
@@ -1307,7 +1518,7 @@ TEST( Function, PointerToPrimitiveTypeTypedefConstReturnNoParameters )
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type1 function1()\n{\n"
-                      "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
 
         // Cleanup
@@ -1435,6 +1646,405 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
             // Cleanup
         }
     }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
+ */
+TEST( Function, PrimitiveTypePointerTypedefTypedefReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s* Type1;\n"
+                "typedef Type1 Type2;\n"
+                "Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type2 function1()\n{\n"
+                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
+ */
+TEST( Function, PrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s* Type1;\n"
+                "typedef const Type1 Type2;\n"
+                "Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type2 function1()\n{\n"
+                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a primitive type.
+ */
+TEST( Function, PrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s* Type1;\n"
+                "typedef Type1 Type2;\n"
+                "const Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "const Type2 function1()\n{\n"
+                      "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
+ */
+TEST( Function, ConstPrimitiveTypePointerTypedefTypedefReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef const %s* Type1;\n"
+                "typedef Type1 Type2;\n"
+                "Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type2 function1()\n{\n"
+                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
+ */
+TEST( Function, ConstPrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef const %s* Type1;\n"
+                "typedef const Type1 Type2;\n"
+                "Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "Type2 function1()\n{\n"
+                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a const primitive type.
+ */
+TEST( Function, ConstPrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef const %s* Type1;\n"
+                "typedef Type1 Type2;\n"
+                "const Type2 function1();", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "const Type2 function1()\n{\n"
+                      "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const typedef for a string.
+ */
+TEST( Function, StringTypedefTypedefReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    ClangTestHelper clangTest(
+            "typedef const char* Type1;\n"
+            "typedef Type1 Type2;\n"
+            "Type2 function1();" );
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "Type2 function1()\n{\n"
+                  "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double non-const / const typedef for a string.
+ */
+TEST( Function, StringTypedefConstTypedefReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    ClangTestHelper clangTest(
+            "typedef const char* Type1;\n"
+            "typedef const Type1 Type2;\n"
+            "Type2 function1();" );
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "Type2 function1()\n{\n"
+                  "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a double const / non-const typedef for a string.
+ */
+TEST( Function, StringConstTypedefTypedefReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    ClangTestHelper clangTest(
+            "typedef const char* Type1;\n"
+            "typedef Type1 Type2;\n"
+            "const Type2 function1();" );
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "const Type2 function1()\n{\n"
+                  "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
 }
 
 //*************************************************************************************************
@@ -2427,9 +3037,9 @@ TEST( Function, VoidReturnVoidTypedefPointerParameter )
 }
 
 /*
- * Check mock generation of a function with pointer to non-const primitive type parameter and without return value.
+ * Check mock generation of a function with pointer to typedef for non-const primitive type parameter and without return value.
  */
-TEST( Function, VoidReturnPrimitiveTypedefPointerParameter )
+TEST( Function, VoidReturnPrimitiveTypeTypedefPointerParameter )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -2439,8 +3049,9 @@ TEST( Function, VoidReturnPrimitiveTypedefPointerParameter )
         std::tie( originalType, mockedType ) = typeData;
 
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "typedef %s Type1;\n"
-                                                    "void function1(Type1* p);", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s Type1;\n"
+                "void function1(Type1* p);", originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2469,13 +3080,12 @@ TEST( Function, VoidReturnPrimitiveTypedefPointerParameter )
     }
 }
 
-#if 0
 /*
- * Check mock generation of a function with pointer to const primitive type parameter and without return value.
+ * Check mock generation of a function with pointer to typedef for const primitive type parameter and without return value.
  */
-TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
+TEST( Function, VoidReturnConstPrimitiveTypeTypedefPointerParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
     testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
 
     for( auto typeData : testedTypes )
@@ -2486,7 +3096,9 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
         std::tie( originalType, mockedType ) = typeData;
 
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(const %s* p);", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat(
+                "typedef const %s Type1;\n"
+                "void function1(Type1* p);", originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2507,17 +3119,60 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
         // Verify
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "void function1(const %s * p)\n{\n"
-                "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                "}\n", mockedType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
+                      "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
+                      "}\n", results[0].c_str() );
 
         // Cleanup
     }
 }
 
-#endif
+/*
+ * Check mock generation of a function with pointer to const typedef for non-const primitive type parameter and without return value.
+ */
+TEST( Function, VoidReturnPrimitiveTypeTypedefConstPointerParameter )
+{
+    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
+    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        std::string originalType;
+        std::string mockedType;
+        std::tie( originalType, mockedType ) = typeData;
+
+        Config config( false );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s Type1;\n"
+                "void function1(const Type1* p);", originalType.c_str() );
+        ClangTestHelper clangTest( testHeader.asCharString() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
+                      "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
+                      "}\n", results[0].c_str() );
+
+        // Cleanup
+    }
+}
 
 /*
  * Check mock generation of a function with a pointer to typedef of a class parameter and without return value.

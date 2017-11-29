@@ -5,42 +5,7 @@
 
 Function::Function( const CXCursor &cursor, const Config &config )
     : m_cursor( cursor ), m_config( config )
-{
-#if 0
-    std::string name = getQualifiedName( cursor );
-
-    std::cout << "Function:" << std::endl;
-    std::cout << "  - Name = " << name << std::endl;
-    std::cout << "  - Return Type = " << clang_getTypeSpelling( clang_getCursorResultType( cursor ) ) << std::endl;
-    std::cout << "  - Return TypeKind = " << clang_getTypeKindSpelling( clang_getCursorResultType( cursor ).kind ) << std::endl;
-    std::cout << "  - Is Definition = " << ( clang_isCursorDefinition( cursor ) ? "YES" : "NO" ) << std::endl;
-    std::cout << "  - Has Definition = " << ( !clang_Cursor_isNull( clang_getCursorDefinition( cursor ) ) ? "YES" : "NO" ) << std::endl;
-    std::cout << "  - Is Canonical = " << ( clang_equalCursors( cursor, clang_getCanonicalCursor(cursor) ) ? "YES" : "NO" ) << std::endl;
-    std::cout << "  - Is Inline = " << ( clang_Cursor_isFunctionInlined( cursor ) ? "YES" : "NO" ) << std::endl;
-
-    int numArgs = clang_Cursor_getNumArguments( cursor );
-    for( int i = 0; i < numArgs; i++ )
-    {
-        const CXCursor arg = clang_Cursor_getArgument( cursor, i );
-
-        std::cout << "  - Param " << (i + 1) << ":" << std::endl;
-        std::cout << "    - Name = " << clang_getCursorSpelling( arg ) << std::endl;
-        CXType argType = clang_getCursorType( arg );
-        std::cout << "    - Type = " << clang_getTypeSpelling( argType ) << std::endl;
-        //std::cout << "    - Type = " << clang_getTypeSpelling( clang_getArgType( clang_getCursorType( cursor ), i ) ) << std::endl;
-        std::cout << "    - TypeKind = " << clang_getTypeKindSpelling( argType.kind ) << std::endl;
-        std::cout << "    - Const = " << (clang_isConstQualifiedType( argType ) ? "YES" : "NO") << std::endl;
-        if( ( argType.kind == CXType_Pointer ) || ( argType.kind == CXType_LValueReference )  || ( argType.kind == CXType_RValueReference ) )
-        {
-            CXType pointeeType = clang_getPointeeType( argType );
-
-            std::cout << "      - Pointer Type = " << clang_getTypeSpelling( pointeeType ) << std::endl;
-            std::cout << "      - Pointer TypeKind = " << clang_getTypeKindSpelling( pointeeType.kind ) << std::endl;
-            std::cout << "      - Pointer Const = " << (clang_isConstQualifiedType( pointeeType ) ? "YES" : "NO") << std::endl;
-        }
-    }
-#endif
-}
+{}
 
 Function::~Function()
 {}
@@ -252,7 +217,7 @@ void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, boo
         case CXType_Pointer:
         case CXType_LValueReference:
         case CXType_RValueReference:
-            ProcessReturnTypeFinalPointer( returnType, mock, inheritConst );
+            ProcessReturnTypeFinalPointer( returnType, mock );
             break;
 
         case CXType_Typedef:
@@ -279,7 +244,7 @@ void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, boo
     }
 }
 
-void Function::ProcessReturnTypeFinalPointer( const CXType &returnType, Mock &mock, bool inheritConst ) const
+void Function::ProcessReturnTypeFinalPointer( const CXType &returnType, Mock &mock ) const
 {
     const CXType pointeeType = clang_getPointeeType( returnType );
     bool isPointeeConst = clang_isConstQualifiedType( pointeeType );
@@ -290,29 +255,37 @@ void Function::ProcessReturnTypeFinalPointer( const CXType &returnType, Mock &mo
     {
         mock.body += ".returnStringValue()";
     }
-    else if( isPointeeConst || inheritConst )
-    {
-        mock.body += ".returnConstPointerValue()";
-    }
     else
     {
-        mock.body += ".returnPointerValue()";
+        // Resolve possible typedefs
+        const CXType underlyingPointeeType = clang_getCanonicalType( pointeeType );
+        bool isUnderlyingPointeeConst = clang_isConstQualifiedType( underlyingPointeeType );
+
+        if( isPointeeConst || isUnderlyingPointeeConst )
+        {
+            mock.body += ".returnConstPointerValue()";
+        }
+        else
+        {
+            mock.body += ".returnPointerValue()";
+        }
     }
 }
 
 void Function::ProcessReturnTypeFinalTypedef( const CXType &returnType, Mock &mock, bool inheritConst ) const
 {
     const CXType underlyingType = clang_getCanonicalType( returnType );
-    bool isTypedefConst = clang_isConstQualifiedType( returnType ) || inheritConst;
 
     if( ( underlyingType.kind == CXType_Pointer ) ||
         ( underlyingType.kind == CXType_LValueReference ) ||
         ( underlyingType.kind == CXType_RValueReference ) )
     {
-        ProcessReturnTypeFinalPointer( underlyingType, mock, isTypedefConst );
+        ProcessReturnTypeFinalPointer( underlyingType, mock );
     }
     else
     {
+        bool isTypedefConst = clang_isConstQualifiedType( returnType ) || inheritConst;
+
         ProcessReturnTypeFinal( underlyingType, mock, isTypedefConst, 0 );
     }
 }
@@ -379,12 +352,12 @@ bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
             break;
 
         case CXType_Pointer:
-            ProcessArgumentTypePointer( argType, origArgType, inheritConst, mock );
+            ProcessArgumentTypePointer( argType, origArgType, mock );
             break;
 
         case CXType_LValueReference:
         case CXType_RValueReference:
-            ProcessArgumentTypePointer( argType, origArgType, inheritConst, mock );
+            ProcessArgumentTypePointer( argType, origArgType, mock );
             passArgumentAddress = true;
             break;
 
@@ -408,60 +381,58 @@ bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
     return passArgumentAddress;
 }
 
-void Function::ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
+void Function::ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, Mock &mock ) const
 {
     const CXType pointeeType = clang_getPointeeType( argType );
     bool isPointeeConst = clang_isConstQualifiedType( pointeeType );
 
-    // Resolve possible typedefs
-    const CXType underlyingPointeeType = clang_getCanonicalType( pointeeType );
-    bool isUnderlyingPointeeConst = clang_isConstQualifiedType( underlyingPointeeType );
-
-    if( isPointeeConst || isUnderlyingPointeeConst || inheritConst )
+    if( ( argType.kind == CXType_Pointer ) &&
+        ( pointeeType.kind == CXType_Char_S) &&
+        isPointeeConst )
     {
-        switch( underlyingPointeeType.kind )
-        {
-            case CXType_Char_S:
-                if( isUnderlyingPointeeConst )
-                {
-                    mock.body += ".withStringParameter(";
-                }
-                else
-                {
-                    mock.body += ".withConstPointerParameter(";
-                }
-                break;
-
-            case CXType_Record:
-            case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
-                ProcessArgumentTypeRecord( underlyingPointeeType, origArgType, true, true, mock );
-                break;
-
-            default:
-                mock.body += ".withConstPointerParameter(";
-                break;
-        }
+        mock.body += ".withStringParameter(";
     }
     else
     {
-        switch( underlyingPointeeType.kind )
+        // Resolve possible typedefs
+        const CXType underlyingPointeeType = clang_getCanonicalType( pointeeType );
+        bool isUnderlyingPointeeConst = clang_isConstQualifiedType( underlyingPointeeType );
+
+        if( isPointeeConst || isUnderlyingPointeeConst )
         {
-            case CXType_Void:
-            case CXType_Pointer:
-            case CXType_LValueReference:
-            case CXType_RValueReference:
-                mock.body += ".withPointerParameter(";
-                break;
+            switch( underlyingPointeeType.kind )
+            {
+                case CXType_Record:
+                case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
+                    ProcessArgumentTypeRecord( underlyingPointeeType, origArgType, true, true, mock );
+                    break;
 
-            case CXType_Record:
-            case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
-                ProcessArgumentTypeRecord( underlyingPointeeType, origArgType, false, true, mock );
-                break;
+                default:
+                    mock.body += ".withConstPointerParameter(";
+                    break;
+            }
+        }
+        else
+        {
+            switch( underlyingPointeeType.kind )
+            {
+                case CXType_Void:
+                case CXType_Pointer:
+                case CXType_LValueReference:
+                case CXType_RValueReference:
+                    mock.body += ".withPointerParameter(";
+                    break;
 
-            default:
-                // TODO: Differentiate pointer from output using user comments
-                mock.body += ".withOutputParameter(";
-                break;
+                case CXType_Record:
+                case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
+                    ProcessArgumentTypeRecord( underlyingPointeeType, origArgType, false, true, mock );
+                    break;
+
+                default:
+                    // TODO: Differentiate pointer from output using user comments
+                    mock.body += ".withOutputParameter(";
+                    break;
+            }
         }
     }
 }
@@ -518,6 +489,7 @@ void Function::ProcessArgumentTypeRecord( const CXType &argType, const CXType &o
     mock.body += getBareTypeSpelling( m_config.UseUnderlyingTypedefType() ? argType : origArgType ) + "\", ";
 }
 
+#if 0
 void Function::ProcessArgumentTypePointedTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
 {
     const CXType underlyingType = clang_getCanonicalType( argType );
@@ -559,3 +531,4 @@ void Function::ProcessArgumentTypePointedType( const CXType &argType, const CXTy
             break;
     }
 }
+#endif

@@ -39,15 +39,15 @@ protected:
     unsigned int ProcessReturnTypeInitialPointer( const CXType & returnType, Mock &mock ) const;
     unsigned int ProcessReturnTypeInitialTypedef( const CXType & returnType, Mock &mock ) const;
     void ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, bool inheritConst, unsigned int castsPerformed ) const;
-    void ProcessReturnTypeFinalPointer( const CXType &returnType, Mock &mock, bool inheritConst ) const;
+    void ProcessReturnTypeFinalPointer( const CXType &returnType, Mock &mock ) const;
     void ProcessReturnTypeFinalTypedef( const CXType &returnType, Mock &mock, bool inheritConst ) const;
     void ProcessArgument( const CXCursor &arg, Mock &mock ) const;
     bool ProcessArgumentType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
-    void ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
+    void ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, Mock &mock ) const;
     bool ProcessArgumentTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
     void ProcessArgumentTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee, Mock &mock ) const;
-    void ProcessArgumentTypePointedTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
-    void ProcessArgumentTypePointedType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
+    //void ProcessArgumentTypePointedTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
+    //void ProcessArgumentTypePointedType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const;
 };
 
 #endif // header guard
