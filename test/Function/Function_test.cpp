@@ -29,7 +29,15 @@
 
 TEST_GROUP( Function )
 {
-    const std::vector< std::tuple< std::string, std::string, bool, std::string > > primitiveTypes {
+    struct primitiveTypeData
+    {
+        std::string originalType;
+        std::string mockedType;
+        bool casted;
+        std::string cpputestFunctionType;
+    };
+
+    const std::vector< struct primitiveTypeData > primitiveTypes {
         { "int", "int", false, "Int" },
         { "unsigned int", "unsigned int", false, "UnsignedInt" },
         { "signed int", "int", false, "Int" },
@@ -47,7 +55,13 @@ TEST_GROUP( Function )
         { "double", "double", false, "Double" },
     };
 
-    const std::vector< std::tuple< std::string, std::string > > primitivePointedTypesWithoutString {
+    struct primitivePointedTypeData
+    {
+        std::string originalType;
+        std::string mockedType;
+    };
+
+    const std::vector< struct primitivePointedTypeData > primitivePointedTypesWithoutString {
         { "int", "int" },
         { "unsigned int", "unsigned int" },
         { "signed int", "int" },
@@ -64,13 +78,18 @@ TEST_GROUP( Function )
         { "double", "double" },
     };
 
-    std::vector< std::tuple< std::string, std::string > > primitivePointedTypesWithString = primitivePointedTypesWithoutString;
+    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithString = primitivePointedTypesWithoutString;
+
+    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithStringAndVoid = primitivePointedTypesWithoutString;
+
+    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithoutStringWithVoid = primitivePointedTypesWithoutString;
 
     TEST_SETUP()
     {
         primitivePointedTypesWithString.insert( primitivePointedTypesWithString.end(), { { "char", "char" } } );
+        primitivePointedTypesWithStringAndVoid.insert( primitivePointedTypesWithStringAndVoid.end(), { { "char", "char" }, { "void", "void" } } );
+        primitivePointedTypesWithoutStringWithVoid.insert( primitivePointedTypesWithoutStringWithVoid.end(), { { "void", "void" } } );
     }
-
 };
 
 /*===========================================================================
@@ -189,14 +208,8 @@ TEST( Function, PrimitiveTypeReturnNoParameters )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        bool casted;
-        std::string cpputestFunctionType;
-        std::tie( originalType, mockedType, casted, cpputestFunctionType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "%s function1();", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "%s function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -218,19 +231,19 @@ TEST( Function, PrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult;
-        if( casted )
+        if( typeData.casted )
         {
             expectedResult= StringFromFormat(
                     "%s function1()\n{\n"
                     "    return static_cast<%s>( mock().actualCall(\"function1\").return%sValue() );\n"
-                    "}\n", mockedType.c_str(), mockedType.c_str(), cpputestFunctionType.c_str() );
+                    "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         }
         else
         {
             expectedResult= StringFromFormat(
                     "%s function1()\n{\n"
                     "    return mock().actualCall(\"function1\").return%sValue();\n"
-                    "}\n", mockedType.c_str(), cpputestFunctionType.c_str() );
+                    "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         }
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
@@ -386,16 +399,10 @@ TEST( Function, PrimitiveTypeTypedefReturnNoParameters )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        bool casted;
-        std::string cpputestFunctionType;
-        std::tie( originalType, mockedType, casted, cpputestFunctionType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "Type1 function1();", originalType.c_str() );
+                "Type1 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -419,7 +426,7 @@ TEST( Function, PrimitiveTypeTypedefReturnNoParameters )
         SimpleString expectedResult= StringFromFormat(
                 "Type1 function1()\n{\n"
                 "    return static_cast<Type1>( mock().actualCall(\"function1\").return%sValue() );\n"
-                "}\n", cpputestFunctionType.c_str() );
+                "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -645,12 +652,8 @@ TEST( Function, PointerToPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "%s* function1();", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "%s* function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -674,7 +677,7 @@ TEST( Function, PointerToPrimitiveTypeReturnNoParameters )
         SimpleString expectedResult= StringFromFormat(
                 "%s * function1()\n{\n"
                 "    return static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
-                "}\n", mockedType.c_str(), mockedType.c_str() );
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -689,12 +692,8 @@ TEST( Function, PointerToConstPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithoutString )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "const %s* function1();", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "const %s* function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -718,7 +717,7 @@ TEST( Function, PointerToConstPrimitiveTypeReturnNoParameters )
         SimpleString expectedResult= StringFromFormat(
                 "const %s * function1()\n{\n"
                 "    return static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                "}\n", mockedType.c_str(), mockedType.c_str() );
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -911,12 +910,8 @@ TEST( Function, ReferenceToPrimitiveTypeReturnNoParameters )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "%s%s function1();", originalType.c_str(), referenceType.c_str() );
+            SimpleString testHeader = StringFromFormat( "%s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -940,7 +935,7 @@ TEST( Function, ReferenceToPrimitiveTypeReturnNoParameters )
             SimpleString expectedResult= StringFromFormat(
                     "%s %s function1()\n{\n"
                     "    return * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
-                    "}\n", mockedType.c_str(), referenceType.c_str(), mockedType.c_str() );
+                    "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
             // Cleanup
@@ -960,12 +955,8 @@ TEST( Function, ReferenceToConstPrimitiveTypeReturnNoParameters )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "const %s%s function1();", originalType.c_str(), referenceType.c_str() );
+            SimpleString testHeader = StringFromFormat( "const %s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -989,7 +980,7 @@ TEST( Function, ReferenceToConstPrimitiveTypeReturnNoParameters )
             SimpleString expectedResult= StringFromFormat(
                     "const %s %s function1()\n{\n"
                     "    return * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                    "}\n", mockedType.c_str(), referenceType.c_str(), mockedType.c_str() );
+                    "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
             // Cleanup
@@ -1248,20 +1239,13 @@ TEST( Function, VoidTypedefConstPointerReturnNoParameters )
  */
 TEST( Function, PrimitiveTypeTypedefPointerReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "Type1* function1();", originalType.c_str() );
+                "Type1* function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1295,20 +1279,13 @@ TEST( Function, PrimitiveTypeTypedefPointerReturnNoParameters )
  */
 TEST( Function, ConstPrimitiveTypeTypedefPointerReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
-                "Type1* function1();", originalType.c_str() );
+                "Type1* function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1342,20 +1319,13 @@ TEST( Function, ConstPrimitiveTypeTypedefPointerReturnNoParameters )
  */
 TEST( Function, PrimitiveTypeTypedefConstPointerReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "const Type1* function1();", originalType.c_str() );
+                "const Type1* function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1389,20 +1359,13 @@ TEST( Function, PrimitiveTypeTypedefConstPointerReturnNoParameters )
  */
 TEST( Function, PointerToPrimitiveTypeTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "Type1 function1();", originalType.c_str() );
+                "Type1 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1436,20 +1399,13 @@ TEST( Function, PointerToPrimitiveTypeTypedefReturnNoParameters )
  */
 TEST( Function, PointerToConstPrimitiveTypeTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
-                "Type1 function1();", originalType.c_str() );
+                "Type1 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1483,20 +1439,13 @@ TEST( Function, PointerToConstPrimitiveTypeTypedefReturnNoParameters )
  */
 TEST( Function, PointerToPrimitiveTypeTypedefConstReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "const Type1 function1();", originalType.c_str() );
+                "const Type1 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1609,14 +1558,10 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
-                    "Type1 function1();", originalType.c_str(), referenceType.c_str() );
+                    "Type1 function1();", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -1640,7 +1585,7 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
             SimpleString expectedResult= StringFromFormat(
                     "Type1 function1()\n{\n"
                     "    return static_cast<Type1>( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
-                    "}\n", mockedType.c_str() );
+                    "}\n", typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
             // Cleanup
@@ -1653,21 +1598,14 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
  */
 TEST( Function, PrimitiveTypePointerTypedefTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "Type2 function1();", originalType.c_str() );
+                "Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1701,21 +1639,14 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefReturnNoParameters )
  */
 TEST( Function, PrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
-                "Type2 function1();", originalType.c_str() );
+                "Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1749,21 +1680,14 @@ TEST( Function, PrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
  */
 TEST( Function, PrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "const Type2 function1();", originalType.c_str() );
+                "const Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1797,21 +1721,14 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
  */
 TEST( Function, ConstPrimitiveTypePointerTypedefTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "Type2 function1();", originalType.c_str() );
+                "Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1845,21 +1762,14 @@ TEST( Function, ConstPrimitiveTypePointerTypedefTypedefReturnNoParameters )
  */
 TEST( Function, ConstPrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
-                "Type2 function1();", originalType.c_str() );
+                "Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -1893,21 +1803,14 @@ TEST( Function, ConstPrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
  */
 TEST( Function, ConstPrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "const Type2 function1();", originalType.c_str() );
+                "const Type2 function1();", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2059,14 +1962,8 @@ TEST( Function, VoidReturnPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        bool unused;
-        std::string cpputestFunctionType;
-        std::tie( originalType, mockedType, unused, cpputestFunctionType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(%s p);", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "void function1(%s p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2090,7 +1987,7 @@ TEST( Function, VoidReturnPrimitiveTypeParameter )
         SimpleString expectedResult = StringFromFormat(
                 "void function1(%s p)\n{\n"
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
-                "}\n", mockedType.c_str(), cpputestFunctionType.c_str() );
+                "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -2245,16 +2142,10 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        bool casted;
-        std::string cpputestFunctionType;
-        std::tie( originalType, mockedType, casted, cpputestFunctionType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(Type1 p);", originalType.c_str() );
+                "void function1(Type1 p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2278,7 +2169,7 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefParameter )
         SimpleString expectedResult= StringFromFormat(
                 "void function1(Type1 p)\n{\n"
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
-                "}\n", cpputestFunctionType.c_str() );
+                "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -2470,12 +2361,8 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(%s* p);", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "void function1(%s* p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2499,7 +2386,7 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeParameter )
         SimpleString expectedResult = StringFromFormat(
                 "void function1(%s * p)\n{\n"
                 "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
-                "}\n", mockedType.c_str() );
+                "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -2511,18 +2398,11 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeParameter )
  */
 TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(const %s* p);", originalType.c_str() );
+        SimpleString testHeader = StringFromFormat( "void function1(const %s* p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -2546,7 +2426,7 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
         SimpleString expectedResult = StringFromFormat(
                 "void function1(const %s * p)\n{\n"
                 "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                "}\n", mockedType.c_str() );
+                "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
@@ -2739,12 +2619,8 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeParameter )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "void function1(%s%s p);", originalType.c_str(), referenceType.c_str() );
+            SimpleString testHeader = StringFromFormat( "void function1(%s%s p);", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -2768,7 +2644,7 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeParameter )
             SimpleString expectedResult = StringFromFormat(
                       "void function1(%s %s p)\n{\n"
                       "    mock().actualCall(\"function1\").withOutputParameter(\"p\", &p);\n"
-                      "}\n", mockedType.c_str(), referenceType.c_str() );
+                      "}\n", typeData.mockedType.c_str(), referenceType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
             // Cleanup
@@ -2788,12 +2664,8 @@ TEST( Function, VoidReturnReferenceToConstPrimitiveTypeParameter )
         for( auto typeData : primitivePointedTypesWithoutString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "void function1(const %s%s p);", originalType.c_str(), referenceType.c_str() );
+            SimpleString testHeader = StringFromFormat( "void function1(const %s%s p);", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -2817,7 +2689,7 @@ TEST( Function, VoidReturnReferenceToConstPrimitiveTypeParameter )
             SimpleString expectedResult = StringFromFormat(
                       "void function1(const %s %s p)\n{\n"
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", &p);\n"
-                      "}\n", mockedType.c_str(), referenceType.c_str() );
+                      "}\n", typeData.mockedType.c_str(), referenceType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
             // Cleanup
@@ -3044,14 +2916,10 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefPointerParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(Type1* p);", originalType.c_str() );
+                "void function1(Type1* p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3085,20 +2953,13 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefPointerParameter )
  */
 TEST( Function, VoidReturnConstPrimitiveTypeTypedefPointerParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
-                "void function1(Type1* p);", originalType.c_str() );
+                "void function1(Type1* p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3132,20 +2993,13 @@ TEST( Function, VoidReturnConstPrimitiveTypeTypedefPointerParameter )
  */
 TEST( Function, VoidReturnPrimitiveTypeTypedefConstPointerParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(const Type1* p);", originalType.c_str() );
+                "void function1(const Type1* p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3325,14 +3179,10 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "void function1(Type1 p);", originalType.c_str() );
+                "void function1(Type1 p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3366,20 +3216,13 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefParameter )
  */
 TEST( Function, VoidReturnPointerToConstPrimitiveTypeTypedefParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithoutString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
-                "void function1(Type1 p);", originalType.c_str() );
+                "void function1(Type1 p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3413,20 +3256,13 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeTypedefParameter )
  */
 TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefConstParameter )
 {
-    std::vector< std::tuple< std::string, std::string > > testedTypes = primitivePointedTypesWithString;
-    testedTypes.insert( testedTypes.end(), { { "void", "void" } } );
-
-    for( auto typeData : testedTypes )
+    for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        std::tie( originalType, mockedType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "void function1(const Type1 p);", originalType.c_str() );
+                "void function1(const Type1 p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3611,14 +3447,10 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeTypedefParameter )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            std::string originalType;
-            std::string mockedType;
-            std::tie( originalType, mockedType ) = typeData;
-
             Config config( false );
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
-                    "void function1(Type1 p);", originalType.c_str(), referenceType.c_str() );
+                    "void function1(Type1 p);", typeData.originalType.c_str(), referenceType.c_str() );
             ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
@@ -3656,17 +3488,11 @@ TEST( Function, VoidReturnPrimitiveTypeDoubleTypedefParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        std::string originalType;
-        std::string mockedType;
-        bool casted;
-        std::string cpputestFunctionType;
-        std::tie( originalType, mockedType, casted, cpputestFunctionType ) = typeData;
-
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "typedef Type1 Type2;\n"
-                "void function1(Type2 p);", originalType.c_str() );
+                "void function1(Type2 p);", typeData.originalType.c_str() );
         ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
@@ -3690,7 +3516,7 @@ TEST( Function, VoidReturnPrimitiveTypeDoubleTypedefParameter )
         SimpleString expectedResult= StringFromFormat(
                 "void function1(Type2 p)\n{\n"
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
-                "}\n", cpputestFunctionType.c_str() );
+                "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
 
         // Cleanup
