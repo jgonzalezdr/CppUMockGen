@@ -30,7 +30,7 @@ std::string Function::GenerateMock() const
 
     // Get & process function return type (initial stage)
     const CXType returnType = clang_getCursorResultType( m_cursor );
-    unsigned int castsPerformed = ProcessReturnTypeInitial( returnType, mock );
+    unsigned int pendingCallClosures = ProcessReturnTypeInitial( returnType, mock );
 
     // Get & process function name
     std::string funcName = getQualifiedName( m_cursor );
@@ -51,14 +51,14 @@ std::string Function::GenerateMock() const
     }
 
     // Process function return type (final stage)
-    ProcessReturnTypeFinal( returnType, mock, false, castsPerformed );
+    ProcessReturnTypeFinal( returnType, mock, false, pendingCallClosures );
 
     return mock.signature + ")\n{\n    " + mock.body + ";\n}\n";
 }
 
 unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock &mock ) const
 {
-    unsigned int castsPerformed = 0;
+    unsigned int pendingCallClosures = 0;
 
     mock.signature += clang_getTypeSpelling( returnType );
 
@@ -82,18 +82,18 @@ unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock 
         case CXType_Pointer:
         case CXType_LValueReference:
         case CXType_RValueReference:
-            castsPerformed = ProcessReturnTypeInitialPointer( returnType, mock );
+            pendingCallClosures = ProcessReturnTypeInitialPointer( returnType, mock );
             break;
 
         case CXType_Record:
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             // Dereference and cast mock return pointer to proper pointer type
             mock.body += "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( ";
-            castsPerformed++;
+            pendingCallClosures++;
             break;
 
         case CXType_Typedef:
-            castsPerformed = ProcessReturnTypeInitialTypedef( returnType, mock );
+            pendingCallClosures = ProcessReturnTypeInitialTypedef( returnType, mock );
             break;
 
         case CXType_Enum:
@@ -108,7 +108,7 @@ unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock 
         case CXType_Char16:
         case CXType_Char32:
             mock.body += "static_cast<" + clang_getTypeSpelling( returnType ) + ">( ";
-            castsPerformed++;
+            pendingCallClosures++;
             break;
 
 // LCOV_EXCL_START
@@ -118,18 +118,23 @@ unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock 
 // LCOV_EXCL_STOP
     }
 
-    return castsPerformed;
+    return pendingCallClosures;
 }
 
 unsigned int Function::ProcessReturnTypeInitialPointer( const CXType &returnType, Mock &mock ) const
 {
-    unsigned int castsPerformed = 0;
+    unsigned int pendingCallClosures = 0;
 
-    if( ( returnType.kind == CXType_LValueReference ) ||
-        ( returnType.kind == CXType_RValueReference ) )
+    if( returnType.kind == CXType_LValueReference )
     {
         // Dereference mock return pointer
         mock.body += "* ";
+    }
+    else if( returnType.kind == CXType_RValueReference )
+    {
+        // Dereference mock return pointer
+        mock.body += "std::move( * ";
+        pendingCallClosures++;
     }
 
     const CXType pointeeType = clang_getPointeeType( returnType );
@@ -140,15 +145,15 @@ unsigned int Function::ProcessReturnTypeInitialPointer( const CXType &returnType
     {
         // Cast mock return pointer to proper pointer type
         mock.body += "static_cast<" + clang_getTypeSpelling( pointeeType ) + " *>( ";
-        castsPerformed++;
+        pendingCallClosures++;
     }
 
-    return castsPerformed;
+    return pendingCallClosures;
 }
 
 unsigned int Function::ProcessReturnTypeInitialTypedef( const CXType &returnType, Mock &mock ) const
 {
-    unsigned int castsPerformed = 1;
+    unsigned int pendingCallClosures = 1;
     const CXType underlyingType = clang_getCanonicalType( returnType );
 
     if( ( underlyingType.kind == CXType_Record ) ||
@@ -163,7 +168,7 @@ unsigned int Function::ProcessReturnTypeInitialTypedef( const CXType &returnType
         // Cast and dereference casted mock return pointer
         const CXType pointeeType = clang_getPointeeType( underlyingType );
         mock.body += "static_cast<" + clang_getTypeSpelling( returnType ) + ">( * static_cast<" + clang_getTypeSpelling( pointeeType ) + " *>( ";
-        castsPerformed++;
+        pendingCallClosures++;
     }
     else
     {
@@ -171,10 +176,10 @@ unsigned int Function::ProcessReturnTypeInitialTypedef( const CXType &returnType
         mock.body += "static_cast<" + clang_getTypeSpelling( returnType ) + ">( ";
     }
 
-    return castsPerformed;
+    return pendingCallClosures;
 }
 
-void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, bool inheritConst, unsigned int castsPerformed ) const
+void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, bool inheritConst, unsigned int pendingCallClosures ) const
 {
     switch( returnType.kind )
     {
@@ -240,10 +245,10 @@ void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, boo
     }
 
     // Close static casts if necessary
-    while( castsPerformed )
+    while( pendingCallClosures )
     {
         mock.body += " )";
-        castsPerformed--;
+        pendingCallClosures--;
     }
 }
 

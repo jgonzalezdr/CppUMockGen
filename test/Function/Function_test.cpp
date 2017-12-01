@@ -936,110 +936,15 @@ TEST( Function, PointerToConstTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning left/right-value reference to non-const primitive type value.
+ * Check mock generation of a function without parameters and returning left-value reference to non-const primitive type value.
  */
-TEST( Function, ReferenceToPrimitiveTypeReturnNoParameters )
+TEST( Function, LVReferenceToPrimitiveTypeReturnNoParameters )
 {
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
-    {
-        for( auto typeData : primitivePointedTypesWithString )
-        {
-            // Prepare
-            Config config( false );
-            SimpleString testHeader = StringFromFormat( "%s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
-            std::vector<std::string> results;
-            unsigned int functionCount = 0;
-
-            // Exercise
-            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
-            {
-                functionCount++;
-
-                Function function( cursor, config );
-
-                if( function.IsMockable() )
-                {
-                    results.push_back( function.GenerateMock() );
-                }
-            } );
-
-            // Verify
-            CHECK_EQUAL( 1, functionCount );
-            CHECK_EQUAL( 1, results.size() );
-            SimpleString expectedResult= StringFromFormat(
-                    "%s %s function1()\n{\n"
-                    "    return * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
-                    "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
-            STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
-
-            // Cleanup
-        }
-    }
-}
-
-/*
- * Check mock generation of a function without parameters and returning left/right-value reference to const primitive type value.
- */
-TEST( Function, ReferenceToConstPrimitiveTypeReturnNoParameters )
-{
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
-    {
-        for( auto typeData : primitivePointedTypesWithString )
-        {
-            // Prepare
-            Config config( false );
-            SimpleString testHeader = StringFromFormat( "const %s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
-            std::vector<std::string> results;
-            unsigned int functionCount = 0;
-
-            // Exercise
-            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
-            {
-                functionCount++;
-
-                Function function( cursor, config );
-
-                if( function.IsMockable() )
-                {
-                    results.push_back( function.GenerateMock() );
-                }
-            } );
-
-            // Verify
-            CHECK_EQUAL( 1, functionCount );
-            CHECK_EQUAL( 1, results.size() );
-            SimpleString expectedResult= StringFromFormat(
-                    "const %s %s function1()\n{\n"
-                    "    return * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                    "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
-            STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
-
-            // Cleanup
-        }
-    }
-}
-
-/*
- * Check mock generation of a function without parameters and returning a left/right-value reference to a non-const class.
- */
-TEST( Function, ReferenceToClassReturnNoParameters )
-{
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
+    for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
         Config config( false );
-        SimpleString testHeader = StringFromFormat(
-                "class Class1 { int member1[100]; };\n"
-                "Class1%s function1();",
-                referenceType.c_str() );
+        SimpleString testHeader = StringFromFormat( "%s& function1();", typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
@@ -1059,10 +964,10 @@ TEST( Function, ReferenceToClassReturnNoParameters )
         // Verify
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "Class1 %s function1()\n{\n"
-                "    return * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
-                "}\n", referenceType.c_str() );
+        SimpleString expectedResult= StringFromFormat(
+                "%s & function1()\n{\n"
+                "    return * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1071,20 +976,15 @@ TEST( Function, ReferenceToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left/right-value reference to a const class.
+ * Check mock generation of a function without parameters and returning left-value reference to const primitive type value.
  */
-TEST( Function, ReferenceToConstClassReturnNoParameters )
+TEST( Function, LVReferenceToConstPrimitiveTypeReturnNoParameters )
 {
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
+    for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
         Config config( false );
-        SimpleString testHeader = StringFromFormat(
-                "class Class1 { int member1[100]; };\n"
-                "const Class1%s function1();",
-                referenceType.c_str() );
+        SimpleString testHeader = StringFromFormat( "const %s& function1();", typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
@@ -1104,10 +1004,10 @@ TEST( Function, ReferenceToConstClassReturnNoParameters )
         // Verify
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "const Class1 %s function1()\n{\n"
-                "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                "}\n", referenceType.c_str() );
+        SimpleString expectedResult= StringFromFormat(
+                "const %s & function1()\n{\n"
+                "    return * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1116,105 +1016,15 @@ TEST( Function, ReferenceToConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left/right-value reference to a non-const template class.
+ * Check mock generation of a function without parameters and returning a left-value reference to a non-const class.
  */
-TEST( Function, ReferenceToTemplateClassReturnNoParameters )
-{
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
-    {
-        // Prepare
-        Config config( false );
-        SimpleString testHeader = StringFromFormat(
-                "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "Class1<int>%s function1();",
-                referenceType.c_str() );
-        std::vector<std::string> results;
-        unsigned int functionCount = 0;
-
-        // Exercise
-        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
-        {
-            functionCount++;
-
-            Function function( cursor, config );
-
-            if( function.IsMockable() )
-            {
-                results.push_back( function.GenerateMock() );
-            }
-        } );
-
-        // Verify
-        CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "Class1<int> %s function1()\n{\n"
-                "    return * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
-                "}\n", referenceType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
-
-        // Cleanup
-    }
-}
-
-/*
- * Check mock generation of a function without parameters and returning a left/right-value reference to a const template class.
- */
-TEST( Function, ReferenceToConstTemplateClassReturnNoParameters )
-{
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
-    {
-        // Prepare
-        Config config( false );
-        SimpleString testHeader = StringFromFormat(
-                "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "const Class1<int>%s function1();",
-                referenceType.c_str() );
-        std::vector<std::string> results;
-        unsigned int functionCount = 0;
-
-        // Exercise
-        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
-        {
-            functionCount++;
-
-            Function function( cursor, config );
-
-            if( function.IsMockable() )
-            {
-                results.push_back( function.GenerateMock() );
-            }
-        } );
-
-        // Verify
-        CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "const Class1<int> %s function1()\n{\n"
-                "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                "}\n", referenceType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
-
-        // Cleanup
-    }
-}
-
-/*
- * Check mock generation of a function without parameters and returning pointer to typedef for const void value.
- */
-TEST( Function, ConstVoidTypedefPointerReturnNoParameters )
+TEST( Function, LVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
     SimpleString testHeader =
-            "typedef const void Type1;\n"
-            "Type1* function1();";
+            "class Class1 { int member1[100]; };\n"
+            "Class1& function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
@@ -1234,24 +1044,26 @@ TEST( Function, ConstVoidTypedefPointerReturnNoParameters )
     // Verify
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "Type1 * function1()\n{\n"
-                  "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                  "}\n", results[0].c_str() );
+    SimpleString expectedResult =
+            "Class1 & function1()\n{\n"
+            "    return * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function without parameters and returning pointer to const typedef for void value.
+ * Check mock generation of a function without parameters and returning a left-value reference to a const class.
  */
-TEST( Function, VoidTypedefConstPointerReturnNoParameters )
+TEST( Function, LVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
     SimpleString testHeader =
-            "typedef void Type1;\n"
-            "const Type1* function1();";
+            "class Class1 { int member1[100]; };\n"
+            "const Class1& function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
@@ -1271,9 +1083,325 @@ TEST( Function, VoidTypedefConstPointerReturnNoParameters )
     // Verify
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "const Type1 * function1()\n{\n"
-                  "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
-                  "}\n", results[0].c_str() );
+    SimpleString expectedResult =
+            "const Class1 & function1()\n{\n"
+            "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a left-value reference to a non-const template class.
+ */
+TEST( Function, LVReferenceToTemplateClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "Class1<int>& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "Class1<int> & function1()\n{\n"
+            "    return * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a left-value reference to a const template class.
+ */
+TEST( Function, LVReferenceToConstTemplateClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "const Class1<int>& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "const Class1<int> & function1()\n{\n"
+            "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning right-value reference to non-const primitive type value.
+ */
+TEST( Function, RVReferenceToPrimitiveTypeReturnNoParameters )
+{
+    for( auto typeData : primitivePointedTypesWithString )
+    {
+        // Prepare
+        Config config( false );
+        SimpleString testHeader = StringFromFormat( "%s&& function1();", typeData.originalType.c_str() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult= StringFromFormat(
+                "%s && function1()\n{\n"
+                "    return std::move( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning right-value reference to const primitive type value.
+ */
+TEST( Function, RVReferenceToConstPrimitiveTypeReturnNoParameters )
+{
+    for( auto typeData : primitivePointedTypesWithString )
+    {
+        // Prepare
+        Config config( false );
+        SimpleString testHeader = StringFromFormat( "const %s&& function1();", typeData.originalType.c_str() );
+        std::vector<std::string> results;
+        unsigned int functionCount = 0;
+
+        // Exercise
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+        {
+            functionCount++;
+
+            Function function( cursor, config );
+
+            if( function.IsMockable() )
+            {
+                results.push_back( function.GenerateMock() );
+            }
+        } );
+
+        // Verify
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult= StringFromFormat(
+                "const %s && function1()\n{\n"
+                "    return std::move( * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a right-value reference to a non-const class.
+ */
+TEST( Function, RVReferenceToClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "Class1&& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "Class1 && function1()\n{\n"
+            "    return std::move( * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a right-value reference to a const class.
+ */
+TEST( Function, RVReferenceToConstClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "const Class1&& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "const Class1 && function1()\n{\n"
+            "    return std::move( * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a right-value reference to a non-const template class.
+ */
+TEST( Function, RVReferenceToTemplateClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "Class1<int>&& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "Class1<int> && function1()\n{\n"
+            "    return std::move( * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a right-value reference to a const template class.
+ */
+TEST( Function, RVReferenceToConstTemplateClassReturnNoParameters )
+{
+    // Prepare
+    Config config( false );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "const Class1<int>&& function1();";
+    std::vector<std::string> results;
+    unsigned int functionCount = 0;
+
+    // Exercise
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
+    {
+        functionCount++;
+
+        Function function( cursor, config );
+
+        if( function.IsMockable() )
+        {
+            results.push_back( function.GenerateMock() );
+        }
+    } );
+
+    // Verify
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+            "const Class1<int> && function1()\n{\n"
+            "    return std::move( * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
