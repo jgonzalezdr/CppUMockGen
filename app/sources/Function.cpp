@@ -99,13 +99,14 @@ unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock 
         case CXType_Enum:
         case CXType_Char_S:
         case CXType_SChar:
-        case CXType_Char16:
         case CXType_Short:
         case CXType_Char_U:
         case CXType_UChar:
         case CXType_UShort:
         case CXType_Float:
         case CXType_WChar:
+        case CXType_Char16:
+        case CXType_Char32:
             mock.body += "static_cast<" + clang_getTypeSpelling( returnType ) + ">( ";
             castsPerformed++;
             break;
