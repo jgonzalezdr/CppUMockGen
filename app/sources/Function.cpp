@@ -105,6 +105,7 @@ unsigned int Function::ProcessReturnTypeInitial( const CXType &returnType, Mock 
         case CXType_UChar:
         case CXType_UShort:
         case CXType_Float:
+        case CXType_WChar:
             mock.body += "static_cast<" + clang_getTypeSpelling( returnType ) + ">( ";
             castsPerformed++;
             break;
@@ -153,7 +154,7 @@ unsigned int Function::ProcessReturnTypeInitialTypedef( const CXType &returnType
         ( underlyingType.kind == CXType_Unexposed ) )
     {
         // Dereference mock return pointer
-        mock.body += "* static_cast<" + clang_getTypeSpelling( returnType ) + " *>( ";
+        mock.body += "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( ";
     }
     else if( ( underlyingType.kind == CXType_LValueReference ) ||
              ( underlyingType.kind == CXType_RValueReference ) )
@@ -187,9 +188,8 @@ void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, boo
         case CXType_Int:
         case CXType_Char_S:
         case CXType_SChar:
-        case CXType_Char16:
-        case CXType_Char32:
         case CXType_Short:
+        case CXType_WChar:
         case CXType_Enum:
             mock.body += ".returnIntValue()";
             break;
@@ -198,15 +198,17 @@ void Function::ProcessReturnTypeFinal( const CXType &returnType, Mock &mock, boo
         case CXType_Char_U:
         case CXType_UChar:
         case CXType_UShort:
+        case CXType_Char16:
+        case CXType_Char32:
             mock.body += ".returnUnsignedIntValue()";
             break;
 
         case CXType_Long:
-            mock.body += ".returnLongValue()";
+            mock.body += ".returnLongIntValue()";
             break;
 
         case CXType_ULong:
-            mock.body += ".returnUnsignedLongValue()";
+            mock.body += ".returnUnsignedLongIntValue()";
             break;
 
         case CXType_Float:
@@ -300,21 +302,16 @@ void Function::ProcessArgument( const CXCursor &arg, Mock &mock ) const
     std::string argName = toString( clang_getCursorSpelling( arg ) );
     mock.signature += " " + argName;
 
-    bool passArgumentAddress = ProcessArgumentType( argType, argType, false, mock );
+    std::string argExpr = argName;
+    ProcessArgumentType( argType, argType, false, mock, argExpr );
 
     // Add arguments name and value
     mock.body += "\"" + argName + "\", ";
-    if( passArgumentAddress )
-    {
-        mock.body += "&";
-    }
-    mock.body += argName + ")";
+    mock.body += argExpr + ")";
 }
 
-bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
+void Function::ProcessArgumentType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock, std::string &argExpr ) const
 {
-    bool passArgumentAddress = false;
-
     switch( argType.kind )
     {
         case CXType_Bool:
@@ -323,27 +320,32 @@ bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
 
         case CXType_Char_S:
         case CXType_SChar:
-        case CXType_Char16:
-        case CXType_Char32:
         case CXType_Int:
         case CXType_Short:
+        case CXType_WChar:
+            mock.body += ".withIntParameter(";
+            break;
+
         case CXType_Enum:
             mock.body += ".withIntParameter(";
+            argExpr = "static_cast<int>(" + argExpr + ")";
             break;
 
         case CXType_Char_U:
         case CXType_UChar:
         case CXType_UInt:
         case CXType_UShort:
+        case CXType_Char16:
+        case CXType_Char32:
             mock.body += ".withUnsignedIntParameter(";
             break;
 
         case CXType_Long:
-            mock.body += ".withLongParameter(";
+            mock.body += ".withLongIntParameter(";
             break;
 
         case CXType_ULong:
-            mock.body += ".withUnsignedLongParameter(";
+            mock.body += ".withUnsignedLongIntParameter(";
             break;
 
         case CXType_Float:
@@ -358,17 +360,17 @@ bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
         case CXType_LValueReference:
         case CXType_RValueReference:
             ProcessArgumentTypePointer( argType, origArgType, mock );
-            passArgumentAddress = true;
+            argExpr.insert(0, "&");
             break;
 
         case CXType_Typedef:
-            passArgumentAddress = ProcessArgumentTypeTypedef( argType, origArgType, inheritConst, mock );
+            ProcessArgumentTypeTypedef( argType, origArgType, inheritConst, mock, argExpr );
             break;
 
         case CXType_Record:
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             ProcessArgumentTypeRecord( argType, origArgType, inheritConst, false, mock );
-            passArgumentAddress = true;
+            argExpr.insert(0, "&");
             break;
 
 // LCOV_EXCL_START
@@ -377,8 +379,6 @@ bool Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
             break;
 // LCOV_EXCL_STOP
     }
-
-    return passArgumentAddress;
 }
 
 void Function::ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, Mock &mock ) const
@@ -437,9 +437,8 @@ void Function::ProcessArgumentTypePointer( const CXType &argType, const CXType &
     }
 }
 
-bool Function::ProcessArgumentTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
+void Function::ProcessArgumentTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock, std::string &argExpr ) const
 {
-    bool passArgumentAddress = false;
     const CXType underlyingType = clang_getCanonicalType( argType );
     bool isTypedefConst = clang_isConstQualifiedType( argType ) || inheritConst;
 
@@ -465,14 +464,15 @@ bool Function::ProcessArgumentTypeTypedef( const CXType &argType, const CXType &
             mock.body += ".withPointerParameter(";
         }
 
-        passArgumentAddress = !( underlyingType.kind == CXType_Pointer );
+        if( underlyingType.kind != CXType_Pointer )
+        {
+            argExpr.insert(0, "&");
+        }
     }
     else
     {
-        passArgumentAddress = ProcessArgumentType( underlyingType, origArgType, isTypedefConst, mock );
+        ProcessArgumentType( underlyingType, origArgType, isTypedefConst, mock, argExpr );
     }
-
-    return passArgumentAddress;
 }
 
 void Function::ProcessArgumentTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee, Mock &mock ) const
@@ -488,47 +488,3 @@ void Function::ProcessArgumentTypeRecord( const CXType &argType, const CXType &o
     }
     mock.body += getBareTypeSpelling( m_config.UseUnderlyingTypedefType() ? argType : origArgType ) + "\", ";
 }
-
-#if 0
-void Function::ProcessArgumentTypePointedTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
-{
-    const CXType underlyingType = clang_getCanonicalType( argType );
-    bool isTypedefConst = clang_isConstQualifiedType( argType ) || inheritConst;
-
-    ProcessArgumentTypePointedType( underlyingType, origArgType, isTypedefConst, mock );
-}
-
-void Function::ProcessArgumentTypePointedType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock ) const
-{
-    bool isTypeConst = clang_isConstQualifiedType( argType ) || inheritConst;
-
-    switch( argType.kind )
-    {
-        case CXType_Pointer:
-        case CXType_LValueReference:
-        case CXType_RValueReference:
-            ProcessArgumentTypePointedType( clang_getPointeeType( argType ), origArgType, isTypeConst, mock );
-            break;
-
-        case CXType_Typedef:
-            ProcessArgumentTypePointedTypedef( argType, origArgType, isTypeConst, mock );
-            break;
-
-        case CXType_Record:
-        case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
-            ProcessArgumentTypeRecord( argType, origArgType, isTypeConst, true, mock );
-            break;
-
-        default:
-            if( isTypeConst )
-            {
-                mock.body += ".withConstPointerParameter(";
-            }
-            else
-            {
-                mock.body += ".withPointerParameter(";
-            }
-            break;
-    }
-}
-#endif

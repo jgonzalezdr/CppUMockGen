@@ -18,8 +18,12 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 
 find_package( LibClang REQUIRED )
 
-include_directories( ${CPPUTEST_HOME}/include ${LibClang_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/test/ClangTestHelper )
+include_directories( ${CPPUTEST_HOME}/include ${LibClang_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/test/TestHelpers )
 link_directories( ${CPPUTEST_HOME}/lib ${LibClang_LIBRARY_DIRS} )
+
+string( REPLACE \\ \\\\ CPPUTEST_INCLUDE_DIR ${CPPUTEST_HOME}\\include )
+
+add_definitions( -DCPPUTEST_INCLUDE_DIR="${CPPUTEST_INCLUDE_DIR}" )
 
 if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )

@@ -13,7 +13,8 @@
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
-#include "ClangTestHelper.hpp"
+#include "ClangParseHelper.hpp"
+#include "ClangCompileHelper.hpp"
 #include <vector>
 #include <string>
 
@@ -47,12 +48,15 @@ TEST_GROUP( Function )
         { "char", "char", true, "Int" },
         { "unsigned char", "unsigned char", true, "UnsignedInt" },
         { "signed char", "signed char", true, "Int" },
-        { "long", "long", false, "Long" },
-        { "unsigned long", "unsigned long", false, "UnsignedLong" },
-        { "signed long", "long", false, "Long" },
+        { "long", "long", false, "LongInt" },
+        { "unsigned long", "unsigned long", false, "UnsignedLongInt" },
+        { "signed long", "long", false, "LongInt" },
         { "bool", "bool", false, "Bool" },
         { "float", "float", true, "Double" },
         { "double", "double", false, "Double" },
+        { "wchar_t", "wchar_t", true, "Int" },
+        { "char16_t", "char16_t", true, "UnsignedInt" },
+        { "char32_t", "char32_t", true, "UnsignedInt" },
     };
 
     struct primitivePointedTypeData
@@ -76,6 +80,9 @@ TEST_GROUP( Function )
         { "bool", "bool" },
         { "float", "float" },
         { "double", "double" },
+        { "wchar_t", "wchar_t" },
+        { "char16_t", "char16_t" },
+        { "char32_t", "char32_t" },
     };
 
     std::vector< struct primitivePointedTypeData > primitivePointedTypesWithString = primitivePointedTypesWithoutString;
@@ -103,12 +110,12 @@ TEST( Function, WithDefinition )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void function1() {}" );
+    SimpleString testHeader = "void function1() {}";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -134,13 +141,14 @@ TEST( Function, DoubleDeclaration )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void function1();\n"
-                               "void function1();" );
+    SimpleString testHeader =
+            "void function1();\n"
+            "void function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -173,12 +181,12 @@ TEST( Function, VoidReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void function1();" );
+    SimpleString testHeader = "void function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -196,6 +204,7 @@ TEST( Function, VoidReturnNoParameters )
     STRCMP_EQUAL( "void function1()\n{\n"
                   "    mock().actualCall(\"function1\");\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -210,12 +219,11 @@ TEST( Function, PrimitiveTypeReturnNoParameters )
         // Prepare
         Config config( false );
         SimpleString testHeader = StringFromFormat( "%s function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -246,6 +254,7 @@ TEST( Function, PrimitiveTypeReturnNoParameters )
                     "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         }
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -258,13 +267,14 @@ TEST( Function, EnumReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum Enum1 { A, B, C };\n"
-                               "Enum1 function1();" );
+    SimpleString testHeader =
+            "enum Enum1 { A, B, C };\n"
+            "Enum1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -282,6 +292,7 @@ TEST( Function, EnumReturnNoParameters )
     STRCMP_EQUAL( "Enum1 function1()\n{\n"
                   "    return static_cast<Enum1>( mock().actualCall(\"function1\").returnIntValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -293,13 +304,14 @@ TEST( Function, ScopedEnumReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum class Enum1 { A, B, C };\n"
-                               "Enum1 function1();" );
+    SimpleString testHeader =
+            "enum class Enum1 { A, B, C };\n"
+            "Enum1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -317,6 +329,7 @@ TEST( Function, ScopedEnumReturnNoParameters )
     STRCMP_EQUAL( "Enum1 function1()\n{\n"
                   "    return static_cast<Enum1>( mock().actualCall(\"function1\").returnIntValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -328,13 +341,14 @@ TEST( Function, ClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "Class1 function1();" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "Class1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -352,6 +366,7 @@ TEST( Function, ClassReturnNoParameters )
     STRCMP_EQUAL( "Class1 function1()\n{\n"
                   "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -363,13 +378,14 @@ TEST( Function, TemplateClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template<class T1> class Class1 { T1 member1[100]; };\n"
-                               "Class1<int> function1();" );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "Class1<int> function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -387,6 +403,7 @@ TEST( Function, TemplateClassReturnNoParameters )
     STRCMP_EQUAL( "Class1<int> function1()\n{\n"
                   "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -402,13 +419,13 @@ TEST( Function, PrimitiveTypeTypedefReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "Type1 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type1 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -428,6 +445,7 @@ TEST( Function, PrimitiveTypeTypedefReturnNoParameters )
                 "    return static_cast<Type1>( mock().actualCall(\"function1\").return%sValue() );\n"
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -440,13 +458,14 @@ TEST( Function, EnumTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef enum { X, Y, Z } Type1;\n"
-                               "Type1 function1();" );
+    SimpleString testHeader =
+            "typedef enum { X, Y, Z } Type1;\n"
+            "Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -464,6 +483,7 @@ TEST( Function, EnumTypedefReturnNoParameters )
     STRCMP_EQUAL( "Type1 function1()\n{\n"
                   "    return static_cast<Type1>( mock().actualCall(\"function1\").returnIntValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -475,14 +495,15 @@ TEST( Function, ScopedEnumTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum class Enum1 { X, Y, Z };\n"
-                               "typedef Enum1 Type1;\n"
-                               "Type1 function1();" );
+    SimpleString testHeader =
+            "enum class Enum1 { X, Y, Z };\n"
+            "typedef Enum1 Type1;\n"
+            "Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -500,6 +521,7 @@ TEST( Function, ScopedEnumTypedefReturnNoParameters )
     STRCMP_EQUAL( "Type1 function1()\n{\n"
                   "    return static_cast<Type1>( mock().actualCall(\"function1\").returnIntValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -511,14 +533,15 @@ TEST( Function, ClassTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef Class1 Type1;\n"
-                               "Type1 function1();" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef Class1 Type1;\n"
+            "Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -534,8 +557,9 @@ TEST( Function, ClassTypedefReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return * static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return * static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -547,14 +571,15 @@ TEST( Function, TemplateClassTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template <class T1> class Class1 { T1 member1[100]; };\n"
-                               "typedef Class1<long> Type1;\n"
-                               "Type1 function1();" );
+    SimpleString testHeader =
+            "template <class T1> class Class1 { T1 member1[100]; };\n"
+            "typedef Class1<long> Type1;\n"
+            "Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -570,8 +595,9 @@ TEST( Function, TemplateClassTypedefReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return * static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return * static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -583,12 +609,12 @@ TEST( Function, PointerToVoidReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void* function1();" );
+    SimpleString testHeader = "void* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -606,6 +632,7 @@ TEST( Function, PointerToVoidReturnNoParameters )
     STRCMP_EQUAL( "void * function1()\n{\n"
                   "    return mock().actualCall(\"function1\").returnPointerValue();\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -617,12 +644,12 @@ TEST( Function, PointerToConstVoidReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "const void* function1();" );
+    SimpleString testHeader = "const void* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -640,6 +667,7 @@ TEST( Function, PointerToConstVoidReturnNoParameters )
     STRCMP_EQUAL( "const void * function1()\n{\n"
                   "    return mock().actualCall(\"function1\").returnConstPointerValue();\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -654,12 +682,11 @@ TEST( Function, PointerToPrimitiveTypeReturnNoParameters )
         // Prepare
         Config config( false );
         SimpleString testHeader = StringFromFormat( "%s* function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -679,6 +706,7 @@ TEST( Function, PointerToPrimitiveTypeReturnNoParameters )
                 "    return static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -694,12 +722,11 @@ TEST( Function, PointerToConstPrimitiveTypeReturnNoParameters )
         // Prepare
         Config config( false );
         SimpleString testHeader = StringFromFormat( "const %s* function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -719,6 +746,7 @@ TEST( Function, PointerToConstPrimitiveTypeReturnNoParameters )
                 "    return static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -731,12 +759,12 @@ TEST( Function, StringReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "const char* function1();" );
+    SimpleString testHeader = "const char* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -754,6 +782,7 @@ TEST( Function, StringReturnNoParameters )
     STRCMP_EQUAL( "const char * function1()\n{\n"
                   "    return mock().actualCall(\"function1\").returnStringValue();\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -765,13 +794,14 @@ TEST( Function, PointerToClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "Class1* function1();" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "Class1* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -789,6 +819,7 @@ TEST( Function, PointerToClassReturnNoParameters )
     STRCMP_EQUAL( "Class1 * function1()\n{\n"
                   "    return static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -800,13 +831,14 @@ TEST( Function, PointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "const Class1* function1();" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "const Class1* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -824,6 +856,7 @@ TEST( Function, PointerToConstClassReturnNoParameters )
     STRCMP_EQUAL( "const Class1 * function1()\n{\n"
                   "    return static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -835,13 +868,14 @@ TEST( Function, PointerToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template<class T1> class Class1 { T1 member1[100]; };\n"
-                               "Class1<int>* function1();" );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "Class1<int>* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -859,6 +893,7 @@ TEST( Function, PointerToTemplateClassReturnNoParameters )
     STRCMP_EQUAL( "Class1<int> * function1()\n{\n"
                   "    return static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -870,13 +905,14 @@ TEST( Function, PointerToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template <class T1> class Class1 { T1 member1[100]; };\n"
-                               "const Class1<char>* function1();" );
+    SimpleString testHeader =
+            "template <class T1> class Class1 { T1 member1[100]; };\n"
+            "const Class1<char>* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -894,6 +930,7 @@ TEST( Function, PointerToConstTemplateClassReturnNoParameters )
     STRCMP_EQUAL( "const Class1<char> * function1()\n{\n"
                   "    return static_cast<const Class1<char> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -912,12 +949,11 @@ TEST( Function, ReferenceToPrimitiveTypeReturnNoParameters )
             // Prepare
             Config config( false );
             SimpleString testHeader = StringFromFormat( "%s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -937,6 +973,7 @@ TEST( Function, ReferenceToPrimitiveTypeReturnNoParameters )
                     "    return * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                     "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -957,12 +994,11 @@ TEST( Function, ReferenceToConstPrimitiveTypeReturnNoParameters )
             // Prepare
             Config config( false );
             SimpleString testHeader = StringFromFormat( "const %s%s function1();", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -982,6 +1018,7 @@ TEST( Function, ReferenceToConstPrimitiveTypeReturnNoParameters )
                     "    return * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                     "}\n", typeData.mockedType.c_str(), referenceType.c_str(), typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -1001,13 +1038,13 @@ TEST( Function, ReferenceToClassReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "class Class1 { int member1[100]; };\n"
-                "Class1%s function1();", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Class1%s function1();",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1027,6 +1064,7 @@ TEST( Function, ReferenceToClassReturnNoParameters )
                 "    return * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1045,13 +1083,13 @@ TEST( Function, ReferenceToConstClassReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "class Class1 { int member1[100]; };\n"
-                "const Class1%s function1();", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Class1%s function1();",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1071,6 +1109,7 @@ TEST( Function, ReferenceToConstClassReturnNoParameters )
                 "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1089,13 +1128,13 @@ TEST( Function, ReferenceToTemplateClassReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "Class1<int>%s function1();", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Class1<int>%s function1();",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1115,6 +1154,7 @@ TEST( Function, ReferenceToTemplateClassReturnNoParameters )
                 "    return * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1133,13 +1173,13 @@ TEST( Function, ReferenceToConstTemplateClassReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "const Class1<int>%s function1();", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Class1<int>%s function1();",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1159,6 +1199,7 @@ TEST( Function, ReferenceToConstTemplateClassReturnNoParameters )
                 "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1171,13 +1212,14 @@ TEST( Function, ConstVoidTypedefPointerReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef const void Type1;\n"
-                               "Type1* function1();" );
+    SimpleString testHeader =
+            "typedef const void Type1;\n"
+            "Type1* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1195,6 +1237,7 @@ TEST( Function, ConstVoidTypedefPointerReturnNoParameters )
     STRCMP_EQUAL( "Type1 * function1()\n{\n"
                   "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1206,13 +1249,14 @@ TEST( Function, VoidTypedefConstPointerReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef void Type1;\n"
-                               "const Type1* function1();" );
+    SimpleString testHeader =
+            "typedef void Type1;\n"
+            "const Type1* function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1230,6 +1274,7 @@ TEST( Function, VoidTypedefConstPointerReturnNoParameters )
     STRCMP_EQUAL( "const Type1 * function1()\n{\n"
                   "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1245,13 +1290,13 @@ TEST( Function, PrimitiveTypeTypedefPointerReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "Type1* function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type1* function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1269,6 +1314,7 @@ TEST( Function, PrimitiveTypeTypedefPointerReturnNoParameters )
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
                       "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1285,13 +1331,13 @@ TEST( Function, ConstPrimitiveTypeTypedefPointerReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
-                "Type1* function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type1* function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1309,6 +1355,7 @@ TEST( Function, ConstPrimitiveTypeTypedefPointerReturnNoParameters )
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
                       "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1325,13 +1372,13 @@ TEST( Function, PrimitiveTypeTypedefConstPointerReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "const Type1* function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Type1* function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1349,6 +1396,7 @@ TEST( Function, PrimitiveTypeTypedefConstPointerReturnNoParameters )
         STRCMP_EQUAL( "const Type1 * function1()\n{\n"
                       "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1365,13 +1413,13 @@ TEST( Function, PointerToPrimitiveTypeTypedefReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "Type1 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type1 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1389,6 +1437,7 @@ TEST( Function, PointerToPrimitiveTypeTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type1 function1()\n{\n"
                       "    return static_cast<Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1405,13 +1454,13 @@ TEST( Function, PointerToConstPrimitiveTypeTypedefReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
-                "Type1 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type1 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1429,6 +1478,7 @@ TEST( Function, PointerToConstPrimitiveTypeTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type1 function1()\n{\n"
                       "    return static_cast<Type1>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1445,13 +1495,13 @@ TEST( Function, PointerToPrimitiveTypeTypedefConstReturnNoParameters )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "const Type1 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Type1 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1469,6 +1519,7 @@ TEST( Function, PointerToPrimitiveTypeTypedefConstReturnNoParameters )
         STRCMP_EQUAL( "const Type1 function1()\n{\n"
                       "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1481,14 +1532,14 @@ TEST( Function, StringTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
-            "Type1 function1();" );
+            "Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1506,6 +1557,7 @@ TEST( Function, StringTypedefReturnNoParameters )
     STRCMP_EQUAL( "Type1 function1()\n{\n"
                   "    return static_cast<Type1>( mock().actualCall(\"function1\").returnStringValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1517,14 +1569,14 @@ TEST( Function, StringTypedefConstReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
-            "const Type1 function1();" );
+            "const Type1 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1542,6 +1594,7 @@ TEST( Function, StringTypedefConstReturnNoParameters )
     STRCMP_EQUAL( "const Type1 function1()\n{\n"
                   "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnStringValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1561,13 +1614,13 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
             Config config( false );
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
-                    "Type1 function1();", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
+                    "Type1 function1();",
+                    typeData.originalType.c_str(), referenceType.c_str() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -1587,6 +1640,7 @@ TEST( Function, ReferenceToPrimitiveTypeTypedefReturnNoParameters )
                     "    return static_cast<Type1>( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
                     "}\n", typeData.mockedType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -1605,13 +1659,13 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1629,6 +1683,7 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type2 function1()\n{\n"
                       "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1646,13 +1701,13 @@ TEST( Function, PrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
-                "Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1670,6 +1725,7 @@ TEST( Function, PrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type2 function1()\n{\n"
                       "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1687,13 +1743,13 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "const Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1711,6 +1767,7 @@ TEST( Function, PrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
                       "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1728,13 +1785,13 @@ TEST( Function, ConstPrimitiveTypePointerTypedefTypedefReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1752,6 +1809,7 @@ TEST( Function, ConstPrimitiveTypePointerTypedefTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type2 function1()\n{\n"
                       "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1769,13 +1827,13 @@ TEST( Function, ConstPrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
-                "Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1793,6 +1851,7 @@ TEST( Function, ConstPrimitiveTypePointerTypedefConstTypedefReturnNoParameters )
         STRCMP_EQUAL( "Type2 function1()\n{\n"
                       "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1810,13 +1869,13 @@ TEST( Function, ConstPrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
-                "const Type2 function1();", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "const Type2 function1();",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1834,6 +1893,7 @@ TEST( Function, ConstPrimitiveTypePointerTypedefTypedefConstReturnNoParameters )
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
                       "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -1846,15 +1906,15 @@ TEST( Function, StringTypedefTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
-            "Type2 function1();" );
+            "Type2 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1872,6 +1932,7 @@ TEST( Function, StringTypedefTypedefReturnNoParameters )
     STRCMP_EQUAL( "Type2 function1()\n{\n"
                   "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1883,15 +1944,15 @@ TEST( Function, StringTypedefConstTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef const Type1 Type2;\n"
-            "Type2 function1();" );
+            "Type2 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1909,6 +1970,7 @@ TEST( Function, StringTypedefConstTypedefReturnNoParameters )
     STRCMP_EQUAL( "Type2 function1()\n{\n"
                   "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1920,15 +1982,15 @@ TEST( Function, StringConstTypedefTypedefReturnNoParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
-            "const Type2 function1();" );
+            "const Type2 function1();";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -1946,6 +2008,7 @@ TEST( Function, StringConstTypedefTypedefReturnNoParameters )
     STRCMP_EQUAL( "const Type2 function1()\n{\n"
                   "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -1964,12 +2027,11 @@ TEST( Function, VoidReturnPrimitiveTypeParameter )
         // Prepare
         Config config( false );
         SimpleString testHeader = StringFromFormat( "void function1(%s p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -1989,6 +2051,7 @@ TEST( Function, VoidReturnPrimitiveTypeParameter )
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
                 "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2001,13 +2064,14 @@ TEST( Function, VoidReturnEnumParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum Enum1 { X, Y, Z };\n"
-                               "void function1(Enum1 p);" );
+    SimpleString testHeader =
+            "enum Enum1 { X, Y, Z };\n"
+            "void function1(Enum1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2023,8 +2087,9 @@ TEST( Function, VoidReturnEnumParameter )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Enum1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", p);\n"
+                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", static_cast<int>(p));\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2036,13 +2101,14 @@ TEST( Function, VoidReturnScopedEnumParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum class Enum1 { X, Y, Z };\n"
-                               "void function1(Enum1 p);" );
+    SimpleString testHeader =
+            "enum class Enum1 { X, Y, Z };\n"
+            "void function1(Enum1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2058,8 +2124,9 @@ TEST( Function, VoidReturnScopedEnumParameter )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Enum1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", p);\n"
+                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", static_cast<int>(p));\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2071,13 +2138,14 @@ TEST( Function, VoidReturnClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "void function1(Class1 p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "void function1(Class1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2095,6 +2163,7 @@ TEST( Function, VoidReturnClassParameter )
     STRCMP_EQUAL( "void function1(Class1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", &p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2106,13 +2175,14 @@ TEST( Function, VoidReturnTemplateClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template<class T1> class Class1 { T1 member1[100]; };\n"
-                               "void function1(Class1<short> p);" );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "void function1(Class1<short> p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2130,6 +2200,7 @@ TEST( Function, VoidReturnTemplateClassParameter )
     STRCMP_EQUAL( "void function1(Class1<short> p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2145,13 +2216,13 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(Type1 p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type1 p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2171,6 +2242,7 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefParameter )
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2183,13 +2255,14 @@ TEST( Function, VoidReturnEnumTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef enum { X, Y, Z, K } Type1;\n"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "typedef enum { X, Y, Z, K } Type1;\n"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2205,8 +2278,9 @@ TEST( Function, VoidReturnEnumTypedefParameter )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", p);\n"
+                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", static_cast<int>(p));\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2218,14 +2292,15 @@ TEST( Function, VoidReturnScopedEnumTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "enum class Enum1 { X, Y, Z, W };\n"
-                               "typedef Enum1 Type1;\n"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "enum class Enum1 { X, Y, Z, W };\n"
+            "typedef Enum1 Type1;\n"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2241,8 +2316,9 @@ TEST( Function, VoidReturnScopedEnumTypedefParameter )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", p);\n"
+                  "    mock().actualCall(\"function1\").withIntParameter(\"p\", static_cast<int>(p));\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2254,14 +2330,15 @@ TEST( Function, VoidReturnClassTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef Class1 Type1;\n"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef Class1 Type1;\n"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2279,6 +2356,7 @@ TEST( Function, VoidReturnClassTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", &p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2290,14 +2368,15 @@ TEST( Function, VoidReturnTemplateClassTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template <class T1> class Class1 { T1 member1[100]; };\n"
-                               "typedef Class1<long> Type1;\n"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "template <class T1> class Class1 { T1 member1[100]; };\n"
+            "typedef Class1<long> Type1;\n"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2315,6 +2394,7 @@ TEST( Function, VoidReturnTemplateClassTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", &p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2326,12 +2406,12 @@ TEST( Function, VoidReturnPointerToVoidParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void function1(void* p);" );
+    SimpleString testHeader = "void function1(void* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2349,6 +2429,7 @@ TEST( Function, VoidReturnPointerToVoidParameter )
     STRCMP_EQUAL( "void function1(void * p)\n{\n"
                   "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2362,13 +2443,14 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeParameter )
     {
         // Prepare
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(%s* p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+        SimpleString testHeader = StringFromFormat(
+                "void function1(%s* p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2388,6 +2470,7 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeParameter )
                 "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
                 "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2402,13 +2485,14 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config config( false );
-        SimpleString testHeader = StringFromFormat( "void function1(const %s* p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+        SimpleString testHeader = StringFromFormat(
+                "void function1(const %s* p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2428,6 +2512,7 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeParameter )
                 "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                 "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2440,12 +2525,12 @@ TEST( Function, VoidReturnStringParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "void function1(const char* p);" );
+    SimpleString testHeader = "void function1(const char* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2463,6 +2548,7 @@ TEST( Function, VoidReturnStringParameter )
     STRCMP_EQUAL( "void function1(const char * p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2474,13 +2560,14 @@ TEST( Function, VoidReturnPointerToClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "void function1(Class1* p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "void function1(Class1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2498,6 +2585,7 @@ TEST( Function, VoidReturnPointerToClassParameter )
     STRCMP_EQUAL( "void function1(Class1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2509,13 +2597,14 @@ TEST( Function, VoidReturnPointerToConstClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "void function1(const Class1* p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "void function1(const Class1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2533,6 +2622,7 @@ TEST( Function, VoidReturnPointerToConstClassParameter )
     STRCMP_EQUAL( "void function1(const Class1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2544,13 +2634,14 @@ TEST( Function, VoidReturnPointerToTemplateClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template<class T1> class Class1 { T1 member1[100]; };\n"
-                               "void function1(Class1<short>* p);" );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "void function1(Class1<short>* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2568,6 +2659,7 @@ TEST( Function, VoidReturnPointerToTemplateClassParameter )
     STRCMP_EQUAL( "void function1(Class1<short> * p)\n{\n"
                   "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1<short>\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2579,13 +2671,14 @@ TEST( Function, VoidReturnPointerToConstTemplateClassParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "template<class T1> class Class1 { T1 member1[100]; };\n"
-                               "void function1(const Class1<short>* p);" );
+    SimpleString testHeader =
+            "template<class T1> class Class1 { T1 member1[100]; };\n"
+            "void function1(const Class1<short>* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2603,6 +2696,7 @@ TEST( Function, VoidReturnPointerToConstTemplateClassParameter )
     STRCMP_EQUAL( "void function1(const Class1<short> * p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2620,13 +2714,14 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeParameter )
         {
             // Prepare
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "void function1(%s%s p);", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
+            SimpleString testHeader = StringFromFormat(
+                    "void function1(%s%s p);",
+                    typeData.originalType.c_str(), referenceType.c_str() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -2646,6 +2741,7 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeParameter )
                       "    mock().actualCall(\"function1\").withOutputParameter(\"p\", &p);\n"
                       "}\n", typeData.mockedType.c_str(), referenceType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -2665,13 +2761,14 @@ TEST( Function, VoidReturnReferenceToConstPrimitiveTypeParameter )
         {
             // Prepare
             Config config( false );
-            SimpleString testHeader = StringFromFormat( "void function1(const %s%s p);", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
+            SimpleString testHeader = StringFromFormat(
+                    "void function1(const %s%s p);",
+                    typeData.originalType.c_str(), referenceType.c_str() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -2691,6 +2788,7 @@ TEST( Function, VoidReturnReferenceToConstPrimitiveTypeParameter )
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", &p);\n"
                       "}\n", typeData.mockedType.c_str(), referenceType.c_str() );
             STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -2710,13 +2808,13 @@ TEST( Function, VoidReturnReferenceToClassParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "class Class1 { int member1[100]; };\n"
-                "void function1(Class1%s p);", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Class1%s p);",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2736,6 +2834,7 @@ TEST( Function, VoidReturnReferenceToClassParameter )
                 "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1\", \"p\", &p);\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2754,13 +2853,13 @@ TEST( Function, VoidReturnReferenceToConstClassParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "class Class1 { int member1[100]; };\n"
-                "void function1(const Class1%s p);", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(const Class1%s p);",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2780,6 +2879,7 @@ TEST( Function, VoidReturnReferenceToConstClassParameter )
                 "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", &p);\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2798,13 +2898,13 @@ TEST( Function, VoidReturnReferenceToTemplateClassParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "void function1(Class1<short>%s p);", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Class1<short>%s p);",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2824,6 +2924,7 @@ TEST( Function, VoidReturnReferenceToTemplateClassParameter )
                 "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1<short>\", \"p\", &p);\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2842,13 +2943,13 @@ TEST( Function, VoidReturnReferenceToConstTemplateClassParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "template<class T1> class Class1 { T1 member1[100]; };\n"
-                "void function1(const Class1<short>%s p);", referenceType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(const Class1<short>%s p);",
+                referenceType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2868,6 +2969,7 @@ TEST( Function, VoidReturnReferenceToConstTemplateClassParameter )
                 "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
                 "}\n", referenceType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2880,13 +2982,14 @@ TEST( Function, VoidReturnVoidTypedefPointerParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef void Type1;\n"
-                               "void function1(Type1* p);" );
+    SimpleString testHeader =
+            "typedef void Type1;\n"
+            "void function1(Type1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -2904,6 +3007,7 @@ TEST( Function, VoidReturnVoidTypedefPointerParameter )
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -2919,13 +3023,13 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefPointerParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(Type1* p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type1* p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2943,6 +3047,7 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefPointerParameter )
         STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
                       "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2959,13 +3064,13 @@ TEST( Function, VoidReturnConstPrimitiveTypeTypedefPointerParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
-                "void function1(Type1* p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type1* p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -2983,6 +3088,7 @@ TEST( Function, VoidReturnConstPrimitiveTypeTypedefPointerParameter )
         STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -2999,13 +3105,13 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefConstPointerParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
-                "void function1(const Type1* p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(const Type1* p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -3023,6 +3129,7 @@ TEST( Function, VoidReturnPrimitiveTypeTypedefConstPointerParameter )
         STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -3035,14 +3142,15 @@ TEST( Function, VoidReturnClassTypedefPointerParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef Class1 Type1;"
-                               "void function1(Type1* p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef Class1 Type1;"
+            "void function1(Type1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3060,6 +3168,7 @@ TEST( Function, VoidReturnClassTypedefPointerParameter )
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Type1\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3071,14 +3180,15 @@ TEST( Function, VoidReturnConstClassTypedefPointerParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef const Class1 Type1;"
-                               "void function1(Type1* p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef const Class1 Type1;"
+            "void function1(Type1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3096,6 +3206,7 @@ TEST( Function, VoidReturnConstClassTypedefPointerParameter )
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3107,14 +3218,15 @@ TEST( Function, VoidReturnClassTypedefConstPointerParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef Class1 Type1;"
-                               "void function1(const Type1* p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef Class1 Type1;"
+            "void function1(const Type1* p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3132,6 +3244,7 @@ TEST( Function, VoidReturnClassTypedefConstPointerParameter )
     STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
                   "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3143,13 +3256,14 @@ TEST( Function, VoidReturnPointerToVoidTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "typedef void* Type1;\n"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "typedef void* Type1;\n"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3167,6 +3281,7 @@ TEST( Function, VoidReturnPointerToVoidTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3182,13 +3297,13 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "void function1(Type1 p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type1 p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -3206,6 +3321,7 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefParameter )
         STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                       "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -3222,13 +3338,13 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeTypedefParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
-                "void function1(Type1 p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type1 p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -3246,6 +3362,7 @@ TEST( Function, VoidReturnPointerToConstPrimitiveTypeTypedefParameter )
         STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -3262,13 +3379,13 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefConstParameter )
         Config config( false );
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
-                "void function1(const Type1 p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(const Type1 p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -3286,6 +3403,7 @@ TEST( Function, VoidReturnPointerToPrimitiveTypeTypedefConstParameter )
         STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
                       "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                       "}\n", results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -3298,14 +3416,14 @@ TEST( Function, VoidReturnStringTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
-            "void function1(Type1 p);" );
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3323,6 +3441,7 @@ TEST( Function, VoidReturnStringTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3334,14 +3453,14 @@ TEST( Function, VoidReturnStringTypedefConstParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
-            "void function1(const Type1 p);" );
+            "void function1(const Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3359,6 +3478,7 @@ TEST( Function, VoidReturnStringTypedefConstParameter )
     STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3370,14 +3490,15 @@ TEST( Function, VoidReturnPointerToClassTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef Class1* Type1;"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef Class1* Type1;"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3395,6 +3516,7 @@ TEST( Function, VoidReturnPointerToClassTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3406,14 +3528,15 @@ TEST( Function, VoidReturnPointerToConstClassTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "class Class1 { int member1[100]; };\n"
-                               "typedef const Class1* Type1;"
-                               "void function1(Type1 p);" );
+    SimpleString testHeader =
+            "class Class1 { int member1[100]; };\n"
+            "typedef const Class1* Type1;"
+            "void function1(Type1 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3431,6 +3554,7 @@ TEST( Function, VoidReturnPointerToConstClassTypedefParameter )
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                   "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3450,13 +3574,13 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeTypedefParameter )
             Config config( false );
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
-                    "void function1(Type1 p);", typeData.originalType.c_str(), referenceType.c_str() );
-            ClangTestHelper clangTest( testHeader.asCharString() );
+                    "void function1(Type1 p);",
+                    typeData.originalType.c_str(), referenceType.c_str() );
             std::vector<std::string> results;
             unsigned int functionCount = 0;
 
             // Exercise
-            clangTest.ParseFunctions( [&]( CXCursor cursor )
+            ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
             {
                 functionCount++;
 
@@ -3474,6 +3598,7 @@ TEST( Function, VoidReturnReferenceToPrimitiveTypeTypedefParameter )
             STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
                           "    mock().actualCall(\"function1\").withPointerParameter(\"p\", &p);\n"
                           "}\n", results[0].c_str() );
+            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
         }
@@ -3492,13 +3617,13 @@ TEST( Function, VoidReturnPrimitiveTypeDoubleTypedefParameter )
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "typedef Type1 Type2;\n"
-                "void function1(Type2 p);", typeData.originalType.c_str() );
-        ClangTestHelper clangTest( testHeader.asCharString() );
+                "void function1(Type2 p);",
+                typeData.originalType.c_str() );
         std::vector<std::string> results;
         unsigned int functionCount = 0;
 
         // Exercise
-        clangTest.ParseFunctions( [&]( CXCursor cursor )
+        ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
         {
             functionCount++;
 
@@ -3518,6 +3643,7 @@ TEST( Function, VoidReturnPrimitiveTypeDoubleTypedefParameter )
                 "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
     }
@@ -3530,15 +3656,15 @@ TEST( Function, VoidReturnStringTypedefTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
-            "void function1(Type2 p);" );
+            "void function1(Type2 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3556,6 +3682,7 @@ TEST( Function, VoidReturnStringTypedefTypedefParameter )
     STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3567,15 +3694,15 @@ TEST( Function, VoidReturnStringTypedefConstTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef const Type1 Type2;\n"
-            "void function1(Type2 p);" );
+            "void function1(Type2 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3593,6 +3720,7 @@ TEST( Function, VoidReturnStringTypedefConstTypedefParameter )
     STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3604,15 +3732,15 @@ TEST( Function, VoidReturnStringConstTypedefTypedefParameter )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest(
+    SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
-            "void function1(const Type2 p);" );
+            "void function1(const Type2 p);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3630,6 +3758,7 @@ TEST( Function, VoidReturnStringConstTypedefTypedefParameter )
     STRCMP_EQUAL( "void function1(const Type2 p)\n{\n"
                   "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
@@ -3641,12 +3770,12 @@ TEST( Function, ReturnAndMultipleParameters )
 {
     // Prepare
     Config config( false );
-    ClangTestHelper clangTest( "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);" );
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);";
     std::vector<std::string> results;
     unsigned int functionCount = 0;
 
     // Exercise
-    clangTest.ParseFunctions( [&]( CXCursor cursor )
+    ClangParseHelper::ParseFunctions( testHeader.asCharString(), [&]( CXCursor cursor )
     {
         functionCount++;
 
@@ -3663,8 +3792,9 @@ TEST( Function, ReturnAndMultipleParameters )
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
                   "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withStringParameter(\"p2\", p2)"
-                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongValue();\n"
+                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
                   "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
 }
