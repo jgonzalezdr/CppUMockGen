@@ -11,8 +11,10 @@ function Publish-TestResults($files)
         $testsuite = ([xml](get-content $_)).testsuite
 
         foreach ($testcase in $testsuite.testcase) {
+            [double]$testtimef = $testsuite.time
+            [int]$testtimei = $testtimef * 1000
             if ($testcase.failure) {
-                Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message
+                Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testtimei
                 Add-AppveyorMessage "$($testcase.name) failed" -Category Error
                 $anyFailures = $TRUE
             }
@@ -20,7 +22,7 @@ function Publish-TestResults($files)
                 Add-AppveyorTest $testcase.name -Outcome Ignored -Filename $testsuite.name
             }
             else {
-                Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name
+                Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $testtimei
             }
         }
 
