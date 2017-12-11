@@ -21,13 +21,13 @@ environment:
 
 install:
 - ps: if ($env:Platform -like 'MinGW*') { choco install mingw --version $env:PlatformToolset $( if ($env:Platform -like '*32') { Write-Output -forcex86 } ) | Out-Null }
-- ps: scripts\appveyor_ci_install_cpputest.ps1
+- ps: ci\appveyor_ci_install_cpputest.ps1
 
 build_script:
-- ps: scripts\appveyor_ci_build.ps1
+- ps: ci\appveyor_ci_build.ps1
 
 test_script:
-- ps: scripts\appveyor_ci_test.ps1
+- ps: ci\appveyor_ci_test.ps1
 
 #artifacts:
 #- path: lib\CppUTest.lib
