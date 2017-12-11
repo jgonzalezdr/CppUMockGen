@@ -8,28 +8,6 @@ function Get-Batchfile ($file) {
     }
 }
 
-# Helper function to provide the bin-folder path to mingw
-function Get-MinGWBin() {
-    if ($env:PlatformToolset -eq "6.3.0" ) {
-        if ($env:Platform -like '*64') {
-            Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin'
-        }
-        else {
-            Write-Output 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin'
-        }
-    }
-}
-
-# Helper function to provide the bin-folder path to cygwin
-function Get-CygwinBin() {
-    if ($env:Platform -like '*64') {
-        Write-Output 'C:\cygwin64\bin'
-    }
-    else {
-        Write-Output 'C:\cygwin\bin'
-    }
-}
-
 function Add-PathFolder($folder)
 {
     if (-not (Test-Path $folder))

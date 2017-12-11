@@ -23,6 +23,7 @@ install:
 - cmd: git submodule update --init --recursive
 #- ps: if ($env:Platform -like 'MinGW*') { choco install mingw --version $env:PlatformToolset $( if ($env:Platform -like '*32') { Write-Output -forcex86 } ) | Out-Null }
 - ps: ci\appveyor_ci_install_cpputest.ps1
+- cmd: dir C:\mingw-w64\
 
 build_script:
 - ps: ci\appveyor_ci_build.ps1
