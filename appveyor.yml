@@ -3,6 +3,7 @@ version: 1.0.0-ci{build}
 image: Visual Studio 2017
 
 environment:
+  CPPUTEST_HOME: C:\cpputest
   Configuration: Release
   matrix:
 #  - Platform: Cygwin32

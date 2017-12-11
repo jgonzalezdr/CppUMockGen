@@ -29,8 +29,6 @@ function Invoke-CygwinCommand($command, $directory = '.')
 #Remove-PathFolder "C:\Program Files (x86)\Git\cmd"
 #Remove-PathFolder "C:\Program Files (x86)\Git\usr\bin"
 
-$env:CPPUTEST_HOME='C:\cpputest\'
-
 $build_dir = "build"
 
 New-Item -ItemType Directory -Force -Path "$build_dir" | Out-Null

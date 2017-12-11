@@ -8,7 +8,7 @@ function Publish-TestResults($files)
 
     # Upload results to AppVeyor one by one
     $files | foreach {
-        $testsuite = ([xml](get-content $_.Name)).testsuite
+        $testsuite = ([xml](get-content $_)).testsuite
 
         foreach ($testcase in $testsuite.testcase) {
             if ($testcase.failure) {
@@ -24,21 +24,13 @@ function Publish-TestResults($files)
             }
         }
 
-        Remove-Item $_.Name
+        Remove-Item $_
     }
 
     if ($anyFailures -eq $TRUE){
-        write-host "Failing build as there are broken tests"
+        Write-Host -ForegroundColor Red "Failing build as there are broken tests"
         $host.SetShouldExit(1)
     }
-}
-
-function Invoke-Tests($executable)
-{
-    # Run tests and output the results using junit
-    $TestCommand = "$executable -ojunit"
-    Write-Host $TestCommand
-    Invoke-Expression $TestCommand
 }
 
 function Invoke-CygwinTests($executable)
@@ -108,7 +100,7 @@ switch -Wildcard ($env:Platform)
     }
 }
 
-Publish-TestResults (Get-ChildItem 'cpputest_*.xml')
+Publish-TestResults (Get-ChildItem -Include 'cpputest_*.xml' -Recurse -Name)
 
 if (-not $env:APPVEYOR)
 {
