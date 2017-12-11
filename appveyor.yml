@@ -1,0 +1,36 @@
+version: 1.0.0-ci{build}
+
+image: Visual Studio 2017
+
+environment:
+  Configuration: Release
+  matrix:
+#  - Platform: Cygwin32
+#  - Platform: MinGW32
+#    PlatformToolset: 4.8.5
+#  - Platform: MinGW64
+#    PlatformToolset: 4.8.5
+#  - Platform: MinGW32
+#   PlatformToolset: 5.3.0
+#  - Platform: MinGW64
+#    PlatformToolset: 5.3.0
+#  - Platform: Win32
+#    PlatformToolset: v140
+  - Platform: MSVC64
+    PlatformToolset: v141
+
+install:
+- ps: if ($env:Platform -like 'MinGW*') { choco install mingw --version $env:PlatformToolset $( if ($env:Platform -like '*32') { Write-Output -forcex86 } ) | Out-Null }
+- ps: Start-FileDownload 'https://github.com/jgonzalezdr/cpputest/releases/download/v3.7.2-custom/cpputest-3.7.2-custom.zip'
+- ps: New-Item -ItemType Directory -Force -Path "C:\cpputest"
+- ps: 7z -x -o C:\cpputest\ cpputest-3.7.2-custom.zip
+
+build_script:
+- ps: scripts\appveyor_ci_build.ps1
+
+test_script:
+- ps: scripts\appveyor_ci_test.ps1
+
+#artifacts:
+#- path: lib\CppUTest.lib
+#  name: CppUTMockGen
