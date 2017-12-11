@@ -77,7 +77,7 @@ switch -Wildcard ($env:Platform)
             $cmake_generator = "Visual Studio 15 Win64"
         }
 
-        Invoke-Command "cmake .. -G '$cmake_generator' -Wno-dev -DCI_MODE=ON" "$build_dir"
+        Invoke-Command "cmake .. -G '$cmake_generator' -Wno-dev -DCI_MODE=ON -DCOVERAGE=OFF" "$build_dir"
         Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg build.vcxproj" "$build_dir"
     }
 }

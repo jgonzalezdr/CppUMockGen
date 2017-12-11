@@ -4,8 +4,6 @@ project( CppUMockGen.AllTests )
 
 enable_testing()
 
-#set( COVERAGE_EXCLUDED \"*/libs/*\" \"*/sources/CAL/*\" \"*/sources/EOL/CAL/*\" )
-
 include( CommonTestTargets.cmake )
 
 # Test modules
