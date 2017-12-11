@@ -35,23 +35,6 @@ function Publish-TestResults($files)
     }
 }
 
-function Invoke-CygwinTests($executable)
-{
-    # Assume cygwin is located at C:\cygwin for now
-    $cygwin_bin = Get-CygwinBin
-
-    # Get the full path to the executable
-    $cygwin_folder = . "${cygwin_bin}\cygpath.exe" (Resolve-Path ".")
-    $cygwin_exe = . "${cygwin_bin}\cygpath.exe" $executable
-    
-    # Run tests from the cygwin prompt
-    $test_command = "${cygwin_exe} -ojunit"
-    $cygwin_command = "${cygwin_bin}\bash.exe --login -c 'cd ${cygwin_folder} ; ${test_command}'"
-
-    Write-Host $test_command
-    Invoke-Expression $cygwin_command
-}
-
 $build_dir = "build"
 
 $TestCount = 0
@@ -80,20 +63,9 @@ if (-not $env:APPVEYOR)
 
 switch -Wildcard ($env:Platform)
 {
-    'Cygwin*'
-    {
-        Invoke-CygwinTests 'cpputest_build\CppUTestTests.exe'
-        Invoke-CygwinTests 'cpputest_build\CppUTestExtTests.exe'
-    }
-
     'MinGW*'
     {
-        $mingw_path = Get-MinGWBin
-
-        Add-PathFolder $mingw_path
-        Invoke-Tests '.\cpputest_build\tests\CppUTestTests.exe'
-        Invoke-Tests '.\cpputest_build\tests\CppUTestExt\CppUTestExtTests.exe'
-        Remove-PathFolder $mingw_path
+        Invoke-Command "mingw32-make run_tests" "$build_dir"
     }
 
     'MSVC*'

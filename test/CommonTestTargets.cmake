@@ -16,7 +16,7 @@ add_custom_target( run_tests COMMAND ctest ${CTEST_ARGS} || ${TRUE} )
 # xUnit report merging
 #
 
-if( CI_MODE AND NOT MSVC )
+if( CI_MODE AND NOT WIN32 )
 
     find_program( MERGE_XUNIT merge_xunit_results.py )
     if( NOT EXISTS ${MERGE_XUNIT} )

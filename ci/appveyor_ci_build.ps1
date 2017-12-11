@@ -2,21 +2,15 @@
 # Load functions from the helper file
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path) 'appveyor_helpers.ps1')
 
-function Invoke-CygwinCommand($command, $directory = '.')
-{
-    # Assume cygwin is located at C:\cygwin on x86 and C:\cygwin64 on x64 for now
-    $cygwin_bin = Get-CygwinBin
-
-    $cygwin_directory = (. "${cygwin_bin}\cygpath.exe" (Resolve-Path $directory))
-    $command_wrapped = "${cygwin_bin}\bash.exe --login -c 'cd $cygwin_directory ; $command'"
-    
-    Write-Host "Executing <$command> in <$cygwin_directory>"
-    Invoke-Expression $command_wrapped
-
-    if ($LASTEXITCODE -ne 0)
-    {
-        Write-Host "Command Returned error: $LASTEXITCODE"
-        Exit $LASTEXITCODE
+# Helper function to provide the bin-folder path to mingw
+function Get-MinGWBin() {
+    if ($env:PlatformToolset -eq "6.3.0" ) {
+        if ($env:Platform -like '*64') {
+            Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin'
+        }
+        else {
+            Write-Output 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin'
+        }
     }
 }
 
@@ -35,13 +29,6 @@ New-Item -ItemType Directory -Force -Path "$build_dir" | Out-Null
 
 switch -Wildcard ($env:Platform)
 {
-    'Cygwin*'
-    {
-        Invoke-CygwinCommand "autoreconf -i .." "$build_dir"
-        Invoke-CygwinCommand "../configure" "$build_dir"
-        Invoke-CygwinCommand "make CppUTestTests.exe CppUTestExtTests.exe" "$build_dir"
-    }
-
     'MinGW*'
     {
         $mingw_path = Get-MinGWBin
@@ -49,8 +36,8 @@ switch -Wildcard ($env:Platform)
         # Add mingw to the path
         Add-PathFolder $mingw_path
 
-        Invoke-Command "cmake -G 'MinGW Makefiles' .." '$build_dir'
-        Invoke-Command "mingw32-make all" '$build_dir'
+        Invoke-Command "cmake .. -G 'MinGW Makefiles' -Wno-dev -DCI_MODE=ON -DCOVERAGE=OFF" "$build_dir"
+        Invoke-Command "mingw32-make" "$build_dir"
 
         Remove-PathFolder $mingw_path
     }

@@ -1,28 +1,27 @@
 version: 1.0.0-ci{build}
 
-image: Visual Studio 2017
-
 environment:
   CPPUTEST_HOME: C:\cpputest
   Configuration: Release
   matrix:
-#  - Platform: Cygwin32
 #  - Platform: MinGW32
 #    PlatformToolset: 4.8.5
 #  - Platform: MinGW64
 #    PlatformToolset: 4.8.5
 #  - Platform: MinGW32
 #   PlatformToolset: 5.3.0
-#  - Platform: MinGW64
-#    PlatformToolset: 5.3.0
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 #  - Platform: Win32
 #    PlatformToolset: v140
   - Platform: MSVC64
     PlatformToolset: v141
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 install:
 - cmd: git submodule update --init --recursive
-- ps: if ($env:Platform -like 'MinGW*') { choco install mingw --version $env:PlatformToolset $( if ($env:Platform -like '*32') { Write-Output -forcex86 } ) | Out-Null }
+#- ps: if ($env:Platform -like 'MinGW*') { choco install mingw --version $env:PlatformToolset $( if ($env:Platform -like '*32') { Write-Output -forcex86 } ) | Out-Null }
 - ps: ci\appveyor_ci_install_cpputest.ps1
 
 build_script:
