@@ -11,7 +11,7 @@ function Publish-TestResults($files)
         $testsuite = ([xml](get-content $_)).testsuite
 
         foreach ($testcase in $testsuite.testcase) {
-            [double]$testtimef = $testsuite.time
+            [double]$testtimef = $testcase.time
             [int]$testtimei = $testtimef * 1000
             if ($testcase.failure) {
                 Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testtimei
