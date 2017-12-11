@@ -1,10 +1,13 @@
 ﻿
-# Helper function to extract vars out of the vsvars batch file
-function Get-Batchfile ($file) {
-    $cmd = "`"$file`" & set"
-    cmd /c $cmd | Foreach-Object {
-        $p, $v = $_.split('=')
-        Set-Item -path env:$p -value $v
+# Helper function to provide the bin-folder path to mingw
+function Get-MinGWBin() {
+    if ($env:PlatformToolset -eq "6.3.0" ) {
+        if ($env:Platform -like '*64') {
+            Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin'
+        }
+        else {
+            Write-Output 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw64\bin'
+        }
     }
 }
 

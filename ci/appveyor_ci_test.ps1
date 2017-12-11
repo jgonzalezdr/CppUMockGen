@@ -65,7 +65,14 @@ switch -Wildcard ($env:Platform)
 {
     'MinGW*'
     {
+        $mingw_path = Get-MinGWBin
+
+        # Add mingw to the path
+        Add-PathFolder $mingw_path
+
         Invoke-Command "mingw32-make run_tests" "$build_dir"
+
+        Remove-PathFolder $mingw_path
     }
 
     'MSVC*'

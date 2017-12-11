@@ -2,7 +2,6 @@
 
 bool ClangCompileHelper::CheckCompilation( const std::string &testedHeader, const std::string &testedSource )
 {
-	return true;
     CXIndex index = clang_createIndex( 0, 1 );
 
     const char* clangOpts[] = { "-xc++", "-I" CPPUTEST_INCLUDE_DIR };
