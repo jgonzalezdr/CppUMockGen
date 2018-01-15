@@ -1,10 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include <set>
 #include <clang-c/Index.h>
 #include <cxxopts.hpp>
 #include "Function.hpp"
 #include "Method.hpp"
 #include "Config.hpp"
+
+const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
 std::ostream* output;
 
@@ -140,10 +143,7 @@ int main( int argc, char* argv[] )
         if( extensionIndex != std::string::npos )
         {
             std::string fileExtension = inputFileName.substr( extensionIndex + 1 );
-            interpretAsCpp = ( fileExtension == "hpp" ) ||
-                             ( fileExtension == "hxx" ) ||
-                             ( fileExtension == "hh" );
-
+            interpretAsCpp = ( cppExtensions.count( fileExtension ) > 0 );
         }
     }
 
