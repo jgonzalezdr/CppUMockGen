@@ -8,7 +8,8 @@
 
 std::ostream* output;
 
-void parseFile( const std::string &input, const Config &config,  bool interpretAsCpp )
+void parseFile( const std::string &input, const Config &config, bool interpretAsCpp,
+                const std::vector<std::string> &includePaths )
 {
     CXIndex index = clang_createIndex( 0, 1 );
 
@@ -16,6 +17,14 @@ void parseFile( const std::string &input, const Config &config,  bool interpretA
     if( interpretAsCpp )
     {
         clangOpts.push_back( "-xc++" );
+    }
+
+    std::vector<std::string> includePathOpts;
+
+    for( const std::string &includePath : includePaths )
+    {
+        includePathOpts.push_back( "-I" + includePath );
+        clangOpts.push_back( includePathOpts.back().c_str() );
     }
 
     CXTranslationUnit tu = clang_parseTranslationUnit( index, input.c_str(),
@@ -81,6 +90,7 @@ int main( int argc, char* argv[] )
         ( "o,output", "Output file", cxxopts::value<std::string>(), "<output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
+        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<include-path>" )
         ( "h,help", "Print help" );
 
     options.positional_help( "[<input>] [<output>]" );
@@ -153,5 +163,5 @@ int main( int argc, char* argv[] )
     }
     *output << std::endl;
 
-    parseFile( inputFileName, config, interpretAsCpp );
+    parseFile( inputFileName, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>() );
 }
