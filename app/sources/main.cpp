@@ -79,8 +79,8 @@ int main( int argc, char* argv[] )
     optionsConfig.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
         ( "o,output", "Output file", cxxopts::value<std::string>(), "<output>" )
-        ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>()->default_value(false), "<force-cpp>" )
-        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>()->default_value("false"), "[<underlying-typedef>]" )
+        ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
+        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
         ( "h,help", "Print help" );
 
     optionsConfig.positional_help( "[<input>] [<output>]" );
@@ -88,7 +88,7 @@ int main( int argc, char* argv[] )
 
     cxxopts::ParseResult parsedOptions = optionsConfig.parse( argc, argv );
 
-    if( parsedOptions.count("help") )
+    if( parsedOptions["help"].as<bool>() )
     {
         std::cout << optionsConfig.help() << std::endl;
         exit(0);
