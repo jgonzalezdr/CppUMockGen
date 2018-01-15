@@ -90,7 +90,7 @@ int main( int argc, char* argv[] )
         ( "o,output", "Output file", cxxopts::value<std::string>(), "<output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
-        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<include-path>" )
+        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
         ( "h,help", "Print help" );
 
     options.positional_help( "[<input>] [<output>]" );
