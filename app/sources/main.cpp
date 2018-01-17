@@ -7,6 +7,10 @@
 #include "Function.hpp"
 #include "Method.hpp"
 #include "Config.hpp"
+#include "ClangHelper.hpp"
+#include "ConsoleColorizer.hpp"
+
+static ConsoleColorizer cerrColorizer( ConsoleColorizer::ConsoleType::STD_ERROR );
 
 const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
@@ -16,10 +20,10 @@ struct ParseData
     std::ostream &output;
 };
 
-void parseFile( const std::string &input, const Config &config, bool interpretAsCpp,
+bool parseFile( const std::string &input, const Config &config, bool interpretAsCpp,
                 const std::vector<std::string> &includePaths, std::ostream &output )
 {
-    CXIndex index = clang_createIndex( 0, 1 );
+    CXIndex index = clang_createIndex( 0, 0 );
 
     std::vector<const char*> clangOpts;
     if( interpretAsCpp )
@@ -45,55 +49,98 @@ void parseFile( const std::string &input, const Config &config, bool interpretAs
         exit(-1);
     }
 
-    ParseData parseData = { config, output };
-
-    CXCursor tuCursor = clang_getTranslationUnitCursor(tu);
-    clang_visitChildren(
-        tuCursor,
-        []( CXCursor cursor, CXCursor parent, CXClientData clientData )
+    unsigned int numDiags = clang_getNumDiagnostics(tu);
+    unsigned int numErrors = 0;
+    if( numDiags > 0 )
+    {
+        for( unsigned int i = 0; i < numDiags; i++ )
         {
-            ParseData *parseData = (ParseData*) clientData;
-            if( clang_Location_isFromMainFile( clang_getCursorLocation( cursor ) ) != 0 )
+            CXDiagnostic diag = clang_getDiagnostic( tu, i );
+
+            CXDiagnosticSeverity diagSeverity = clang_getDiagnosticSeverity( diag );
+
+            switch( diagSeverity )
             {
-                CXCursorKind cursorKind = clang_getCursorKind( cursor );
-                if( cursorKind == CXCursor_FunctionDecl )
+                case CXDiagnosticSeverity::CXDiagnostic_Fatal:
+                case CXDiagnosticSeverity::CXDiagnostic_Error:
+                    numErrors++;
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
+                    std::cerr << "PARSE ERROR: ";
+                    break;
+
+                case CXDiagnosticSeverity::CXDiagnostic_Warning:
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::YELLOW );
+                    std::cerr << "PARSE WARNING: ";
+                    break;
+
+                default:
+                    break;
+            }
+
+            cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+
+            std::cerr << clang_formatDiagnostic( diag, clang_defaultDiagnosticDisplayOptions() ) << std::endl;
+
+            clang_disposeDiagnostic( diag );
+        }
+    }
+
+    if( numErrors == 0 )
+    {
+        ParseData parseData = { config, output };
+
+        CXCursor tuCursor = clang_getTranslationUnitCursor(tu);
+        clang_visitChildren(
+            tuCursor,
+            []( CXCursor cursor, CXCursor parent, CXClientData clientData )
+            {
+                ParseData *parseData = (ParseData*) clientData;
+                if( clang_Location_isFromMainFile( clang_getCursorLocation( cursor ) ) != 0 )
                 {
-                    Function function( cursor, parseData->config );
-                    if( function.IsMockable() )
+                    CXCursorKind cursorKind = clang_getCursorKind( cursor );
+                    if( cursorKind == CXCursor_FunctionDecl )
                     {
-                        parseData->output << function.GenerateMock() << std::endl;
+                        Function function( cursor, parseData->config );
+                        if( function.IsMockable() )
+                        {
+                            parseData->output << function.GenerateMock() << std::endl;
+                        }
+                        return CXChildVisit_Continue;
                     }
-                    return CXChildVisit_Continue;
-                }
-                else if( cursorKind == CXCursor_CXXMethod )
-                {
-                    Method method( cursor, parseData->config );
-                    if( method.IsMockable() )
+                    else if( cursorKind == CXCursor_CXXMethod )
                     {
-                        parseData->output << method.GenerateMock() << std::endl;
+                        Method method( cursor, parseData->config );
+                        if( method.IsMockable() )
+                        {
+                            parseData->output << method.GenerateMock() << std::endl;
+                        }
+                        return CXChildVisit_Continue;
                     }
-                    return CXChildVisit_Continue;
+                    else
+                    {
+                        //            std::cout << "Cursor '" << clang_getCursorSpelling( cursor ) << "' of kind '"
+                        //                << clang_getCursorKindSpelling( clang_getCursorKind( cursor ) ) << "'\n";
+                        return CXChildVisit_Recurse;
+                    }
                 }
                 else
                 {
-                    //            std::cout << "Cursor '" << clang_getCursorSpelling( cursor ) << "' of kind '"
-                    //                << clang_getCursorKindSpelling( clang_getCursorKind( cursor ) ) << "'\n";
-                    return CXChildVisit_Recurse;
+                    return CXChildVisit_Continue;
                 }
-            }
-            else
-            {
-                return CXChildVisit_Continue;
-            }
-        },
-        (CXClientData) &parseData );
+            },
+            (CXClientData) &parseData );
+    }
 
     clang_disposeTranslationUnit( tu );
     clang_disposeIndex( index );
+
+    return (numErrors == 0);
 }
 
 int main( int argc, char* argv[] )
 {
+    int returnCode = 0;
+
     cxxopts::Options options("CppUMockGen", "Mock generator for CppUTest");
 
     options.add_options()
@@ -113,14 +160,13 @@ int main( int argc, char* argv[] )
 
         if( options.count("help") )
         {
-            std::cout << options.help() << std::endl;
+            std::cout << options.help();
             exit(0);
         }
 
         if( !options.count( "input" ) )
         {
-            std::cerr << "No input file specified" << std::endl;
-            exit(1);
+            throw std::runtime_error( "No input file specified." );
         }
 
         std::string inputFileName = options["input"].as<std::string>();
@@ -131,8 +177,7 @@ int main( int argc, char* argv[] )
             outputFile.open( options["output"].as<std::string>() );
             if( ! outputFile.is_open() )
             {
-                std::cerr << "Error opening output file" << std::endl;
-                exit(1);
+                throw std::runtime_error( "Output file could not be opened." );
             }
         }
 
@@ -155,7 +200,7 @@ int main( int argc, char* argv[] )
 
         std::ostringstream output;
 
-        output << "// This file has been auto-generated by CppUTestMock. DO NOT EDIT IT!!!" << std::endl;
+        output << "/* This file has been auto-generated by CppUTestMock. DO NOT EDIT IT!!! */" << std::endl;
         output << std::endl;
         output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
         if( !interpretAsCpp )
@@ -169,22 +214,34 @@ int main( int argc, char* argv[] )
         }
         output << std::endl;
 
-        parseFile( inputFileName, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), output );
-
-        if( options.count( "output" ) )
+        if( parseFile( inputFileName, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), output ) )
         {
-            outputFile << output.str();
+            if( options.count( "output" ) )
+            {
+                outputFile << output.str();
+            }
+            else
+            {
+                std::cout << output.str();
+            }
         }
         else
         {
-            std::cout << output.str();
+            returnCode = 2;
+            throw std::runtime_error( "Mock could not be generated due to errors parsing the input file." );
         }
-
-        return 0;
     }
-    catch(cxxopts::OptionParseException &e)
+    catch(std::exception &e)
     {
+        cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
+        std::cerr << "ERROR: ";
+        cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
         std::cerr << e.what();
-        return 1;
+        if( !returnCode )
+        {
+            returnCode = 1;
+        }
     }
+
+    return returnCode;
 }
