@@ -1,3 +1,7 @@
+#
+# Script to install CppUTest binary libraries in AppVeyor
+#
+
 # Load functions from the helper file
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path) 'appveyor_helpers.ps1')
 

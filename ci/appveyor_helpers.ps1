@@ -1,4 +1,7 @@
-﻿
+#
+# Common helper functions for AppVeyor
+#
+
 # Helper function to provide the bin-folder path to mingw
 function Get-MinGWBin() {
     if ($env:PlatformToolset -eq "6.3.0" ) {
