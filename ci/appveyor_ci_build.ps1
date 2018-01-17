@@ -1,4 +1,7 @@
-﻿
+#
+# Script to manage builds in AppVeyor
+#
+
 # Load functions from the helper file
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path) 'appveyor_helpers.ps1')
 

@@ -6,6 +6,7 @@ environment:
   matrix:
   - Platform: MinGW64
     PlatformToolset: 6.3.0
+    PublishArtifacts: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   - Platform: MSVC64
     PlatformToolset: v141
@@ -20,3 +21,6 @@ build_script:
 
 test_script:
 - ps: ci\appveyor_ci_test.ps1
+
+after_test:
+- ps: ci\appveyor_ci_after_test.ps1
