@@ -42,7 +42,7 @@ bool parseFile( const std::string &input, const Config &config, bool interpretAs
     CXTranslationUnit tu = clang_parseTranslationUnit( index, input.c_str(),
                                                        clangOpts.data(), clangOpts.size(),
                                                        nullptr, 0,
-                                                       CXTranslationUnit_None );
+                                                       CXTranslationUnit_SkipFunctionBodies );
     if( tu == nullptr )
     {
         std::cerr << "Unable to parse translation unit. Quitting." << std::endl;
