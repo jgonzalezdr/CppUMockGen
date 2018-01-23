@@ -11,12 +11,16 @@
  *                              INCLUDES
  *===========================================================================*/
 
+#include <map>
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
-#include "ClangParseHelper.hpp"
-#include "ClangCompileHelper.hpp"
+
 #include <vector>
 #include <string>
+
+#include "ClangParseHelper.hpp"
+#include "ClangCompileHelper.hpp"
 
 #include "Function.hpp"
 
@@ -40,6 +44,11 @@
 #define ENUM_TAG
 #define STRUCT_TAG
 #endif
+
+Config* GetMockConfig()
+{
+    return (Config*) (void*) 78876433;
+}
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -155,12 +164,13 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
 TEST_EX( TEST_GROUP_NAME, WithDefinition )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "void function1() {}";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -175,14 +185,15 @@ TEST_EX( TEST_GROUP_NAME, WithDefinition )
 TEST_EX( TEST_GROUP_NAME, DoubleDeclaration )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "void function1();\n"
             "void function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 2, functionCount );
@@ -201,7 +212,8 @@ TEST_EX( TEST_GROUP_NAME, DoubleDeclaration )
 TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "namespace ns1 {\n"
             "void function1();\n"
@@ -209,7 +221,7 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -238,12 +250,13 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "void function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -262,12 +275,13 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "void function(void);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -288,12 +302,13 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "%s function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -326,14 +341,15 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "enum Enum1 { A, B, C };\n"
             ENUM_TAG "Enum1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -353,14 +369,15 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "enum class Enum1 { A, B, C };\n"
             "Enum1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -379,14 +396,15 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "Class1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -405,14 +423,15 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "Class1<int> function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -432,14 +451,15 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             STRUCT_TAG "Struct1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -464,7 +484,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "Type1 function1();",
@@ -472,7 +493,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -494,14 +515,15 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef enum { X, Y, Z } Type1;\n"
             "Type1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -521,7 +543,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z };\n"
             "typedef Enum1 Type1;\n"
@@ -529,7 +552,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -548,7 +571,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;\n"
@@ -556,7 +580,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -575,7 +599,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
             "typedef Class1<long> Type1;\n"
@@ -583,7 +608,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -603,7 +628,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "typedef struct Struct1 Type1;\n"
@@ -611,7 +637,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -634,12 +660,13 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "void* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -658,12 +685,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "const void* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -684,12 +712,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "%s* function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -713,12 +742,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithoutString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "const %s* function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -740,12 +770,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "const char* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -765,14 +796,15 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "Class1* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -791,14 +823,15 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "const Class1* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -817,14 +850,15 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "Class1<int>* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -843,14 +877,15 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
             "const Class1<char>* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -870,14 +905,15 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "struct Struct1* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -896,14 +932,15 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "const struct Struct1* function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -929,12 +966,13 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "%s& function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -958,12 +996,13 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "const %s& function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -985,14 +1024,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "Class1& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1013,14 +1053,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "const Class1& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1041,14 +1082,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "Class1<int>& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1069,14 +1111,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "const Class1<int>& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1097,14 +1140,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "struct Struct1& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1125,14 +1169,15 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "const struct Struct1& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1159,12 +1204,13 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "%s&& function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1188,12 +1234,13 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat( "const %s&& function1();", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1215,14 +1262,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "Class1&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1243,14 +1291,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "const Class1&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1271,14 +1320,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "Class1<int>&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1299,14 +1349,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "const Class1<int>&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1327,14 +1378,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "struct Struct1&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1355,14 +1407,15 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "const struct Struct1&& function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1390,7 +1443,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "Type1* function1();",
@@ -1398,7 +1452,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1420,7 +1474,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
                 "Type1* function1();",
@@ -1428,7 +1483,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1450,7 +1505,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "const Type1* function1();",
@@ -1458,7 +1514,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1480,7 +1536,8 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "Type1* const function1();",
@@ -1488,7 +1545,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1509,7 +1566,8 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;"
@@ -1517,7 +1575,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1536,7 +1594,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef const Class1 Type1;"
@@ -1544,7 +1603,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1563,7 +1622,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;"
@@ -1571,7 +1631,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1597,7 +1657,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "Type1 function1();",
@@ -1605,7 +1666,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1627,7 +1688,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "Type1 function1();",
@@ -1635,7 +1697,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1657,7 +1719,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* const Type1;\n"
                 "Type1 function1();",
@@ -1665,7 +1728,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1687,7 +1750,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "const Type1 function1();",
@@ -1695,7 +1759,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -1715,14 +1779,15 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
 TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "Type1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1741,14 +1806,15 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "const Type1 function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1768,7 +1834,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* Type1;"
@@ -1776,7 +1843,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1795,7 +1862,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef const Class1* Type1;"
@@ -1803,7 +1871,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1822,7 +1890,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* const Type1;"
@@ -1830,7 +1899,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1849,7 +1918,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* Type1;"
@@ -1857,7 +1927,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1892,7 +1962,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            Config config( false );
+            Config* config = GetMockConfig();
+
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
                     "Type1 function1();",
@@ -1900,7 +1971,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
 
             // Exercise
             std::vector<std::string> results;
-            unsigned int functionCount = ParseHeader( testHeader, config, results );
+            unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
             // Verify
             CHECK_EQUAL( 1, functionCount );
@@ -1928,12 +1999,13 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "int* *function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1952,12 +2024,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "const unsigned char* *function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -1976,12 +2049,13 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "short* const *function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2005,12 +2079,13 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "double* &function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2029,12 +2104,13 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader = "bool* const &function1();";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2060,7 +2136,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -2069,7 +2146,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2097,7 +2174,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -2106,7 +2184,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2128,7 +2206,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
@@ -2137,7 +2216,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2159,7 +2238,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -2168,7 +2248,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2190,7 +2270,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -2199,7 +2280,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2221,7 +2302,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
@@ -2230,7 +2312,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2252,7 +2334,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -2261,7 +2344,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
         CHECK_EQUAL( 1, functionCount );
@@ -2281,7 +2364,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
 TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
@@ -2289,7 +2373,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2308,7 +2392,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef const Type1 Type2;\n"
@@ -2316,7 +2401,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2335,7 +2420,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
@@ -2343,7 +2429,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, functionCount );
@@ -2374,14 +2460,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat( "void function1(%s p);", typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -2392,6 +2481,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2401,16 +2491,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "enum Enum1 { X, Y, Z };\n"
             "void function1(" ENUM_TAG "Enum1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(" ENUM_TAG "Enum1 p)\n{\n"
@@ -2428,16 +2521,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z };\n"
             "void function1(Enum1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Enum1 p)\n{\n"
@@ -2454,16 +2550,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(Class1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Class1 p)\n{\n"
@@ -2480,16 +2580,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(Class1<short> p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Class1<short> p)\n{\n"
@@ -2507,16 +2611,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(" STRUCT_TAG "Struct1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(" STRUCT_TAG "Struct1 p)\n{\n"
@@ -2539,7 +2647,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "void function1(Type1 p);",
@@ -2547,9 +2657,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -2560,6 +2671,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2569,16 +2681,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef enum { X, Y, Z, K } Type1;\n"
             "void function1(Type1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2596,7 +2711,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z, W };\n"
             "typedef Enum1 Type1;\n"
@@ -2604,9 +2721,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2623,7 +2741,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;\n"
@@ -2631,9 +2752,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2650,7 +2772,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 {
     // Prepare
-    Config config( true );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;\n"
@@ -2658,9 +2783,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2677,7 +2803,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
             "typedef Class1<long> Type1;\n"
@@ -2685,9 +2814,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2704,7 +2834,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyingType )
 {
     // Prepare
-    Config config( true );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
+
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
             "typedef Class1<long> Type1;\n"
@@ -2712,9 +2845,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2732,7 +2866,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "typedef struct Struct1 Type1;\n"
@@ -2740,9 +2877,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2759,7 +2897,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType )
 {
     // Prepare
-    Config config( true );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "typedef struct Struct1 Type1;\n"
@@ -2767,9 +2908,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -2790,14 +2932,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void function1(void* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(void * p)\n{\n"
@@ -2816,16 +2961,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s* p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -2836,6 +2984,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2847,16 +2996,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s* p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -2867,6 +3019,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2876,14 +3029,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void function1(const char* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const char * p)\n{\n"
@@ -2901,16 +3057,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(Class1* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Class1 * p)\n{\n"
@@ -2927,16 +3087,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(const Class1* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Class1 * p)\n{\n"
@@ -2953,16 +3117,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(Class1<short>* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Class1<short> * p)\n{\n"
@@ -2979,16 +3147,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(const Class1<short>* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Class1<short> * p)\n{\n"
@@ -3006,16 +3178,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(struct Struct1* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(struct Struct1 * p)\n{\n"
@@ -3032,16 +3208,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(const struct Struct1* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const struct Struct1 * p)\n{\n"
@@ -3065,16 +3245,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s& p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -3085,6 +3268,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3096,16 +3280,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s& p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -3116,6 +3303,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3125,16 +3313,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(Class1& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3153,16 +3345,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(const Class1& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3181,16 +3377,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(Class1<short>& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3209,16 +3409,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(const Class1<short>& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3237,16 +3441,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(struct Struct1& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3265,16 +3473,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(const struct Struct1& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3299,16 +3511,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s&& p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -3319,6 +3534,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3330,16 +3546,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s&& p);",
                 typeData.originalType.c_str() );
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -3350,6 +3569,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3359,16 +3579,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(Class1&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3387,16 +3611,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "void function1(const Class1&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3415,16 +3643,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(Class1<short>&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3443,16 +3675,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
             "void function1(const Class1<short>&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3471,16 +3707,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(struct Struct1&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3499,16 +3739,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
             "void function1(const struct Struct1&& p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -3532,16 +3776,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef void Type1;\n"
             "void function1(Type1* p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
@@ -3558,16 +3805,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef void Type1;\n"
             "void function1(Type1* const p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
@@ -3586,7 +3836,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "void function1(Type1* p);",
@@ -3594,9 +3846,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
@@ -3616,7 +3869,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
                 "void function1(Type1* p);",
@@ -3624,9 +3879,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
@@ -3646,7 +3902,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "void function1(const Type1* p);",
@@ -3654,9 +3912,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
@@ -3676,7 +3935,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithString )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "void function1(Type1* const p);",
@@ -3684,9 +3945,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
@@ -3705,7 +3967,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;"
@@ -3713,9 +3978,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
@@ -3732,7 +3998,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef const Class1 Type1;"
@@ -3740,9 +4009,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
@@ -3759,7 +4029,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;"
@@ -3767,9 +4040,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
@@ -3786,7 +4060,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1 Type1;"
@@ -3794,9 +4071,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
@@ -3820,7 +4098,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "void function1(Type1 p);",
@@ -3828,9 +4108,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -3839,6 +4120,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3850,7 +4132,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "void function1(Type1 p);",
@@ -3858,9 +4142,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -3869,6 +4154,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3880,7 +4166,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* const Type1;\n"
                 "void function1(Type1 p);",
@@ -3888,9 +4176,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -3899,6 +4188,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3910,7 +4200,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "void function1(const Type1 p);",
@@ -3918,9 +4210,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
@@ -3929,6 +4222,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -3938,16 +4232,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "void function1(Type1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -3964,16 +4261,19 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "void function1(const Type1 p);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
@@ -3991,7 +4291,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* Type1;"
@@ -3999,9 +4301,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -4018,7 +4321,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef const Class1* Type1;"
@@ -4026,9 +4331,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -4045,7 +4351,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* const Type1;"
@@ -4053,9 +4361,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -4072,7 +4381,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
             "typedef Class1* Type1;"
@@ -4080,9 +4391,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
@@ -4113,7 +4425,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
         for( auto typeData : primitivePointedTypesWithString )
         {
             // Prepare
-            Config config( false );
+            Config* config = GetMockConfig();
+            mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
                     "void function1(Type1 p);",
@@ -4121,9 +4435,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
 
             // Exercise
             std::vector<std::string> results;
-            unsigned int functionCount = ParseHeader( testHeader, config, results );
+            unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
             // Verify
+            mock().checkExpectations();
             CHECK_EQUAL( 1, functionCount );
             CHECK_EQUAL( 1, results.size() );
             STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
@@ -4132,6 +4447,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
             CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
+            mock().clear();
         }
     }
 }
@@ -4147,14 +4463,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#param").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void function1(signed int* * param);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(int ** param)\n{\n"
@@ -4171,14 +4490,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "functionX#x").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void functionX(const struct ExternStruct* *x);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void functionX(const struct ExternStruct ** x)\n{\n"
@@ -4195,14 +4517,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "functionY#arg").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void functionY(short* const * arg);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void functionY(short *const * arg)\n{\n"
@@ -4224,14 +4549,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#i").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void function1(double* &i);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(double *& i)\n{\n"
@@ -4248,14 +4576,17 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#j").andReturnValue((const void*)0);
+
     SimpleString testHeader = "void function1(bool* const &j);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(bool *const & j)\n{\n"
@@ -4279,7 +4610,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
     for( auto typeData : primitiveTypes )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -4288,9 +4621,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -4301,6 +4635,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4316,7 +4651,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -4325,9 +4662,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4336,6 +4674,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4347,7 +4686,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
@@ -4356,9 +4697,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4367,6 +4709,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4378,7 +4721,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -4387,9 +4732,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(const Type2 p)\n{\n"
@@ -4398,6 +4744,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4409,7 +4756,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -4418,9 +4767,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4429,6 +4779,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4440,7 +4791,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef const Type1 Type2;\n"
@@ -4449,9 +4802,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4460,6 +4814,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4471,7 +4826,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
         // Prepare
-        Config config( false );
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
                 "typedef Type1 Type2;\n"
@@ -4480,9 +4837,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
 
         // Exercise
         std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, config, results );
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "void function1(const Type2 p)\n{\n"
@@ -4491,6 +4849,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4500,7 +4859,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
@@ -4508,9 +4869,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4527,7 +4889,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef const Type1 Type2;\n"
@@ -4535,9 +4899,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(Type2 p)\n{\n"
@@ -4554,7 +4919,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+
     SimpleString testHeader =
             "typedef const char* Type1;\n"
             "typedef Type1 Type2;\n"
@@ -4562,9 +4929,10 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void function1(const Type2 p)\n{\n"
@@ -4587,14 +4955,20 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+
     SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
@@ -4612,14 +4986,20 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#_unnamedArg0").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#_unnamedArg1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#_unnamedArg3").andReturnValue((const void*)0);
+
     SimpleString testHeader = "unsigned long function1(const signed int*, const char*, signed char* p3, short);";
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "unsigned long function1(const int * _unnamedArg0, const char * _unnamedArg1, signed char * p3, short _unnamedArg3)\n{\n"

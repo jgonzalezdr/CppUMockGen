@@ -33,6 +33,7 @@ set( SRC_LIST
      sources/Function.cpp
      sources/Method.cpp
      sources/ConsoleColorizer.cpp
+     sources/Config.cpp
 )
 
 set( PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}" )

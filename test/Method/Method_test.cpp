@@ -11,18 +11,27 @@
  *                              INCLUDES
  *===========================================================================*/
 
+#include <map>
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
+
+#include <string>
+#include <vector>
+
 #include "ClangParseHelper.hpp"
 #include "ClangCompileHelper.hpp"
-#include <vector>
-#include <string>
 
 #include "Method.hpp"
 
 /*===========================================================================
  *                      COMMON TEST DEFINES & MACROS
  *===========================================================================*/
+
+Config* GetMockConfig()
+{
+    return (Config*) (void*) 836487567;
+}
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -60,7 +69,8 @@ TEST_GROUP( Method )
 TEST( Method, WithDefinitionInsideClass )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "public:\n"
@@ -69,7 +79,7 @@ TEST( Method, WithDefinitionInsideClass )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -84,7 +94,8 @@ TEST( Method, WithDefinitionInsideClass )
 TEST( Method, WithDefinitionOutsideClass )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "public:\n"
@@ -94,7 +105,7 @@ TEST( Method, WithDefinitionOutsideClass )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 2, methodCount );
@@ -109,8 +120,9 @@ TEST( Method, WithDefinitionOutsideClass )
 TEST( Method, PrivateMethod )
 {
     // Prepare
-    Config config( false );
-    SimpleString testHeader =
+    Config* config = GetMockConfig();
+
+   SimpleString testHeader =
             "class class1 {\n"
             "private:\n"
             "    void method1();\n"
@@ -118,7 +130,7 @@ TEST( Method, PrivateMethod )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -133,7 +145,8 @@ TEST( Method, PrivateMethod )
 TEST( Method, ProtectedMethod )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "protected:\n"
@@ -142,7 +155,7 @@ TEST( Method, ProtectedMethod )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -157,7 +170,8 @@ TEST( Method, ProtectedMethod )
 TEST( Method, PureVirtualMethod )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "public:\n"
@@ -166,7 +180,7 @@ TEST( Method, PureVirtualMethod )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -181,7 +195,8 @@ TEST( Method, PureVirtualMethod )
 TEST( Method, PublicMethod )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "public:\n"
@@ -190,7 +205,7 @@ TEST( Method, PublicMethod )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -208,7 +223,8 @@ TEST( Method, PublicMethod )
 TEST( Method, PublicConstMethod )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "class class1 {\n"
             "public:\n"
@@ -217,7 +233,7 @@ TEST( Method, PublicConstMethod )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );
@@ -235,7 +251,8 @@ TEST( Method, PublicConstMethod )
 TEST( Method, MethodWithinNamespace )
 {
     // Prepare
-    Config config( false );
+    Config* config = GetMockConfig();
+
     SimpleString testHeader =
             "namespace ns1 {\n"
             "class class1 {\n"
@@ -246,7 +263,7 @@ TEST( Method, MethodWithinNamespace )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, config, results );
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
 
     // Verify
     CHECK_EQUAL( 1, methodCount );

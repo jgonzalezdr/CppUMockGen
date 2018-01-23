@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <string>
+
 #include "ClangHelper.hpp"
 
 Function::Function( const CXCursor &cursor, const Config &config )
@@ -52,11 +54,11 @@ std::string Function::GenerateMock( bool isMethod ) const
             }
 
             const CXCursor arg = clang_Cursor_getArgument( m_cursor, i );
-            ProcessArgument( arg, mock, i );
+            ProcessArgument( funcName, arg, i, mock );
         }
 
         // Process function return type (final stage)
-        ProcessReturnFinal( returnType, mock, false );
+        ProcessReturnFinal( returnType, false, mock );
 
         // Close static casts if necessary
         while( pendingCallClosures )
@@ -223,7 +225,7 @@ unsigned int Function::ProcessReturnInitialTypeTypedef( const CXType &returnType
     return pendingCallClosures;
 }
 
-void Function::ProcessReturnFinal( const CXType &returnType, Mock &mock, bool inheritConst ) const
+void Function::ProcessReturnFinal( const CXType &returnType, bool inheritConst, Mock &mock ) const
 {
     switch( returnType.kind )
     {
@@ -273,7 +275,7 @@ void Function::ProcessReturnFinal( const CXType &returnType, Mock &mock, bool in
             break;
 
         case CXType_Typedef:
-            ProcessReturnFinalTypeTypedef( returnType, mock, inheritConst );
+            ProcessReturnFinalTypeTypedef( returnType, inheritConst, mock );
             break;
 
         case CXType_Record:
@@ -282,7 +284,7 @@ void Function::ProcessReturnFinal( const CXType &returnType, Mock &mock, bool in
             break;
 
         case CXType_Elaborated:
-            ProcessReturnFinal( clang_Type_getNamedType( returnType ), mock, inheritConst );
+            ProcessReturnFinal( clang_Type_getNamedType( returnType ), inheritConst, mock );
             break;
 
 // LCOV_EXCL_START
@@ -321,7 +323,7 @@ void Function::ProcessReturnFinalTypePointer( const CXType &returnType, Mock &mo
     }
 }
 
-void Function::ProcessReturnFinalTypeTypedef( const CXType &returnType, Mock &mock, bool inheritConst ) const
+void Function::ProcessReturnFinalTypeTypedef( const CXType &returnType, bool inheritConst, Mock &mock ) const
 {
     const CXType underlyingType = clang_getCanonicalType( returnType );
 
@@ -335,11 +337,11 @@ void Function::ProcessReturnFinalTypeTypedef( const CXType &returnType, Mock &mo
     {
         bool isTypedefConst = clang_isConstQualifiedType( returnType ) || inheritConst;
 
-        ProcessReturnFinal( underlyingType, mock, isTypedefConst );
+        ProcessReturnFinal( underlyingType, isTypedefConst, mock );
     }
 }
 
-void Function::ProcessArgument( const CXCursor &arg, Mock &mock, int argNum ) const
+void Function::ProcessArgument( const std::string funcName, const CXCursor &arg, int argNum, Mock &mock ) const
 {
     // Get argument type
     const CXType argType = clang_getCursorType( arg );
@@ -356,11 +358,27 @@ void Function::ProcessArgument( const CXCursor &arg, Mock &mock, int argNum ) co
     mock.signature += " " + argName;
 
     std::string argExpr = argName;
-    ProcessArgumentType( argType, argType, false, mock, argExpr );
+
+    std::string argId = funcName + "#" + argName;
+    const Config::OverrideSpec *override = m_config.GetOverride( argId );
+    if( override != NULL )
+    {
+        ProcessArgumentOverride( *override, argId, mock, argExpr );
+    }
+    else
+    {
+        ProcessArgumentType( argType, argType, false, mock, argExpr );
+    }
 
     // Add arguments name and value
     mock.body += "\"" + argName + "\", ";
     mock.body += argExpr + ")";
+}
+
+void Function::ProcessArgumentOverride( const Config::OverrideSpec& overrideSpec, const std::string& argId, Mock &mock, std::string &argExpr ) const
+{
+    mock.body += ".with" + overrideSpec.GetType() + "Parameter(";
+    overrideSpec.UpdateArgExpr( argExpr );
 }
 
 void Function::ProcessArgumentType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock, std::string &argExpr ) const

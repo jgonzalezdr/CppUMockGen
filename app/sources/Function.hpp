@@ -30,11 +30,12 @@ protected:
     unsigned int ProcessReturnInitialTypePointer( const CXType & returnType, Mock &mock ) const;
     unsigned int ProcessReturnInitialTypeRVReference( const CXType & returnType, Mock &mock ) const;
     unsigned int ProcessReturnInitialTypeTypedef( const CXType & returnType, Mock &mock ) const;
-    void ProcessReturnFinal( const CXType &returnType, Mock &mock, bool inheritConst ) const;
+    void ProcessReturnFinal( const CXType &returnType, bool inheritConst, Mock &mock ) const;
     void ProcessReturnFinalTypePointer( const CXType &returnType, Mock &mock ) const;
     void ProcessReturnFinalTypeRVReference( const CXType &returnType, Mock &mock ) const;
-    void ProcessReturnFinalTypeTypedef( const CXType &returnType, Mock &mock, bool inheritConst ) const;
-    void ProcessArgument( const CXCursor &arg, Mock &mock, int argNum ) const;
+    void ProcessReturnFinalTypeTypedef( const CXType &returnType, bool inheritConst, Mock &mock ) const;
+    void ProcessArgument( const std::string funcName, const CXCursor &arg, int argNum, Mock &mock ) const;
+    void ProcessArgumentOverride( const Config::OverrideSpec& overrideSpec, const std::string& argId, Mock &mock, std::string &argExpr ) const;
     void ProcessArgumentType( const CXType &argType, const CXType &origArgType, bool inheritConst, Mock &mock, std::string &argExpr ) const;
     void ProcessArgumentTypePointer( const CXType &argType, const CXType &origArgType, Mock &mock, std::string &argExpr ) const;
     void ProcessArgumentTypeRVReference( const CXType &argType, const CXType &origArgType, Mock &mock, std::string &argExpr ) const;

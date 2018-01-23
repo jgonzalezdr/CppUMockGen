@@ -19,6 +19,7 @@ set( TEST_SRC_FILES
      Function_test.cpp
      ${CMAKE_SOURCE_DIR}/test/TestHelpers/ClangParseHelper.cpp
      ${CMAKE_SOURCE_DIR}/test/TestHelpers/ClangCompileHelper.cpp
+     ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp
 )
 
 # Generate test target
