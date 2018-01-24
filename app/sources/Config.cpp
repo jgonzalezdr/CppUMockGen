@@ -93,6 +93,11 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
                 throw std::runtime_error( errorMsg );
             }
         }
+        else
+        {
+            std::string errorMsg = "Invalid override option <" + option + ">.";
+            throw std::runtime_error( errorMsg );
+        }
     }
 }
 
