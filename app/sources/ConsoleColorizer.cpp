@@ -1,5 +1,7 @@
 #include "ConsoleColorizer.hpp"
 
+ConsoleColorizer cerrColorizer( ConsoleColorizer::ConsoleType::STD_ERROR );
+
 ConsoleColorizer::ConsoleColorizer( ConsoleType consoleType )
 {
 #ifdef WIN32

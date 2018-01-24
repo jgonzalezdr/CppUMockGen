@@ -42,4 +42,6 @@ private:
 #endif
 };
 
+extern ConsoleColorizer cerrColorizer;
+
 #endif // header guard

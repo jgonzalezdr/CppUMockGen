@@ -29,6 +29,7 @@ endif()
 
 set( SRC_LIST
      sources/main.cpp
+     sources/MockGenerator.cpp
      sources/ClangHelper.cpp
      sources/Function.cpp
      sources/Method.cpp
