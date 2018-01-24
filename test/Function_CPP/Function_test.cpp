@@ -45,10 +45,26 @@
 #define STRUCT_TAG
 #endif
 
-Config* GetMockConfig()
+Config* GetMockConfig( uintptr_t n = 0 )
 {
-    return (Config*) (void*) 78876433;
+    return (Config*) (void*) (n + 78876433);
 }
+
+Config::OverrideSpec* GetMockConfig_OverrideSpec( uintptr_t n = 0 )
+{
+    return (Config::OverrideSpec*) (void*) (n + 23898746);
+}
+
+class StdStringCopier : public MockNamedValueCopier
+{
+public:
+    virtual void copy(void* out, const void* in)
+    {
+        *(std::string*)out = *(const std::string*)in;
+    }
+};
+
+StdStringCopier stdStringCopier;
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -5010,3 +5026,42 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 
     // Cleanup
 }
+
+/*
+ * Check mock generation of a function with parameter override.
+ */
+TEST_EX( TEST_GROUP_NAME, ParameterOverride )
+{
+    // Prepare
+    mock().installCopier( "std::string", stdStringCopier );
+
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* overrideA = GetMockConfig_OverrideSpec(1);
+    const std::string overrideAType = "ConstPointer";
+    const std::string overrideAArgExpr = "xp2X";
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue(overrideA);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::OverrideSpec::GetType").andReturnValue(&overrideAType);
+    mock().expectOneCall("Config::OverrideSpec::UpdateArgExpr").withOutputParameterOfTypeReturning("std::string", "argExpr", &overrideAArgExpr);
+
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
+                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withConstPointerParameter(\"p2\", xp2X)"
+                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+                  "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
