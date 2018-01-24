@@ -2,8 +2,8 @@
 
 #include <set>
 
-Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &options )
-: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_overrideMap( options )
+Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &overrideOptions )
+: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_overrideMap( overrideOptions )
 {};
 
 bool Config::UseUnderlyingTypedefType() const
@@ -42,18 +42,18 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
     if( sepPos != std::string::npos )
     {
         m_type = value.substr(0, sepPos);
-        m_argExp = value.substr(sepPos+1);
+        m_argExprMod = value.substr(sepPos+1);
         if( m_type.empty() )
         {
             std::string errorMsg = "Override option type cannot be empty <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
-        if( m_argExp.empty() )
+        if( m_argExprMod.empty() )
         {
             std::string errorMsg = "Override option argument expression cannot be empty if specified <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
-        if( m_argExp.find('$') == std::string::npos )
+        if( m_argExprMod.find('$') == std::string::npos )
         {
             std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) <" + option + ">";
             throw std::runtime_error( errorMsg );
@@ -109,10 +109,10 @@ const std::string& Config::OverrideSpec::GetType() const
 
 void Config::OverrideSpec::UpdateArgExpr( std::string& argExpr ) const
 {
-    if( !m_argExp.empty() )
+    if( !m_argExprMod.empty() )
     {
-        std::string ret = m_argExp;
-        size_t placeholderPos = m_argExp.find('$');
+        std::string ret = m_argExprMod;
+        size_t placeholderPos = m_argExprMod.find('$');
 
         argExpr = ret.replace(placeholderPos, 1, argExpr);
     }
