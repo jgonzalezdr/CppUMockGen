@@ -5038,7 +5038,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
     Config* config = GetMockConfig();
     const Config::OverrideSpec* overrideA = GetMockConfig_OverrideSpec(1);
     const std::string overrideAType = "ConstPointer";
-    const std::string overrideAArgExpr = "xp2X";
+    const std::string overrideAArgExpr = "&p2[0]";
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue(overrideA);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
@@ -5057,7 +5057,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
-                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withConstPointerParameter(\"p2\", xp2X)"
+                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withConstPointerParameter(\"p2\", &p2[0])"
                        ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
