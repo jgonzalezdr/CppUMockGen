@@ -33,6 +33,50 @@ static std::string GetFilenameFromPath( const std::string& filepath )
     }
 }
 
+void GenerateMock( CXTranslationUnit tu, const Config &config, std::ostream &output )
+{
+    ParseData parseData = { config, output };
+
+    CXCursor tuCursor = clang_getTranslationUnitCursor(tu);
+    clang_visitChildren(
+        tuCursor,
+        []( CXCursor cursor, CXCursor parent, CXClientData clientData )
+        {
+            ParseData *parseData = (ParseData*) clientData;
+            if( clang_Location_isFromMainFile( clang_getCursorLocation( cursor ) ) != 0 )
+            {
+                CXCursorKind cursorKind = clang_getCursorKind( cursor );
+                if( cursorKind == CXCursor_FunctionDecl )
+                {
+                    Function function( cursor, parseData->config );
+                    if( function.IsMockable() )
+                    {
+                        parseData->output << function.GenerateMock() << std::endl;
+                    }
+                    return CXChildVisit_Continue;
+                }
+                else if( cursorKind == CXCursor_CXXMethod )
+                {
+                    Method method( cursor, parseData->config );
+                    if( method.IsMockable() )
+                    {
+                        parseData->output << method.GenerateMock() << std::endl;
+                    }
+                    return CXChildVisit_Continue;
+                }
+                else
+                {
+                    return CXChildVisit_Recurse;
+                }
+            }
+            else
+            {
+                return CXChildVisit_Continue;
+            }
+        },
+        (CXClientData) &parseData );
+}
+
 bool GenerateMock( const std::string &inputFilename, const Config &config, bool interpretAsCpp,
                    const std::vector<std::string> &includePaths, std::ostream &output )
 {
@@ -115,48 +159,7 @@ bool GenerateMock( const std::string &inputFilename, const Config &config, bool 
         output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
         output << std::endl;
 
-        ParseData parseData = { config, output };
-
-        CXCursor tuCursor = clang_getTranslationUnitCursor(tu);
-        clang_visitChildren(
-            tuCursor,
-            []( CXCursor cursor, CXCursor parent, CXClientData clientData )
-            {
-                ParseData *parseData = (ParseData*) clientData;
-                if( clang_Location_isFromMainFile( clang_getCursorLocation( cursor ) ) != 0 )
-                {
-                    CXCursorKind cursorKind = clang_getCursorKind( cursor );
-                    if( cursorKind == CXCursor_FunctionDecl )
-                    {
-                        Function function( cursor, parseData->config );
-                        if( function.IsMockable() )
-                        {
-                            parseData->output << function.GenerateMock() << std::endl;
-                        }
-                        return CXChildVisit_Continue;
-                    }
-                    else if( cursorKind == CXCursor_CXXMethod )
-                    {
-                        Method method( cursor, parseData->config );
-                        if( method.IsMockable() )
-                        {
-                            parseData->output << method.GenerateMock() << std::endl;
-                        }
-                        return CXChildVisit_Continue;
-                    }
-                    else
-                    {
-                        //            std::cout << "Cursor '" << clang_getCursorSpelling( cursor ) << "' of kind '"
-                        //                << clang_getCursorKindSpelling( clang_getCursorKind( cursor ) ) << "'\n";
-                        return CXChildVisit_Recurse;
-                    }
-                }
-                else
-                {
-                    return CXChildVisit_Continue;
-                }
-            },
-            (CXClientData) &parseData );
+        GenerateMock( tu, config, output );
     }
 
     clang_disposeTranslationUnit( tu );
