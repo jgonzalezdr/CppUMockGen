@@ -151,10 +151,25 @@ TEST( Config, Exception_OverrideBadFormat )
                   Config( false, std::vector<std::string> { "function1#p=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#Int/" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=/" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#Int/abc" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int/" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=Int/abc" } ) );
 
     // Cleanup
+}
+
+/*
+ * Check that an exception is thrown when an override option function identifier is repeated.
+ */
+TEST( Config, Exception_FunctionRepeated )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" } ) );
 }
