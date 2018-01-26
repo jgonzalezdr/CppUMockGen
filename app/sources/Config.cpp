@@ -38,7 +38,7 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         throw std::runtime_error( errorMsg );
     }
 
-    size_t sepPos = value.find('@');
+    size_t sepPos = value.find('/');
     if( sepPos != std::string::npos )
     {
         m_type = value.substr(0, sepPos);

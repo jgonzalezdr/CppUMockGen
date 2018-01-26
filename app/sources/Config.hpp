@@ -46,6 +46,30 @@ public:
     };
 
     /**
+     * Constructs a Config object.
+     *
+     * @param useUnderlyingTypedefType [in] Indicates whether to use the underlying type of typedefs or the typedef name
+     *                                      to identify function or method parameters types
+     * @param overrideOptions [in] Override options (see OverrideMap)
+     */
+    Config( bool useUnderlyingTypedefType, const std::vector<std::string> &overrideOptions );
+
+    /**
+     * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function or method
+     * parameters types
+     */
+    bool UseUnderlyingTypedefType() const;
+
+    /**
+     * Returns the override spec related to the function or method parameter represented by @p key (if it exists).
+     *
+     * @param key [in] Identifier for a function or method parameter
+     * @return A pointer to an override spec, or NULL if it does not exist
+     */
+    const OverrideSpec* GetOverride( const std::string& key ) const;
+
+private:
+    /**
      * Correspondences between function or method parameters and its related override specification.
      */
     class OverrideMap
@@ -73,30 +97,6 @@ public:
         OverrideMapType m_map;
     };
 
-    /**
-     * Constructs a Config object.
-     *
-     * @param useUnderlyingTypedefType [in] Indicates whether to use the underlying type of typedefs or the typedef name
-     *                                      to identify function or method parameters types
-     * @param overrideOptions [in] Override options (see OverrideMap)
-     */
-    Config( bool useUnderlyingTypedefType, const std::vector<std::string> &overrideOptions );
-
-    /**
-     * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function or method
-     * parameters types
-     */
-    bool UseUnderlyingTypedefType() const;
-
-    /**
-     * Returns the override spec related to the function or method parameter represented by @p key (if it exists).
-     *
-     * @param key [in] Identifier for a function or method parameter
-     * @return A pointer to an override spec, or NULL if it does not exist
-     */
-    const OverrideSpec* GetOverride( const std::string& key ) const;
-
-private:
     bool m_useUnderlyingTypedefType;
     OverrideMap m_overrideMap;
 };
