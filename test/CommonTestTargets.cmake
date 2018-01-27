@@ -51,10 +51,10 @@ if( COVERAGE AND NOT MSVC )
     endif()
 
     if( WIN32 )
-        set( LCOV_PATH "C:/Devel/lcov/bin" )
+        set( LCOV_PATHS "C:/Devel/lcov/bin" "C:/lcov/bin" )
     endif()
 
-    find_program( LCOV lcov PATHS ${LCOV_PATH} )
+    find_program( LCOV lcov PATHS ${LCOV_PATHS} )
     if( NOT EXISTS ${LCOV} )
         message(FATAL_ERROR "lcov is not installed")
     endif()
@@ -69,7 +69,10 @@ if( COVERAGE AND NOT MSVC )
         endif()
     endif()
 
-    set( LCOV_ARGS --rc lcov_branch_coverage=1 )
+    if( NOT CI_MODE )
+        set( LCOV_ARGS --rc lcov_branch_coverage=1 )
+    endif()
+
     set( COVSRC_DIR ${CMAKE_SOURCE_DIR} )
 
     if( NOT COVERAGE_VERBOSE )
@@ -95,7 +98,7 @@ if( COVERAGE AND NOT MSVC )
                        COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -r ${COVDST_DIR}/app_stripped_i.info -o ${COVDST_DIR}/app_stripped.info ${COVERAGE_EXCLUDED}
                        DEPENDS run_tests )
 
-    if( CI_MODE )
+    if( CI_MODE AND JENKINS )
 
         find_program( LCOV_XML lcov_cobertura.py )
         if( NOT EXISTS ${LCOV_XML} )
@@ -110,7 +113,7 @@ if( COVERAGE AND NOT MSVC )
 
         add_dependencies( ci coverage_report )
 
-    else()
+    elseif( NOT CI_MODE )
 
         find_program( GENHTML genhtml PATHS ${LCOV_PATH} )
         if( NOT EXISTS ${GENHTML} )

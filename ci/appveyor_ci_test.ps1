@@ -64,6 +64,8 @@ if (-not $env:APPVEYOR)
     }
 }
 
+$build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
+
 switch -Wildcard ($env:Platform)
 {
     'MinGW*'
@@ -73,14 +75,14 @@ switch -Wildcard ($env:Platform)
         # Add mingw to the path
         Add-PathFolder $mingw_path
 
-        Invoke-Command "mingw32-make run_tests" "$build_dir"
+        Invoke-Command "mingw32-make $build_target" "$build_dir"
 
         Remove-PathFolder $mingw_path
     }
 
     'MSVC*'
     {
-        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg run_tests.vcxproj" "$build_dir\test"
+        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg $build_target.vcxproj" "$build_dir\test"
     }
 }
 

@@ -2,19 +2,29 @@ version: 1.0.0-ci{build}
 
 environment:
   CPPUTEST_HOME: C:\cpputest
-  Configuration: Release
   matrix:
-  - Platform: MinGW64
-    PlatformToolset: 6.3.0
-    PublishArtifacts: True
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   - Platform: MSVC64
     PlatformToolset: v141
+    Configuration: Release
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    Configuration: Coverage
+    CheckCompilation: True
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    Configuration: Release
+    PublishArtifacts: True
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 install:
-- cmd: git submodule update --init --recursive
 - ps: ci\appveyor_ci_install_cpputest.ps1
+- ps: ci\appveyor_ci_install_lcov.ps1
+- cinst codecov
+
+before_build:
+- cmd: git submodule update --init --recursive
 
 build_script:
 - ps: ci\appveyor_ci_build.ps1
@@ -24,3 +34,4 @@ test_script:
 
 after_test:
 - ps: ci\appveyor_ci_after_test.ps1
+- cmd: codecov -f coverage_lcov\app_stripped.info
