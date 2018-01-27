@@ -19,13 +19,15 @@ environment:
 #    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 cache:
-    - C:\Strawberry -> .appveyor_clear_cache.txt
+    - C:\cpputest -> appveyor.yml
+    - C:\Strawberry -> appveyor.yml
+    - C:\lcov -> appveyor.yml
 
 install:
-- ps: ci\appveyor_ci_install_cpputest.ps1
-- ps: ci\appveyor_ci_install_lcov.ps1
-- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { cinst strawberryperl }
-- ps: if ($env:Configuration -eq 'Coverage') { cinst codecov }
+- ps: if (!(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
+- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { choco install strawberryperl -r --no-progress }
+- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\lcov")) { ci\appveyor_ci_install_lcov.ps1 }
+- ps: if ($env:Configuration -eq 'Coverage') { choco install codecov -r --no-progress }
 - cmd: set PATH=C:\Strawberry\perl\bin;%PATH%
 
 before_build:
