@@ -49,7 +49,7 @@ if( COVERAGE AND NOT MSVC )
     if( NOT EXISTS ${PERL} )
         message(FATAL_ERROR "Perl is not installed")
     else()
-        message("Found Perl: ${LCOV}")
+        message("Found Perl: ${PERL}")
     endif()
 
     if( WIN32 )
