@@ -63,7 +63,7 @@ if( COVERAGE AND NOT MSVC )
         set( COVDST_DIR ${COVERAGE_OUTDIR} )
     else()
         if( CI_MODE )
-            set( COVDST_DIR reports/coverage )
+            set( COVDST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/reports/coverage )
         else()
             set( COVDST_DIR ${CMAKE_SOURCE_DIR}/coverage_lcov )
         endif()
@@ -86,7 +86,7 @@ if( COVERAGE AND NOT MSVC )
     add_custom_target( coverage_clean
                        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVDST_DIR}
                        COMMAND ${PERL} ${LCOV} -z -d ${CMAKE_BINARY_DIR}
-                       COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -c -i -d ${CMAKE_BINARY_DIR} -b ${COVSRC_DIR} -o ${COVDST_DIR}/app_base.info
+                       COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -c -i -d ${CMAKE_BINARY_DIR} -b ${COVSRC_DIR} -o ${COVDST_DIR}/app_base.info || ${TRUE}
                        DEPENDS build )
 
     add_dependencies( run_tests coverage_clean )
