@@ -18,6 +18,7 @@ $build_dir = "build"
 
 New-Item -ItemType Directory -Force -Path "$build_dir" | Out-Null
 
+$build_config = $env:Configuration
 $coverage = if ($env:Configuration -eq 'Coverage') {'ON'} else {'OFF'}
 $check_compilation = if ($env:CheckCompilation) {'ON'} else {'OFF'}
 
@@ -32,7 +33,7 @@ switch -Wildcard ($env:Platform)
         # Add mingw to the path
         Add-PathFolder $mingw_path
 
-        Invoke-Command "cmake .. -G 'MinGW Makefiles' $cmake_options" "$build_dir"
+        Invoke-Command "cmake .. -G 'MinGW Makefiles' $cmake_options -DCMAKE_BUILD_TYPE=$build_config" "$build_dir"
         Invoke-Command "mingw32-make" "$build_dir"
 
         Remove-PathFolder $mingw_path
