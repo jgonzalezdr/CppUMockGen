@@ -3,20 +3,20 @@ version: 1.0.0-ci{build}
 environment:
   CPPUTEST_HOME: C:\cpputest
   matrix:
-#  - Platform: MSVC64
-#    PlatformToolset: v141
-#    Configuration: Release
-#    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  - Platform: MSVC64
+    PlatformToolset: v141
+    Configuration: Release
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
   - Platform: MinGW64
     PlatformToolset: 6.3.0
     Configuration: Coverage
-    #CheckCompilation: True
+    CheckCompilation: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-#  - Platform: MinGW64
-#    PlatformToolset: 6.3.0
-#    Configuration: Release
-#    PublishArtifacts: True
-#    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    Configuration: Release
+    PublishArtifacts: True
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 cache:
     - C:\cpputest -> appveyor.yml

@@ -89,8 +89,8 @@ if( COVERAGE AND NOT MSVC )
 
     add_custom_target( coverage_clean
                        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVDST_DIR}
-                       COMMAND ${PERL} ${LCOV} -z -d ${CMAKE_BINARY_DIR} || ${TRUE}
-                       COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -c -i -d ${CMAKE_BINARY_DIR} -b ${COVSRC_DIR} -o ${COVDST_DIR}/app_base.info || ${TRUE}
+                       COMMAND ${PERL} ${LCOV} -z -d ${CMAKE_BINARY_DIR}
+                       COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -c -i -d ${CMAKE_BINARY_DIR} -b ${COVSRC_DIR} -o ${COVDST_DIR}/app_base.info
                        DEPENDS build )
 
     add_dependencies( run_tests coverage_clean )
