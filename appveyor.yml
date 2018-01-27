@@ -34,4 +34,4 @@ test_script:
 
 after_test:
 - ps: ci\appveyor_ci_after_test.ps1
-- cmd: codecov -f coverage_lcov\app_stripped.info
+- ps: if ($env:Configuration -eq 'Coverage') { codecov -f coverage_lcov\app_stripped.info }
