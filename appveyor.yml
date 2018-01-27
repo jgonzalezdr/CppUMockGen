@@ -20,7 +20,7 @@ environment:
 
 cache:
     - C:\cpputest -> appveyor.yml
-    - C:\Strawberry -> appveyor.yml
+    - C:\Strawberry
     - C:\lcov -> appveyor.yml
 
 install:
