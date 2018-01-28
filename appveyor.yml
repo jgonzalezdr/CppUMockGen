@@ -24,7 +24,7 @@ cache:
     - C:\lcov -> appveyor.yml
 
 install:
-- ps: if (!(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
+- ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
 - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { choco install strawberryperl -r --no-progress }
 - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\lcov")) { ci\appveyor_ci_install_lcov.ps1 }
 - ps: if ($env:Configuration -eq 'Coverage') { choco install codecov -r --no-progress }

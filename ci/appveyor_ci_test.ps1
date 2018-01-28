@@ -66,29 +66,32 @@ if (-not $env:APPVEYOR)
 
 $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
 
-switch -Wildcard ($env:Platform)
+if (!($env:Test -eq 'False'))
 {
-    'MinGW*'
+    switch -Wildcard ($env:Platform)
     {
-        $mingw_path = Get-MinGWBin
+        'MinGW*'
+        {
+            $mingw_path = Get-MinGWBin
 
-        # Add mingw to the path
-        Add-PathFolder $mingw_path
+            # Add mingw to the path
+            Add-PathFolder $mingw_path
 
-        Invoke-Command "mingw32-make $build_target" "$build_dir"
+            Invoke-Command "mingw32-make $build_target" "$build_dir"
 
-        Remove-PathFolder $mingw_path
+            Remove-PathFolder $mingw_path
+        }
+
+        'MSVC*'
+        {
+            Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg $build_target.vcxproj" "$build_dir\test"
+        }
     }
 
-    'MSVC*'
+    Publish-TestResults (Get-ChildItem -Include 'cpputest_*.xml' -Recurse -Name)
+
+    if (-not $env:APPVEYOR)
     {
-        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg $build_target.vcxproj" "$build_dir\test"
+        Write-Host "Tests Ran: $TestCount"
     }
-}
-
-Publish-TestResults (Get-ChildItem -Include 'cpputest_*.xml' -Recurse -Name)
-
-if (-not $env:APPVEYOR)
-{
-    Write-Host "Tests Ran: $TestCount"
 }

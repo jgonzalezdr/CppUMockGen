@@ -20,7 +20,7 @@ if( CI_MODE AND NOT WIN32 )
 
     find_program( MERGE_XUNIT merge_xunit_results.py )
     if( NOT EXISTS ${MERGE_XUNIT} )
-        message(FATAL_ERROR "merge_xunit_results.py is not installed")
+        message( FATAL_ERROR "merge_xunit_results.py is not installed" )
     endif()
 
     set( XUNIT_OUT_PATH "reports/xunit/" )
@@ -47,9 +47,9 @@ if( COVERAGE AND NOT MSVC )
 
     find_program( PERL perl )
     if( NOT EXISTS ${PERL} )
-        message(FATAL_ERROR "Perl is not installed")
+        message( FATAL_ERROR "Perl is not installed" )
     else()
-        message(STATUS "Found Perl: ${PERL}")
+        message( STATUS "Found Perl: ${PERL}" )
     endif()
 
     if( WIN32 )
@@ -58,9 +58,9 @@ if( COVERAGE AND NOT MSVC )
 
     find_program( LCOV lcov PATHS ${LCOV_PATHS} )
     if( NOT EXISTS ${LCOV} )
-        message(FATAL_ERROR "LCOV is not installed")
+        message( FATAL_ERROR "LCOV is not installed" )
     else()
-        message(STATUS "Found LCOV: ${LCOV}")
+        message( STATUS "Found LCOV: ${LCOV}" )
     endif()
 
     if( COVERAGE_OUTDIR )
@@ -106,7 +106,7 @@ if( COVERAGE AND NOT MSVC )
 
         find_program( LCOV_XML lcov_cobertura.py )
         if( NOT EXISTS ${LCOV_XML} )
-            message(FATAL_ERROR "lcov_cobertura is not installed")
+            message( FATAL_ERROR "lcov_cobertura is not installed" )
         endif()
 
         set( COVERAGE_FILE coverage.xml )
@@ -121,7 +121,7 @@ if( COVERAGE AND NOT MSVC )
 
         find_program( GENHTML genhtml PATHS ${LCOV_PATH} )
         if( NOT EXISTS ${GENHTML} )
-            message(FATAL_ERROR "genhtml is not installed")
+            message( FATAL_ERROR "genhtml is not installed" )
         endif()
 
         add_custom_target( coverage_report
@@ -136,7 +136,7 @@ if( COVERAGE AND MSVC )
 
     find_program( OPENCPPCOVERAGE OpenCppCoverage )
     if( NOT EXISTS ${OPENCPPCOVERAGE} )
-        message(FATAL_ERROR "OpenCppCoverage is not installed")
+        message( FATAL_ERROR "OpenCppCoverage is not installed" )
     endif()
 
     if( COVERAGE_OUTDIR )
