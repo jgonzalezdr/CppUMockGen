@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen.Top )
 
-option( TESTS "Enable building tests" ON )
+option( TEST "Enable building tests" ON )
 option( COVERAGE "Enable coverage analysis" ON )
 
 set( DEFAULT_BUILD_TYPE "Release" )
@@ -25,7 +25,7 @@ else()
     endif()
     
     if( NOT CMAKE_BUILD_TYPE IN_LIST BUILD_TYPES_LIST )
-        message( FATAL_ERROR "Unknown build type '${CMAKE_BUILD_TYPE}'" )
+        message( FATAL_ERROR "Unknown build type '${CMAKE_BUILD_TYPE}', please choose a supported build type: ${BUILD_TYPES_STRLIST}" )
     endif()
     
 endif()
@@ -35,9 +35,6 @@ if( CMAKE_BUILD_TYPE )
 endif()
 
 if( NOT MSVC )
-    set( CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" )
-    set( CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG" )
-
     set( CMAKE_CXX_FLAGS_COVERAGE ${CMAKE_CXX_FLAGS_DEBUG} )
     set( CMAKE_C_FLAGS_COVERAGE ${CMAKE_C_FLAGS_DEBUG} )
     set( CMAKE_EXE_LINKER_FLAGS_COVERAGE ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
@@ -50,6 +47,6 @@ endif()
 add_custom_target( build )
 
 add_subdirectory( app )
-if( TESTS )
+if( TEST )
     add_subdirectory( test )
 endif()

@@ -15,6 +15,7 @@ environment:
   - Platform: MinGW64
     PlatformToolset: 6.3.0
     Configuration: Release
+    Test: False
     PublishArtifacts: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
