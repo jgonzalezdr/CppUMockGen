@@ -9,14 +9,13 @@ set( DEFAULT_BUILD_TYPE "Release" )
 
 set( BUILD_TYPES_LIST "Debug" "Release" "RelWithDebInfo" "MinSizeRel" )
 
-if( COVERAGE AND NOT MSVC )
+if( COVERAGE )
     set( BUILD_TYPES_LIST ${BUILD_TYPES_LIST} "Coverage" )
 endif()
 
-if( CMAKE_CONFIGURATION_TYPES )
-    set( CMAKE_CONFIGURATION_TYPES "${BUILD_TYPES_LIST}" CACHE STRING "" FORCE )
-else()
+if( NOT CMAKE_CONFIGURATION_TYPES )
     string( REPLACE ";" " " BUILD_TYPES_STRLIST "${BUILD_TYPES_LIST}" )
+    
     if( NOT CMAKE_BUILD_TYPE )
         message( STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified" )
         set( CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Choose the type of build, options are: ${BUILD_TYPES_STRLIST}" FORCE )
@@ -27,7 +26,6 @@ else()
     if( NOT CMAKE_BUILD_TYPE IN_LIST BUILD_TYPES_LIST )
         message( FATAL_ERROR "Unknown build type '${CMAKE_BUILD_TYPE}', please choose a supported build type: ${BUILD_TYPES_STRLIST}" )
     endif()
-    
 endif()
 
 if( CMAKE_BUILD_TYPE )
@@ -47,6 +45,7 @@ endif()
 add_custom_target( build )
 
 add_subdirectory( app )
+
 if( TEST )
     add_subdirectory( test )
 endif()
