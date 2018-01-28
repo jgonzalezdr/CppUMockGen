@@ -20,7 +20,7 @@ if( CI_MODE AND NOT WIN32 )
 
     find_program( MERGE_XUNIT merge_xunit_results.py )
     if( NOT EXISTS ${MERGE_XUNIT} )
-        message(FATAL_ERROR "merge_xunit_results.py is not installed")
+        message( FATAL_ERROR "merge_xunit_results.py is not installed" )
     endif()
 
     set( XUNIT_OUT_PATH "reports/xunit/" )
@@ -47,16 +47,20 @@ if( COVERAGE AND NOT MSVC )
 
     find_program( PERL perl )
     if( NOT EXISTS ${PERL} )
-        message(FATAL_ERROR "Perl is not installed")
+        message( FATAL_ERROR "Perl is not installed" )
+    else()
+        message( STATUS "Found Perl: ${PERL}" )
     endif()
 
     if( WIN32 )
-        set( LCOV_PATH "C:/Devel/lcov/bin" )
+        set( LCOV_PATHS "C:/Devel/lcov/bin" "C:/lcov/bin" )
     endif()
 
-    find_program( LCOV lcov PATHS ${LCOV_PATH} )
+    find_program( LCOV lcov PATHS ${LCOV_PATHS} )
     if( NOT EXISTS ${LCOV} )
-        message(FATAL_ERROR "lcov is not installed")
+        message( FATAL_ERROR "LCOV is not installed" )
+    else()
+        message( STATUS "Found LCOV: ${LCOV}" )
     endif()
 
     if( COVERAGE_OUTDIR )
@@ -69,7 +73,10 @@ if( COVERAGE AND NOT MSVC )
         endif()
     endif()
 
-    set( LCOV_ARGS --rc lcov_branch_coverage=1 )
+    if( NOT CI_MODE )
+        set( LCOV_ARGS --rc lcov_branch_coverage=1 )
+    endif()
+
     set( COVSRC_DIR ${CMAKE_SOURCE_DIR} )
 
     if( NOT COVERAGE_VERBOSE )
@@ -95,11 +102,11 @@ if( COVERAGE AND NOT MSVC )
                        COMMAND ${PERL} ${LCOV} ${LCOV_ARGS} -r ${COVDST_DIR}/app_stripped_i.info -o ${COVDST_DIR}/app_stripped.info ${COVERAGE_EXCLUDED}
                        DEPENDS run_tests )
 
-    if( CI_MODE )
+    if( CI_MODE AND JENKINS )
 
         find_program( LCOV_XML lcov_cobertura.py )
         if( NOT EXISTS ${LCOV_XML} )
-            message(FATAL_ERROR "lcov_cobertura is not installed")
+            message( FATAL_ERROR "lcov_cobertura is not installed" )
         endif()
 
         set( COVERAGE_FILE coverage.xml )
@@ -110,11 +117,11 @@ if( COVERAGE AND NOT MSVC )
 
         add_dependencies( ci coverage_report )
 
-    else()
+    elseif( NOT CI_MODE )
 
         find_program( GENHTML genhtml PATHS ${LCOV_PATH} )
         if( NOT EXISTS ${GENHTML} )
-            message(FATAL_ERROR "genhtml is not installed")
+            message( FATAL_ERROR "genhtml is not installed" )
         endif()
 
         add_custom_target( coverage_report
@@ -129,7 +136,7 @@ if( COVERAGE AND MSVC )
 
     find_program( OPENCPPCOVERAGE OpenCppCoverage )
     if( NOT EXISTS ${OPENCPPCOVERAGE} )
-        message(FATAL_ERROR "OpenCppCoverage is not installed")
+        message( FATAL_ERROR "OpenCppCoverage is not installed" )
     endif()
 
     if( COVERAGE_OUTDIR )

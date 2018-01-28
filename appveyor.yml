@@ -2,19 +2,37 @@ version: 1.0.0-ci{build}
 
 environment:
   CPPUTEST_HOME: C:\cpputest
-  Configuration: Release
   matrix:
-  - Platform: MinGW64
-    PlatformToolset: 6.3.0
-    PublishArtifacts: True
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   - Platform: MSVC64
     PlatformToolset: v141
+    Configuration: Release
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    Configuration: Coverage
+    CheckCompilation: True
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - Platform: MinGW64
+    PlatformToolset: 6.3.0
+    Configuration: Release
+    Test: False
+    PublishArtifacts: True
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+cache:
+    - C:\cpputest -> appveyor.yml
+    - C:\Strawberry
+    - C:\lcov -> appveyor.yml
 
 install:
+- ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
+- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { choco install strawberryperl -r --no-progress }
+- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\lcov")) { ci\appveyor_ci_install_lcov.ps1 }
+- ps: if ($env:Configuration -eq 'Coverage') { choco install codecov -r --no-progress }
+- cmd: set PATH=C:\Strawberry\perl\bin;%PATH%
+
+before_build:
 - cmd: git submodule update --init --recursive
-- ps: ci\appveyor_ci_install_cpputest.ps1
 
 build_script:
 - ps: ci\appveyor_ci_build.ps1
@@ -24,3 +42,4 @@ test_script:
 
 after_test:
 - ps: ci\appveyor_ci_after_test.ps1
+- ps: if ($env:Configuration -eq 'Coverage') { codecov -f build\test\reports\coverage\app_stripped.info }

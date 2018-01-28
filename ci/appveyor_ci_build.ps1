@@ -18,6 +18,13 @@ $build_dir = "build"
 
 New-Item -ItemType Directory -Force -Path "$build_dir" | Out-Null
 
+$build_config = $env:Configuration
+$coverage = if ($env:Configuration -eq 'Coverage') {'ON'} else {'OFF'}
+$check_compilation = if ($env:CheckCompilation) {'ON'} else {'OFF'}
+$test = if ($env:Test -eq 'False') {'OFF'} else {'ON'}
+
+$cmake_options = "-Wno-dev -DCI_MODE=ON -DTEST=$test -DCOVERAGE=$coverage -DCHECK_COMPILATION=$check_compilation"
+
 switch -Wildcard ($env:Platform)
 {
     'MinGW*'
@@ -27,7 +34,7 @@ switch -Wildcard ($env:Platform)
         # Add mingw to the path
         Add-PathFolder $mingw_path
 
-        Invoke-Command "cmake .. -G 'MinGW Makefiles' -Wno-dev -DCI_MODE=ON -DCOVERAGE=OFF" "$build_dir"
+        Invoke-Command "cmake .. -G 'MinGW Makefiles' $cmake_options -DCMAKE_BUILD_TYPE=$build_config" "$build_dir"
         Invoke-Command "mingw32-make" "$build_dir"
 
         Remove-PathFolder $mingw_path
@@ -53,7 +60,7 @@ switch -Wildcard ($env:Platform)
             $cmake_generator = "Visual Studio 15 Win64"
         }
 
-        Invoke-Command "cmake .. -G '$cmake_generator' -Wno-dev -DCI_MODE=ON -DCOVERAGE=OFF -DCHECK_COMPILATION=OFF" "$build_dir"
+        Invoke-Command "cmake .. -G '$cmake_generator' $cmake_options" "$build_dir"
         Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg build.vcxproj" "$build_dir"
     }
 }
