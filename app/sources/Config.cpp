@@ -21,8 +21,8 @@ static const std::set<std::string> validOverrideTypes =
     "Bool",
     "Int",
     "UnsignedInt",
-    "Long",
-    "UnsignedLong",
+    "LongInt",
+    "UnsignedLongInt",
     "Double",
     "String",
     "Pointer",
@@ -34,7 +34,7 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
 {
     if( value.empty() )
     {
-        std::string errorMsg = "Override option spec cannot be empty <" + option + ">";
+        std::string errorMsg = "Override option specification cannot be empty <" + option + ">";
         throw std::runtime_error( errorMsg );
     }
 

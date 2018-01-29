@@ -19,8 +19,6 @@ bool Function::IsMockable() const
     // declared more than once
     bool isCanonical = clang_equalCursors( m_cursor, clang_getCanonicalCursor( m_cursor ) );
 
-    // TODO: Print warning if not mockable
-
     return isCanonical && hasNoDefinition;
 }
 
@@ -509,7 +507,6 @@ void Function::ProcessArgumentTypePointer( const CXType &argType, const CXType &
                     break;
 
                 default:
-                    // TODO: Differentiate pointer from output using user comments
                     mock.body += ".withOutputParameter(";
                     break;
             }
@@ -531,7 +528,6 @@ void Function::ProcessArgumentTypeRVReference( const CXType &argType, const CXTy
         ( pointeeType.kind == CXType_Unexposed ) )
     {
         ProcessArgumentTypePointer( argType, origArgType, mock, argExpr );
-        //throw std::runtime_error( "Unsupported parameter type " + clang_getTypeSpelling( argType ) );
     }
     else
     {
