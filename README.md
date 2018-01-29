@@ -42,7 +42,7 @@ CppUMock, just as any C/C++ compiler, needs to know where to find other include 
 CppUMockGen deduces the `with<Type>Parameter` or `return<Type>Value` function to call on `MockActualCall` objects from the C/C++ types according to the following table:
 
 | C/C++ type                                                        | CppUTest parameter function | CppUTest return function |
-| -                                                                 | - |
+| -                                                                 | - | - |
 | `bool`                                                            | `withBoolParameter`  | `returnBoolValue` |
 | `char` <br> `short` <br> `int` <br> `wchar_t`                     | `withIntParameter` | `returnIntValue` |
 | `unsigned char` <br> `unsigned short` <br> `unsigned int` <br> `char16_t` | `withUnsignedIntParameter` | `returnUnsignedIntValue` |
