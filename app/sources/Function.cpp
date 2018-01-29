@@ -251,7 +251,6 @@ void Function::ProcessReturnFinal( const CXType &returnType, bool inheritConst, 
         case CXType_UChar:
         case CXType_UShort:
         case CXType_Char16:
-        case CXType_Char32:
             mock.body += ".returnUnsignedIntValue()";
             break;
 
@@ -260,6 +259,7 @@ void Function::ProcessReturnFinal( const CXType &returnType, bool inheritConst, 
             break;
 
         case CXType_ULong:
+        case CXType_Char32:
             mock.body += ".returnUnsignedLongIntValue()";
             break;
 
@@ -407,7 +407,6 @@ void Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
         case CXType_UInt:
         case CXType_UShort:
         case CXType_Char16:
-        case CXType_Char32:
             mock.body += ".withUnsignedIntParameter(";
             break;
 
@@ -416,6 +415,7 @@ void Function::ProcessArgumentType( const CXType &argType, const CXType &origArg
             break;
 
         case CXType_ULong:
+        case CXType_Char32:
             mock.body += ".withUnsignedLongIntParameter(";
             break;
 

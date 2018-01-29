@@ -99,7 +99,7 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
         { "bool", "bool", false, "Bool" },
         { "wchar_t", "wchar_t", true, "Int" },
         { "char16_t", "char16_t", true, "UnsignedInt" },
-        { "char32_t", "char32_t", true, "UnsignedInt" },
+        { "char32_t", "char32_t", true, "UnsignedLongInt" },
 #endif
     };
 
