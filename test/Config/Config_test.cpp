@@ -100,6 +100,43 @@ TEST( Config, OverrideOptions_Simple )
 }
 
 /*
+ * Check that the override options allowed types are accepted.
+ */
+TEST( Config, OverrideOptions_AllowedTypes )
+{
+    // Prepare
+
+    // Exercise
+    Config testConfig( false, std::vector<std::string>
+    {
+        "function1#p1=Int",
+        "function1#p2=UnsignedInt",
+        "function1#p3=LongInt",
+        "function1#p4=UnsignedLongInt",
+        "function1#p5=Bool",
+        "function1#p6=String",
+        "function1#p7=Pointer",
+        "function1#p8=ConstPointer",
+        "function1#p9=Output",
+        "function1#p10=Double"
+    } );
+
+    // Verify
+    CHECK( testConfig.GetOverride("function1#p1") != NULL );
+    CHECK( testConfig.GetOverride("function1#p2") != NULL );
+    CHECK( testConfig.GetOverride("function1#p3") != NULL );
+    CHECK( testConfig.GetOverride("function1#p4") != NULL );
+    CHECK( testConfig.GetOverride("function1#p5") != NULL );
+    CHECK( testConfig.GetOverride("function1#p6") != NULL );
+    CHECK( testConfig.GetOverride("function1#p7") != NULL );
+    CHECK( testConfig.GetOverride("function1#p8") != NULL );
+    CHECK( testConfig.GetOverride("function1#p9") != NULL );
+    CHECK( testConfig.GetOverride("function1#p10") != NULL );
+
+    // Cleanup
+}
+
+/*
  * Check that the override options are handled properly with override with argument expression.
  */
 TEST( Config, OverrideOptions_ArgumentExpression )
