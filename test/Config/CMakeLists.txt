@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen.Test.Config )
 
@@ -10,11 +10,11 @@ include_directories(
     ${PROD_DIR}/sources
 )
 
-set( PROD_SRC_FILES 
+set( PROD_SRC_FILES
      ${PROD_DIR}/sources/Config.cpp
 )
 
-set( TEST_SRC_FILES 
+set( TEST_SRC_FILES
      Config_test.cpp
 )
 

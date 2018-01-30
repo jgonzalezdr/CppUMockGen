@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen.AllTests )
 
@@ -18,3 +18,4 @@ add_subdirectory( Function_CPP )
 add_subdirectory( Function_C )
 add_subdirectory( Method )
 add_subdirectory( Config )
+add_subdirectory( MockGenerator )
