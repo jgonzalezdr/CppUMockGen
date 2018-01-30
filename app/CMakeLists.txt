@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen )
 set( PROJECT_VERSION_MAJOR 0 )
@@ -48,8 +48,10 @@ generate_product_version(
     VERSION_MINOR ${PROJECT_VERSION_MINOR}
     VERSION_PATCH ${PROJECT_VERSION_PATCH}
     COMPANY_NAME "www.gdr-sistemas.com"
-    COMPANY_COPYRIGHT "(C) Copyright 2017 Jesus Gonzalez"
+    COMPANY_COPYRIGHT "(C) Copyright 2017-2018 Jesus Gonzalez"
 )
+
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
 if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
@@ -67,7 +69,3 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION} )
 target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARIES} )
 
 add_dependencies( build ${PROJECT_NAME} )
-
-#install( TARGETS ${PROJECT_NAME} DESTINATION lib )
-
-#include( DocsTargets.cmake )
