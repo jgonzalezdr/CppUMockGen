@@ -52,9 +52,16 @@ static std::string nonexistingFilePath = std::string(std::getenv("TEMP")) + "\\C
 TEST_GROUP( MockGenerator )
 {
     std::ofstream tempFile;
+    std::string initialDir;
+
+    TEST_SETUP()
+    {
+        initialDir = getcwd( NULL, 0 );
+    }
 
     TEST_TEARDOWN()
     {
+        chdir( initialDir.c_str() );
         std::remove( tempFilePath.c_str() );
     }
 
