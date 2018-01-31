@@ -1,6 +1,7 @@
 #include "MockGenerator.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <clang-c/Index.h>
 
 #include "Function.hpp"
@@ -79,7 +80,7 @@ void GenerateMock( CXTranslationUnit tu, const Config &config, std::ostream &out
 }
 
 bool GenerateMock( const std::string &inputFilename, const Config &config, bool interpretAsCpp,
-                   const std::vector<std::string> &includePaths, std::ostream &output )
+                   const std::vector<std::string> &includePaths, std::ostream &output, std::ostream &error )
 {
     CXIndex index = clang_createIndex( 0, 0 );
 
@@ -98,16 +99,33 @@ bool GenerateMock( const std::string &inputFilename, const Config &config, bool 
         clangOpts.push_back( includePathOptions.back().c_str() );
     }
 
-    CXTranslationUnit tu = clang_parseTranslationUnit( index, inputFilename.c_str(),
+    CXTranslationUnit tu;
+    CXErrorCode tuError = clang_parseTranslationUnit2( index, inputFilename.c_str(),
                                                        clangOpts.data(), (int) clangOpts.size(),
                                                        nullptr, 0,
-                                                       CXTranslationUnit_SkipFunctionBodies );
-    if( tu == nullptr )
+                                                       CXTranslationUnit_SkipFunctionBodies,
+                                                       &tu );
+    if( tuError != CXError_Success )
     {
+        cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
+        error << "INPUT ERROR: ";
+        cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+
+        // Check if file exists
+        std::ifstream inputFile( inputFilename.c_str() );
+        if( !inputFile.good() )
+        {
+            error << "Input file '" << inputFilename.c_str() << "' does not exist" << std::endl;
+        }
 // LCOV_EXCL_START
-        std::cerr << "Unable to parse translation unit. Quitting." << std::endl;
-        exit(-1);
+        else
+        {
+            error << "Unable to parse input file (Error code = " << tuError << ")" << std::endl;
+        }
 // LCOV_EXCL_STOP
+
+        clang_disposeIndex( index );
+        return false;
     }
 
     unsigned int numDiags = clang_getNumDiagnostics(tu);
@@ -126,12 +144,12 @@ bool GenerateMock( const std::string &inputFilename, const Config &config, bool 
                 case CXDiagnosticSeverity::CXDiagnostic_Error:
                     numErrors++;
                     cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
-                    std::cerr << "PARSE ERROR: ";
+                    error << "PARSE ERROR: ";
                     break;
 
                 case CXDiagnosticSeverity::CXDiagnostic_Warning:
                     cerrColorizer.SetColor( ConsoleColorizer::Color::YELLOW );
-                    std::cerr << "PARSE WARNING: ";
+                    error << "PARSE WARNING: ";
                     break;
 
 // LCOV_EXCL_START
@@ -141,8 +159,7 @@ bool GenerateMock( const std::string &inputFilename, const Config &config, bool 
             }
 
             cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
-
-            std::cerr << clang_formatDiagnostic( diag, clang_defaultDiagnosticDisplayOptions() ) << std::endl;
+            error << clang_formatDiagnostic( diag, clang_defaultDiagnosticDisplayOptions() ) << std::endl;
 
             clang_disposeDiagnostic( diag );
         }

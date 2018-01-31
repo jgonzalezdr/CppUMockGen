@@ -8,6 +8,6 @@
 #include "Config.hpp"
 
 bool GenerateMock( const std::string &inputFilename, const Config &config, bool interpretAsCpp,
-                   const std::vector<std::string> &includePaths, std::ostream &output );
+                   const std::vector<std::string> &includePaths, std::ostream &output, std::ostream &error );
 
 #endif // header guard

@@ -86,7 +86,7 @@ int main( int argc, char* argv[] )
 
         std::ostringstream output;
 
-        if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), output ) )
+        if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), output, std::cerr ) )
         {
             if( options.count( "output" ) )
             {
