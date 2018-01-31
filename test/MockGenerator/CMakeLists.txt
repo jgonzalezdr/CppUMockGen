@@ -24,6 +24,10 @@ set( TEST_SRC_FILES
      ${CMAKE_SOURCE_DIR}/test/Mocks/ConsoleColorizer_mock.cpp
 )
 
+if( MSVC )
+    add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+endif()
+
 # Generate test target
 
 include( ../GenerateTest.cmake )
