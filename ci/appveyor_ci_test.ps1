@@ -11,6 +11,8 @@ function Publish-TestResults($files)
 
     # Upload results to AppVeyor one by one
     $files | foreach {
+        Write-Host "Analyzing test results file '$_'" 
+    
         $testsuite = ([xml](get-content $_)).testsuite
 
         foreach ($testcase in $testsuite.testcase) {
