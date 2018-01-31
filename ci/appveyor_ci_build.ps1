@@ -61,6 +61,6 @@ switch -Wildcard ($env:Platform)
         }
 
         Invoke-Command "cmake .. -G '$cmake_generator' $cmake_options" "$build_dir"
-        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg build.vcxproj" "$build_dir"
+        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg /property:Configuration=$build_config build.vcxproj" "$build_dir"
     }
 }

@@ -1,16 +1,11 @@
 option( COVERAGE_VERBOSE "Coverage analysis is performed in verbose mode" OFF )
 
-if( WIN32 )
-    set( TRUE exit /b 0 )
-else()
-    set( TRUE true )
-endif( WIN32 )
+if( NOT CI_MODE AND MSVC )
+    set( IGNORE_ERROR || exit /b 0 )
+endif()
 
-if( NOT CI_MODE )
-    set( CTEST_ARGS -V )
-endif( NOT CI_MODE )
-
-add_custom_target( run_tests COMMAND ctest ${CTEST_ARGS} || ${TRUE} )
+# Test errors are ignored with MSVC to avoid the IDE nagging
+add_custom_target( run_tests COMMAND ctest -V ${IGNORE_ERROR} )
 
 #
 # xUnit report merging
