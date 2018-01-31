@@ -44,7 +44,7 @@ add_dependencies( build ${PROJECT_NAME} )
 add_dependencies( run_tests ${PROJECT_NAME} )
 
 if( CI_MODE )
-    set( TEST_ARGS -ojunit )
+    set( TEST_ARGS -ojunit -v )
 else()
     set( TEST_ARGS -v )
 endif()

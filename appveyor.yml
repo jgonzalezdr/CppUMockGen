@@ -5,7 +5,7 @@ environment:
   matrix:
   - Platform: MSVC64
     PlatformToolset: v141
-    Configuration: Release
+    Configuration: Debug
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
   - Platform: MinGW64
     PlatformToolset: 6.3.0

@@ -38,8 +38,6 @@ function Publish-TestResults($files)
     }
 }
 
-$build_dir = "build"
-
 $TestCount = 0
 
 if (-not $env:APPVEYOR)
@@ -64,10 +62,11 @@ if (-not $env:APPVEYOR)
     }
 }
 
-$build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
-
 if (!($env:Test -eq 'False'))
 {
+    $build_dir = "build"
+    $build_config = $env:Configuration
+    
     switch -Wildcard ($env:Platform)
     {
         'MinGW*'
@@ -77,6 +76,8 @@ if (!($env:Test -eq 'False'))
             # Add mingw to the path
             Add-PathFolder $mingw_path
 
+            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
+
             Invoke-Command "mingw32-make $build_target" "$build_dir"
 
             Remove-PathFolder $mingw_path
@@ -84,7 +85,7 @@ if (!($env:Test -eq 'False'))
 
         'MSVC*'
         {
-            Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg $build_target.vcxproj" "$build_dir\test"
+            Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg /property:Configuration=$build_config run_tests.vcxproj" "$build_dir\test"
         }
     }
 
