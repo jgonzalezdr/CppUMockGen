@@ -192,6 +192,9 @@ TEST( Config, Exception_OverrideBadFormat )
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "function1#p=Int/abc" } ) );
 
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1@=Output" } ) );
+
     // Cleanup
 }
 

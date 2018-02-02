@@ -22,9 +22,12 @@ public:
          * Constructs a OverrideSpec object.
          *
          * @param value [in] Override specification, consisting in a type identifier optionally followed
-         *                   by the '@' character and an argument expression modifier.
+         *                   by the '@' character and an argument expression modifier
+         * @param option [in] Full override option text
+         * @param isReturn [in] Indicates that the option is for return type if @c true, or for parameter
+         *                      type otherwise
          */
-        OverrideSpec( const std::string &value, const std::string &option );
+        OverrideSpec( const std::string &value, const std::string &option, bool isReturn );
 
         /**
          * Returns the type identifier.

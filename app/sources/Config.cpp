@@ -1,6 +1,7 @@
 #include "Config.hpp"
 
 #include <set>
+#include <vector>
 
 Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &overrideOptions )
 : m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_overrideMap( overrideOptions )
@@ -16,7 +17,7 @@ const Config::OverrideSpec* Config::GetOverride( const std::string& key ) const
     return m_overrideMap.GetOverride(key);
 }
 
-static const std::set<std::string> validOverrideTypes =
+static const std::vector<std::string> validOverrideTypes =
 {
     "Bool",
     "Int",
@@ -30,7 +31,10 @@ static const std::set<std::string> validOverrideTypes =
     "Output",
 };
 
-Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option )
+static const std::set<std::string> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 1 );
+static const std::set<std::string> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
+
+Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )
 {
     if( value.empty() )
     {
@@ -70,10 +74,21 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         m_type = value;
     }
 
-    if( validOverrideTypes.count( m_type ) == 0 )
+    if( isReturn )
     {
-        std::string errorMsg = "Invalid override option type <" + option + ">.";
-        throw std::runtime_error( errorMsg );
+        if( validReturnOverrideTypes.count( m_type ) == 0 )
+        {
+            std::string errorMsg = "Invalid return override option type <" + option + ">.";
+            throw std::runtime_error( errorMsg );
+        }
+    }
+    else
+    {
+        if( validParameterOverrideTypes.count( m_type ) == 0 )
+        {
+            std::string errorMsg = "Invalid parameter override option type <" + option + ">.";
+            throw std::runtime_error( errorMsg );
+        }
     }
 }
 
@@ -91,7 +106,9 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
                 throw std::runtime_error( errorMsg );
             }
 
-            Config::OverrideSpec spec = Config::OverrideSpec( option.substr(sepPos+1), option );
+            bool isReturn = ( key.back()  == '@' );
+
+            Config::OverrideSpec spec = Config::OverrideSpec( option.substr(sepPos+1), option, isReturn );
 
             if( !m_map.emplace( key, spec ).second )
             {

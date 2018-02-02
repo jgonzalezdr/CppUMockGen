@@ -75,9 +75,11 @@ Function::Function( const CXCursor &cursor, const Config &config )
 {
 }
 
+// LCOV_EXCL_START
 Function::~Function()
 {
 }
+// LCOV_EXCL_STOP
 
 bool Function::IsMockable() const
 {
