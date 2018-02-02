@@ -42,22 +42,28 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
     if( sepPos != std::string::npos )
     {
         m_type = value.substr(0, sepPos);
-        m_argExprMod = value.substr(sepPos+1);
         if( m_type.empty() )
         {
             std::string errorMsg = "Override option type cannot be empty <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
-        if( m_argExprMod.empty() )
+
+        std::string argExprMod = value.substr(sepPos+1);
+        if( argExprMod.empty() )
         {
             std::string errorMsg = "Override option argument expression cannot be empty if specified <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
-        if( m_argExprMod.find('$') == std::string::npos )
+
+        size_t placeholderPos = argExprMod.find('$');
+        if( placeholderPos == std::string::npos )
         {
             std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
+
+        m_argExprModFront = argExprMod.substr( 0, placeholderPos );
+        m_argExprModBack = argExprMod.substr( placeholderPos + 1 );
     }
     else
     {
@@ -112,13 +118,12 @@ const std::string& Config::OverrideSpec::GetType() const
     return m_type;
 }
 
-void Config::OverrideSpec::UpdateArgExpr( std::string& argExpr ) const
+const std::string& Config::OverrideSpec::GetArgExprModFront() const
 {
-    if( !m_argExprMod.empty() )
-    {
-        std::string ret = m_argExprMod;
-        size_t placeholderPos = m_argExprMod.find('$');
+    return m_argExprModFront;
+}
 
-        argExpr = ret.replace(placeholderPos, 1, argExpr);
-    }
+const std::string& Config::OverrideSpec::GetArgExprModBack() const
+{
+    return m_argExprModBack;
 }

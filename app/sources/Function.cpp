@@ -6,23 +6,30 @@
 
 #include "ClangHelper.hpp"
 
+/*===========================================================================
+ *                              PRIVATE CLASSES
+ *===========================================================================*/
+
 class FunctionReturn
 {
 public:
     FunctionReturn( const Config &config, std::string &signature, std::string &body )
-    : m_config( config ), m_signature( signature ), m_body( body ), m_pendingCallClosures( 0 )
+    : m_config( config ), m_signature( signature ), m_body( body ), m_pendingCallClosures( 0 ), m_override( NULL )
     {
     }
 
-    void ProcessInitial( const CXType &returnType );
-    void ProcessFinal( const CXType &returnType, bool inheritConst );
+    void ProcessInitial( const std::string funcName, const CXType &returnType );
+    void ProcessFinal( const CXType &returnType );
 
 private:
+    void ProcessInitialOverride();
     void ProcessInitialType( const CXType &returnType );
     void ProcessInitialTypePointer( const CXType & returnType );
     void ProcessInitialTypeRVReference( const CXType & returnType );
     void ProcessInitialTypeTypedef( const CXType & returnType );
 
+    void ProcessFinalOverride();
+    void ProcessFinalType( const CXType &returnType, bool inheritConst );
     void ProcessFinalTypePointer( const CXType &returnType );
     void ProcessFinalTypeRVReference( const CXType &returnType );
     void ProcessFinalTypeTypedef( const CXType &returnType, bool inheritConst );
@@ -31,6 +38,7 @@ private:
     std::string &m_signature;
     std::string &m_body;
     unsigned int m_pendingCallClosures;
+    const Config::OverrideSpec *m_override;
 };
 
 class FunctionArgument
@@ -44,7 +52,7 @@ public:
     void Process( const std::string funcName, const CXCursor &arg, int argNum );
 
 private:
-    void ProcessOverride( const Config::OverrideSpec& overrideSpec, const std::string& argId, std::string &argExpr );
+    void ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr );
     void ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst, std::string &argExpr );
     void ProcessTypePointer( const CXType &argType, const CXType &origArgType, std::string &argExpr );
     void ProcessTypeRVReference( const CXType &argType, const CXType &origArgType, std::string &argExpr );
@@ -55,6 +63,12 @@ private:
     std::string &m_signature;
     std::string &m_body;
 };
+
+//*************************************************************************************************
+//
+//                                        FUNCTION PROCESSING
+//
+//*************************************************************************************************
 
 Function::Function( const CXCursor &cursor, const Config &config )
     : m_cursor( cursor ), m_config( config )
@@ -91,12 +105,14 @@ std::string Function::GenerateMock( bool isMethod ) const
         FunctionReturn returnProc( m_config, signature, body );
         FunctionArgument argumentProc( m_config, signature, body );
 
+        // Get function name
+        std::string funcName = getQualifiedName( m_cursor );
+
         // Get & process function return type (initial stage)
         const CXType returnType = clang_getCursorResultType( m_cursor );
-        returnProc.ProcessInitial( returnType );
+        returnProc.ProcessInitial( funcName, returnType );
 
-        // Get & process function name
-        std::string funcName = getQualifiedName( m_cursor );
+        // Process function name
         signature += " " + funcName + "(";
         body += "mock().actualCall(\"" + funcName + "\")";
 
@@ -114,7 +130,7 @@ std::string Function::GenerateMock( bool isMethod ) const
         }
 
         // Process function return type (final stage)
-        returnProc.ProcessFinal( returnType, false );
+        returnProc.ProcessFinal( returnType );
 
         // Generate final mock from signature and body
         std::string mockCode = signature + ")";
@@ -139,9 +155,16 @@ std::string Function::GenerateMock( bool isMethod ) const
     // LCOV_EXCL_STOP
 }
 
-void FunctionReturn::ProcessInitial( const CXType &returnType )
+//*************************************************************************************************
+//
+//                                        INITIAL RETURN PROCESSING
+//
+//*************************************************************************************************
+
+void FunctionReturn::ProcessInitial( const std::string funcName, const CXType &returnType )
 {
     m_pendingCallClosures = 0;
+    m_override = NULL;
 
     m_signature += clang_getTypeSpelling( returnType );
 
@@ -149,8 +172,23 @@ void FunctionReturn::ProcessInitial( const CXType &returnType )
     {
         m_body += "return ";
 
-        ProcessInitialType( returnType );
+        std::string overrideKey = funcName + "@";
+        m_override = m_config.GetOverride( overrideKey );
+
+        if( m_override != NULL )
+        {
+            ProcessInitialOverride();
+        }
+        else
+        {
+            ProcessInitialType( returnType );
+        }
     }
+}
+
+void FunctionReturn::ProcessInitialOverride()
+{
+    m_body += m_override->GetArgExprModFront();
 }
 
 void FunctionReturn::ProcessInitialType( const CXType &returnType )
@@ -264,7 +302,31 @@ void FunctionReturn::ProcessInitialTypeTypedef( const CXType &returnType )
     }
 }
 
-void FunctionReturn::ProcessFinal( const CXType &returnType, bool inheritConst )
+//*************************************************************************************************
+//
+//                                        FINAL RETURN PROCESSING
+//
+//*************************************************************************************************
+
+void FunctionReturn::ProcessFinal( const CXType &returnType )
+{
+    if( m_override != NULL )
+    {
+        ProcessFinalOverride();
+    }
+    else
+    {
+        ProcessFinalType( returnType, false );
+    }
+}
+
+void FunctionReturn::ProcessFinalOverride()
+{
+    m_body += ".return" + m_override->GetType() + "Value()" + m_override->GetArgExprModBack();
+}
+
+
+void FunctionReturn::ProcessFinalType( const CXType &returnType, bool inheritConst )
 {
     switch( returnType.kind )
     {
@@ -323,7 +385,7 @@ void FunctionReturn::ProcessFinal( const CXType &returnType, bool inheritConst )
             break;
 
         case CXType_Elaborated:
-            ProcessFinal( clang_Type_getNamedType( returnType ), inheritConst );
+            ProcessFinalType( clang_Type_getNamedType( returnType ), inheritConst );
             break;
 
 // LCOV_EXCL_START
@@ -383,9 +445,15 @@ void FunctionReturn::ProcessFinalTypeTypedef( const CXType &returnType, bool inh
     {
         bool isTypedefConst = clang_isConstQualifiedType( returnType ) || inheritConst;
 
-        ProcessFinal( underlyingType, isTypedefConst );
+        ProcessFinalType( underlyingType, isTypedefConst );
     }
 }
+
+//*************************************************************************************************
+//
+//                                     ARGUMENT PROCESSING
+//
+//*************************************************************************************************
 
 void FunctionArgument::Process( const std::string funcName, const CXCursor &arg, int argNum )
 {
@@ -405,11 +473,11 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
 
     std::string argExpr = argName;
 
-    std::string argId = funcName + "#" + argName;
-    const Config::OverrideSpec *override = m_config.GetOverride( argId );
+    std::string overrideKey = funcName + "#" + argName;
+    const Config::OverrideSpec *override = m_config.GetOverride( overrideKey );
     if( override != NULL )
     {
-        ProcessOverride( *override, argId, argExpr );
+        ProcessOverride( override, argExpr );
     }
     else
     {
@@ -421,10 +489,10 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
     m_body += argExpr + ")";
 }
 
-void FunctionArgument::ProcessOverride( const Config::OverrideSpec& overrideSpec, const std::string& argId, std::string &argExpr )
+void FunctionArgument::ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr )
 {
-    m_body += ".with" + overrideSpec.GetType() + "Parameter(";
-    overrideSpec.UpdateArgExpr( argExpr );
+    m_body += ".with" + override->GetType() + "Parameter(";
+    argExpr = override->GetArgExprModFront() + argExpr + override->GetArgExprModBack();
 }
 
 void FunctionArgument::ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst, std::string &argExpr )

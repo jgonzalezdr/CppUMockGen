@@ -27,4 +27,3 @@ std::string Function::GenerateMock() const
 {
     return mock().actualCall("Function::GenerateMock").returnStringValue();
 }
-

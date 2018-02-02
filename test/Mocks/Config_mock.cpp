@@ -6,12 +6,17 @@
 
 const std::string & Config::OverrideSpec::GetType() const
 {
-    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetType").returnConstPointerValue() );
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetType").onObject(this).returnConstPointerValue() );
 }
 
-void Config::OverrideSpec::UpdateArgExpr(std::string & argExpr) const
+const std::string& Config::OverrideSpec::GetArgExprModFront() const
 {
-    mock().actualCall("Config::OverrideSpec::UpdateArgExpr").withOutputParameterOfType("std::string", "argExpr", &argExpr);
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetArgExprModFront").onObject(this).returnConstPointerValue() );
+}
+
+const std::string& Config::OverrideSpec::GetArgExprModBack() const
+{
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetArgExprModBack").onObject(this).returnConstPointerValue() );
 }
 
 const Config::OverrideSpec * Config::OverrideMap::GetOverride(const std::string & key) const

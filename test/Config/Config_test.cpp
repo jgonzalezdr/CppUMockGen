@@ -75,20 +75,18 @@ TEST( Config, OverrideOptions_Simple )
 {
     // Prepare
     Config testConfig( false, std::vector<std::string> { "function1#p=Int", "ns1::function2#p1=ConstPointer" } );
-    std::string pname1 = "pname1";
-    std::string pname2 = "pname2";
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetOverride("function1#p");
     const Config::OverrideSpec* override2 = testConfig.GetOverride("ns1::function2#p1");
-    override1->UpdateArgExpr( pname1 );
-    override2->UpdateArgExpr( pname2 );
 
     // Verify
     STRCMP_EQUAL( "Int", override1->GetType().c_str() );
     STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
-    STRCMP_EQUAL( "pname1", pname1.c_str() );
-    STRCMP_EQUAL( "pname2", pname2.c_str() );
+    STRCMP_EQUAL( "", override1->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override1->GetArgExprModBack().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("ABC") );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("function1") );
@@ -143,20 +141,18 @@ TEST( Config, OverrideOptions_ArgumentExpression )
 {
     // Prepare
     Config testConfig( false, std::vector<std::string> { "function1#p=Int/($)", "ns1::function2#p1=ConstPointer/&$" } );
-    std::string pname1 = "pname1";
-    std::string pname2 = "pname2";
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetOverride("function1#p");
     const Config::OverrideSpec* override2 = testConfig.GetOverride("ns1::function2#p1");
-    override1->UpdateArgExpr( pname1 );
-    override2->UpdateArgExpr( pname2 );
 
     // Verify
     STRCMP_EQUAL( "Int", override1->GetType().c_str() );
     STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
-    STRCMP_EQUAL( "(pname1)", pname1.c_str() );
-    STRCMP_EQUAL( "&pname2", pname2.c_str() );
+    STRCMP_EQUAL( "(", override1->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( ")", override1->GetArgExprModBack().c_str() );
+    STRCMP_EQUAL( "&", override2->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("ABC") );
     POINTERS_EQUAL( NULL, testConfig.GetOverride("function1") );

@@ -32,17 +32,21 @@ public:
         const std::string& GetType() const;
 
         /**
-         * Updates @p argExpr according to the stored argument expression modifier (if it exists),
-         * returning in @p argExpr the results of replacing the character '$' in the argument expression
-         * modifier by the value passed initially in @p argExpr.
-         *
-         * @param argExpr [in/out] Argument expression to be updated (if necessary)
+         * Returns the argument expression modifier part before the character '$'.
+         * @return String with the front argument expression modifier part
          */
-        void UpdateArgExpr( std::string &argExpr ) const;
+        const std::string& GetArgExprModFront() const;
+
+        /**
+         * Returns the argument expression modifier part after the character '$'.
+         * @return String with the back argument expression modifier part
+         */
+        const std::string& GetArgExprModBack() const;
 
     private:
         std::string m_type;
-        std::string m_argExprMod;
+        std::string m_argExprModFront;
+        std::string m_argExprModBack;
     };
 
     /**

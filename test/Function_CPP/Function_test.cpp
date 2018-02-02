@@ -319,6 +319,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s function1();", typeData.originalType.c_str() );
 
@@ -327,6 +328,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult;
@@ -348,6 +350,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -358,6 +361,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum Enum1 { A, B, C };\n"
@@ -368,6 +372,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( ENUM_TAG "Enum1 function1()\n{\n"
@@ -386,6 +391,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { A, B, C };\n"
@@ -396,6 +402,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Enum1 function1()\n{\n"
@@ -413,6 +420,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -423,6 +431,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1 function1()\n{\n"
@@ -440,6 +449,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -450,6 +460,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1<int> function1()\n{\n"
@@ -468,6 +479,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -478,6 +490,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( STRUCT_TAG "Struct1 function1()\n{\n"
@@ -501,6 +514,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -512,6 +526,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -522,6 +537,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -532,6 +548,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef enum { X, Y, Z } Type1;\n"
@@ -542,6 +559,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -560,6 +578,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z };\n"
@@ -571,6 +590,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -588,6 +608,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -599,6 +620,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -616,6 +638,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -627,6 +650,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -645,6 +669,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -656,6 +681,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -677,6 +703,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void* function1();";
 
@@ -685,6 +712,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void * function1()\n{\n"
@@ -702,6 +730,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const void* function1();";
 
@@ -710,6 +739,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const void * function1()\n{\n"
@@ -729,6 +759,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s* function1();", typeData.originalType.c_str() );
 
@@ -737,6 +768,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -747,6 +779,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -759,6 +792,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s* function1();", typeData.originalType.c_str() );
 
@@ -767,6 +801,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -777,6 +812,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -787,6 +823,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const char* function1();";
 
@@ -795,6 +832,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const char * function1()\n{\n"
@@ -813,6 +851,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -823,6 +862,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1 * function1()\n{\n"
@@ -840,6 +880,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -850,6 +891,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Class1 * function1()\n{\n"
@@ -867,6 +909,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -877,6 +920,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1<int> * function1()\n{\n"
@@ -894,6 +938,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -904,6 +949,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Class1<char> * function1()\n{\n"
@@ -922,6 +968,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -932,6 +979,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "struct Struct1 * function1()\n{\n"
@@ -949,6 +997,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -959,6 +1008,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const struct Struct1 * function1()\n{\n"
@@ -983,6 +1033,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s& function1();", typeData.originalType.c_str() );
 
@@ -991,6 +1042,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -1001,6 +1053,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1013,6 +1066,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s& function1();", typeData.originalType.c_str() );
 
@@ -1021,6 +1075,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -1031,6 +1086,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1041,6 +1097,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1051,6 +1108,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1070,6 +1128,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1080,6 +1139,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1099,6 +1159,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1109,6 +1170,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1128,6 +1190,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1138,6 +1201,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1157,6 +1221,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1167,6 +1232,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1186,6 +1252,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1196,6 +1263,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1221,6 +1289,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s&& function1();", typeData.originalType.c_str() );
 
@@ -1229,6 +1298,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -1239,6 +1309,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1251,6 +1322,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s&& function1();", typeData.originalType.c_str() );
 
@@ -1259,6 +1331,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -1269,6 +1342,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1279,6 +1353,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1289,6 +1364,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1308,6 +1384,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1318,6 +1395,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1337,6 +1415,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1347,6 +1426,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1366,6 +1446,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1376,6 +1457,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1395,6 +1477,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1405,6 +1488,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1424,6 +1508,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1434,6 +1519,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
@@ -1460,6 +1546,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1471,6 +1558,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
@@ -1479,6 +1567,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1491,6 +1580,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
@@ -1502,6 +1592,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
@@ -1510,6 +1601,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1522,6 +1614,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1533,6 +1626,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type1 * function1()\n{\n"
@@ -1541,6 +1635,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1553,6 +1648,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1564,6 +1660,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 *const function1()\n{\n"
@@ -1572,6 +1669,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1583,6 +1681,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1594,6 +1693,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 * function1()\n{\n"
@@ -1611,6 +1711,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1622,6 +1723,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 * function1()\n{\n"
@@ -1639,6 +1741,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1650,6 +1753,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 * function1()\n{\n"
@@ -1674,6 +1778,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -1685,6 +1790,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1693,6 +1799,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1705,6 +1812,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -1716,6 +1824,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1724,6 +1833,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1736,6 +1846,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* const Type1;\n"
@@ -1747,6 +1858,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1755,6 +1867,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1767,6 +1880,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -1778,6 +1892,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type1 function1()\n{\n"
@@ -1786,6 +1901,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -1796,6 +1912,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -1806,6 +1923,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1823,6 +1941,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -1833,6 +1952,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 function1()\n{\n"
@@ -1851,6 +1971,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1862,6 +1983,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1879,6 +2001,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1890,6 +2013,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1907,6 +2031,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1918,6 +2043,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
@@ -1935,6 +2061,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1946,6 +2073,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 function1()\n{\n"
@@ -1979,6 +2107,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
         {
             // Prepare
             Config* config = GetMockConfig();
+            mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
@@ -1990,6 +2119,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
             unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
             // Verify
+            mock().checkExpectations();
             CHECK_EQUAL( 1, functionCount );
             CHECK_EQUAL( 1, results.size() );
             SimpleString expectedResult = StringFromFormat(
@@ -2000,6 +2130,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
             CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
             // Cleanup
+            mock().clear();
         }
     }
 }
@@ -2016,6 +2147,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "int* *function1();";
 
@@ -2024,6 +2156,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "int ** function1()\n{\n"
@@ -2041,6 +2174,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const unsigned char* *function1();";
 
@@ -2049,6 +2183,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const unsigned char ** function1()\n{\n"
@@ -2066,6 +2201,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "short* const *function1();";
 
@@ -2074,6 +2210,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "short *const * function1()\n{\n"
@@ -2096,6 +2233,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "double* &function1();";
 
@@ -2104,6 +2242,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "double *& function1()\n{\n"
@@ -2121,6 +2260,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader = "bool* const &function1();";
 
@@ -2129,6 +2269,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "bool *const & function1()\n{\n"
@@ -2153,6 +2294,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -2165,6 +2307,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
@@ -2175,6 +2318,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2191,6 +2335,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2203,6 +2348,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2211,6 +2357,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2223,6 +2370,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2235,6 +2383,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2243,6 +2392,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2255,6 +2405,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2267,6 +2418,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
@@ -2275,6 +2427,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2287,6 +2440,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2299,6 +2453,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2307,6 +2462,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2319,6 +2475,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2331,6 +2488,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2339,6 +2497,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2351,6 +2510,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2363,6 +2523,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
         // Verify
+        mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
@@ -2371,6 +2532,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
         CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -2381,6 +2543,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2392,6 +2555,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2409,6 +2573,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2420,6 +2585,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type2 function1()\n{\n"
@@ -2437,6 +2603,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2448,6 +2615,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
     unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type2 function1()\n{\n"
@@ -4972,6 +5140,7 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
@@ -5003,6 +5172,7 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#_unnamedArg0").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#_unnamedArg1").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
@@ -5036,17 +5206,20 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
     mock().installCopier( "std::string", stdStringCopier );
 
     Config* config = GetMockConfig();
-    const Config::OverrideSpec* overrideA = GetMockConfig_OverrideSpec(1);
-    const std::string overrideAType = "ConstPointer";
-    const std::string overrideAArgExpr = "&p2[0]";
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+    const std::string overrideType = "ConstPointer";
+    const std::string overrideArgExprFront = "&";
+    const std::string overrideArgExprBack = "[0]";
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue(overrideA);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue(override);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::OverrideSpec::GetType").andReturnValue(&overrideAType);
-    mock().expectOneCall("Config::OverrideSpec::UpdateArgExpr").withOutputParameterOfTypeReturning("std::string", "argExpr", &overrideAArgExpr);
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
+    mock().expectOneCall("Config::OverrideSpec::GetArgExprModFront").onObject((void*)override).andReturnValue(&overrideArgExprFront);
+    mock().expectOneCall("Config::OverrideSpec::GetArgExprModBack").onObject((void*)override).andReturnValue(&overrideArgExprBack);
 
-    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);";
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
 
     // Exercise
     std::vector<std::string> results;
@@ -5059,6 +5232,43 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
     STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
                   "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withConstPointerParameter(\"p2\", &p2[0])"
                        ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+                  "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
+ * Check mock generation of a function with parameter override.
+ */
+TEST_EX( TEST_GROUP_NAME,ReturnOverride )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(199);
+    const std::string overrideType = "ConstPointer";
+    const std::string overrideArgExprFront = "(*(unsigned long*)";
+    const std::string overrideArgExprBack = ")+1";
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1@").andReturnValue(override);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetOverride").withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
+    mock().expectOneCall("Config::OverrideSpec::GetArgExprModFront").onObject((void*)override).andReturnValue(&overrideArgExprFront);
+    mock().expectOneCall("Config::OverrideSpec::GetArgExprModBack").onObject((void*)override).andReturnValue(&overrideArgExprBack);
+
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2)\n{\n"
+                  "    return (*(unsigned long*)mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withStringParameter(\"p2\", p2)"
+                       ".returnConstPointerValue())+1;\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
