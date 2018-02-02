@@ -14,6 +14,10 @@ Function::Function( const CXCursor &cursor, const Config &config )
     mock().actualCall("Function::Function").withConstPointerParameter("cursor", &cursor).withConstPointerParameter("config", &config) ;
 }
 
+Function::~Function()
+{
+}
+
 bool Function::IsMockable() const
 {
     return mock().actualCall("Function::IsMockable").returnBoolValue();
