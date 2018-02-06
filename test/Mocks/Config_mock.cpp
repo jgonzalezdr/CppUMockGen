@@ -29,8 +29,12 @@ bool Config::UseUnderlyingTypedefType() const
     return mock().actualCall("Config::UseUnderlyingTypedefType").returnBoolValue();
 }
 
-const Config::OverrideSpec * Config::GetOverride(const std::string & key) const
+const Config::OverrideSpec * Config::GetParameterOverride(const std::string & key) const
 {
-    return static_cast<const Config::OverrideSpec *>( mock().actualCall("Config::GetOverride").withStringParameter("key", key.c_str()).returnConstPointerValue() );
+    return static_cast<const Config::OverrideSpec *>( mock().actualCall("Config::GetParameterOverride").withStringParameter("key", key.c_str()).returnConstPointerValue() );
 }
 
+const Config::OverrideSpec * Config::GetTypeOverride(const std::string & key) const
+{
+    return static_cast<const Config::OverrideSpec *>( mock().actualCall("Config::GetTypeOverride").withStringParameter("key", key.c_str()).returnConstPointerValue() );
+}

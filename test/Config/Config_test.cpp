@@ -38,13 +38,13 @@ TEST_GROUP( Config )
  *===========================================================================*/
 
 /*
- * Check that the UseUnderlyingTypedefType is handled properly.
+ * Check that UseUnderlyingTypedefType is handled properly.
  */
 TEST( Config, UseUnderlyingTypedefType )
 {
     // Prepare
-    Config testConfigTrue( true, std::vector<std::string>() );
-    Config testConfigFalse( false, std::vector<std::string>() );
+    Config testConfigTrue( true, std::vector<std::string>(), std::vector<std::string>() );
+    Config testConfigFalse( false, std::vector<std::string>(), std::vector<std::string>() );
 
     // Exercise & Verify
     CHECK_TRUE( testConfigTrue.UseUnderlyingTypedefType() );
@@ -54,53 +54,96 @@ TEST( Config, UseUnderlyingTypedefType )
 }
 
 /*
- * Check that the override options are handled properly when empty.
+ * Check that override options are handled properly when empty.
  */
 TEST( Config, OverrideOptions_Empty )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string>() );
+    Config testConfig( false, std::vector<std::string>(), std::vector<std::string>() );
 
     // Exercise & Verify
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("f1#p") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("f2@") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("#int*") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("@class1") );
 
     // Cleanup
 }
 
 /*
- * Check that the override options are handled properly with simple override.
+ * Check that parameter override options are handled properly with simple override.
  */
-TEST( Config, OverrideOptions_Simple )
+TEST( Config, ParameterOverrideOptions_Simple )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string> { "function1#p=Int", "ns1::function2#p1=ConstPointer" } );
+    Config testConfig( false,
+                       std::vector<std::string> { "function1#p=Int", "ns1::function2@=ConstPointer" },
+                       std::vector<std::string>() );
 
     // Exercise
-    const Config::OverrideSpec* override1 = testConfig.GetOverride("function1#p");
-    const Config::OverrideSpec* override2 = testConfig.GetOverride("ns1::function2#p1");
+    const Config::OverrideSpec* override1 = testConfig.GetParameterOverride("function1#p");
+    const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function2@");
 
     // Verify
     STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
     STRCMP_EQUAL( "", override1->GetArgExprModFront().c_str() );
     STRCMP_EQUAL( "", override1->GetArgExprModBack().c_str() );
+
+    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
     STRCMP_EQUAL( "", override2->GetArgExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("ABC") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#q") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#p2") );
+
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1@") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#q") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#p2") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function2#p") );
 
     // Cleanup
 }
 
 /*
- * Check that the override options allowed types are accepted.
+ * Check that type override options are handled properly with simple override.
  */
-TEST( Config, OverrideOptions_AllowedTypes )
+TEST( Config, TypeOverrideOptions_Simple )
+{
+    // Prepare
+    Config testConfig( false,
+                       std::vector<std::string>(),
+                       std::vector<std::string> { "#class1=Int", "@class2 *=ConstPointer" } );
+
+    // Exercise
+    const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#class1");
+    const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@class2 *");
+
+    // Verify
+    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
+    STRCMP_EQUAL( "", override1->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override1->GetArgExprModBack().c_str() );
+
+    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("class1") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("#class1 *") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("class2") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("@class2") );
+
+    // Cleanup
+}
+
+/*
+ * Check that parameter override options allowed types are accepted.
+ */
+TEST( Config, ParameterOverrideOptions_AllowedTypes )
 {
     // Prepare
 
@@ -117,89 +160,196 @@ TEST( Config, OverrideOptions_AllowedTypes )
         "function1#p8=ConstPointer",
         "function1#p9=Output",
         "function1#p10=Double"
+    }, std::vector<std::string>() );
+
+    // Verify
+    CHECK( testConfig.GetParameterOverride("function1#p1") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p2") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p3") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p4") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p5") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p6") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p7") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p8") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p9") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p10") != NULL );
+
+    // Cleanup
+}
+
+/*
+ * Check that type override options allowed types are accepted.
+ */
+TEST( Config, TypeOverrideOptions_AllowedTypes )
+{
+    // Prepare
+
+    // Exercise
+    Config testConfig( false, std::vector<std::string>(), std::vector<std::string>
+    {
+        "#type1=Int",
+        "#type2=UnsignedInt",
+        "#type3=LongInt",
+        "#type4=UnsignedLongInt",
+        "#type5=Bool",
+        "#type6=String",
+        "#type7=Pointer",
+        "#type8=ConstPointer",
+        "#type9=Output",
+        "#type10=Double"
     } );
 
     // Verify
-    CHECK( testConfig.GetOverride("function1#p1") != NULL );
-    CHECK( testConfig.GetOverride("function1#p2") != NULL );
-    CHECK( testConfig.GetOverride("function1#p3") != NULL );
-    CHECK( testConfig.GetOverride("function1#p4") != NULL );
-    CHECK( testConfig.GetOverride("function1#p5") != NULL );
-    CHECK( testConfig.GetOverride("function1#p6") != NULL );
-    CHECK( testConfig.GetOverride("function1#p7") != NULL );
-    CHECK( testConfig.GetOverride("function1#p8") != NULL );
-    CHECK( testConfig.GetOverride("function1#p9") != NULL );
-    CHECK( testConfig.GetOverride("function1#p10") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type1") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type2") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type3") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type4") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type5") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type6") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type7") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type8") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type9") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type10") != NULL );
 
     // Cleanup
 }
 
 /*
- * Check that the override options are handled properly with override with argument expression.
+ * Check that parameter override options are handled properly with override with argument expression.
  */
-TEST( Config, OverrideOptions_ArgumentExpression )
+TEST( Config, ParameterOverrideOptions_ArgumentExpression )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string> { "function1#p=Int/($)", "ns1::function2#p1=ConstPointer/&$" } );
+    Config testConfig( false,
+                       std::vector<std::string> { "function1#p=Int/($)", "ns1::function1@=ConstPointer/&$" },
+                       std::vector<std::string>() );
 
     // Exercise
-    const Config::OverrideSpec* override1 = testConfig.GetOverride("function1#p");
-    const Config::OverrideSpec* override2 = testConfig.GetOverride("ns1::function2#p1");
+    const Config::OverrideSpec* override1 = testConfig.GetParameterOverride("function1#p");
+    const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function1@");
 
     // Verify
     STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
     STRCMP_EQUAL( "(", override1->GetArgExprModFront().c_str() );
     STRCMP_EQUAL( ")", override1->GetArgExprModBack().c_str() );
+
+    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
     STRCMP_EQUAL( "&", override2->GetArgExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("ABC") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#q") );
-    POINTERS_EQUAL( NULL, testConfig.GetOverride("function1#p2") );
+
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#q") );
+    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#p2") );
 
     // Cleanup
 }
 
 /*
- * Check that an exception is thrown when the override options is not valid.
+ * Check that type override options are handled properly with override with argument expression.
  */
-TEST( Config, Exception_OverrideBadFormat )
+TEST( Config, TypeOverrideOptions_ArgumentExpression )
+{
+    // Prepare
+    Config testConfig( false,
+                       std::vector<std::string>(),
+                       std::vector<std::string> { "#const int *=Int/(*$)", "@const int *=LongInt/&$" } );
+
+    // Exercise
+    const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#const int *");
+    const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@const int *");
+
+    // Verify
+    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
+    STRCMP_EQUAL( "(*", override1->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( ")", override1->GetArgExprModBack().c_str() );
+
+    STRCMP_EQUAL( "LongInt", override2->GetType().c_str() );
+    STRCMP_EQUAL( "&", override2->GetArgExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("const int *") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("#const int &") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("@int") );
+
+    // Cleanup
+}
+
+/*
+ * Check that an exception is thrown when the parameter override options is not valid.
+ */
+TEST( Config, Exception_ParameterOverrideBadFormat )
 {
     // Prepare
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p" } ) );
+                  Config( false, std::vector<std::string> { "function1#p" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "=Int" } ) );
+                  Config( false, std::vector<std::string> { "=Int" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=abc" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=abc" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=/" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=/" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int/" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int/" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int/abc" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int/abc" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Output" } ) );
+                  Config( false, std::vector<std::string> { "function1@=Output" }, std::vector<std::string>() ) );
 
     // Cleanup
 }
 
 /*
- * Check that an exception is thrown when an override option function identifier is repeated.
+ * Check that an exception is thrown when the type override options is not valid.
+ */
+TEST( Config, Exception_TypeOverrideBadFormat )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "=Int" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type1=abc" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=/" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1=Int/" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type2=Int/abc" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Output" } ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that an exception is thrown when an parameter override option function identifier is repeated.
  */
 TEST( Config, Exception_FunctionRepeated )
 {
@@ -207,5 +357,17 @@ TEST( Config, Exception_FunctionRepeated )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" } ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" }, std::vector<std::string>() ) );
+}
+
+/*
+ * Check that an exception is thrown when an type override option type identifier is repeated.
+ */
+TEST( Config, Exception_TypeRepeated )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Int", "@class1=Double" } ) );
 }

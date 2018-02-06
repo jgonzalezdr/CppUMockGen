@@ -168,22 +168,31 @@ void FunctionReturn::ProcessInitial( const std::string funcName, const CXType &r
     m_pendingCallClosures = 0;
     m_override = NULL;
 
-    m_signature += clang_getTypeSpelling( returnType );
+    std::string typeExpr = toString( clang_getTypeSpelling( returnType ) );
+    m_signature += typeExpr;
 
     if( returnType.kind != CXType_Void )
     {
         m_body += "return ";
 
+        // Check if a function specific override exists
         std::string overrideKey = funcName + "@";
-        m_override = m_config.GetOverride( overrideKey );
+        m_override = m_config.GetParameterOverride( overrideKey );
 
-        if( m_override != NULL )
+        if( m_override == NULL )
         {
-            ProcessInitialOverride();
+            // Check if a generic override exists
+            overrideKey = "@" + typeExpr;
+            m_override = m_config.GetTypeOverride( overrideKey );
+        }
+
+        if( m_override == NULL )
+        {
+            ProcessInitialType( returnType );
         }
         else
         {
-            ProcessInitialType( returnType );
+            ProcessInitialOverride();
         }
     }
 }
@@ -461,7 +470,8 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
 {
     // Get argument type
     const CXType argType = clang_getCursorType( arg );
-    m_signature += clang_getTypeSpelling( argType );
+    std::string typeExpr = toString( clang_getTypeSpelling( argType ) );
+    m_signature += typeExpr;
 
     // Get argument name
     std::string argName = toString( clang_getCursorSpelling( arg ) );
@@ -475,15 +485,24 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
 
     std::string argExpr = argName;
 
+    // Check if a function specific override exists
     std::string overrideKey = funcName + "#" + argName;
-    const Config::OverrideSpec *override = m_config.GetOverride( overrideKey );
-    if( override != NULL )
+    const Config::OverrideSpec *override = m_config.GetParameterOverride( overrideKey );
+
+    if( override == NULL )
     {
-        ProcessOverride( override, argExpr );
+        // Check if a generic type override exists
+        overrideKey = "#" + typeExpr;
+        override = m_config.GetTypeOverride( overrideKey );
+    }
+
+    if( override == NULL )
+    {
+        ProcessType( argType, argType, false, argExpr );
     }
     else
     {
-        ProcessType( argType, argType, false, argExpr );
+        ProcessOverride( override, argExpr );
     }
 
     // Add arguments name and value

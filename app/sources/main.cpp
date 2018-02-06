@@ -32,6 +32,7 @@ int main( int argc, char* argv[] )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
         ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
         ( "p,param-override", "Override parameter type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
+        ( "t,type-override", "Override generic type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
         ( "h,help", "Print help" );
 
     options.positional_help( "[<input>] [<output>]" );
@@ -82,7 +83,8 @@ int main( int argc, char* argv[] )
         }
 
         Config config( options["underlying-typedef"].as<bool>(),
-                       options["param-override"].as<std::vector<std::string>>() );
+                       options["param-override"].as<std::vector<std::string>>(),
+                       options["type-override"].as<std::vector<std::string>>() );
 
         std::ostringstream output;
 

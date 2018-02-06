@@ -3,18 +3,25 @@
 #include <set>
 #include <vector>
 
-Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &overrideOptions )
-: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_overrideMap( overrideOptions )
-{};
+Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
+                const std::vector<std::string> &typeOverrideOptions )
+: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_paramOverrideMap( paramOverrideOptions, false ),
+  m_typeOverrideMap( typeOverrideOptions, true )
+{}
 
 bool Config::UseUnderlyingTypedefType() const
 {
     return m_useUnderlyingTypedefType;
 }
 
-const Config::OverrideSpec* Config::GetOverride( const std::string& key ) const
+const Config::OverrideSpec* Config::GetParameterOverride( const std::string& key ) const
 {
-    return m_overrideMap.GetOverride(key);
+    return m_paramOverrideMap.GetOverride(key);
+}
+
+const Config::OverrideSpec* Config::GetTypeOverride( const std::string& key ) const
+{
+    return m_typeOverrideMap.GetOverride(key);
 }
 
 static const std::vector<std::string> validOverrideTypes =
@@ -92,7 +99,7 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
     }
 }
 
-Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
+Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool typeOverride )
 {
     for( const std::string &option : options )
     {
@@ -106,7 +113,7 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
                 throw std::runtime_error( errorMsg );
             }
 
-            bool isReturn = ( key.back()  == '@' );
+            bool isReturn = ( typeOverride ? ( key.front()  == '@' ) : ( key.back()  == '@' ) );
 
             Config::OverrideSpec spec = Config::OverrideSpec( option.substr(sepPos+1), option, isReturn );
 
