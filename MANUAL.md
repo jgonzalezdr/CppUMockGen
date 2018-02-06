@@ -33,7 +33,7 @@ CppUMockGen deduces the data types to use with CppUMock from the actual function
 
 ## Mocked Parameter and Return Types
 
-CppUMockGen deduces the<code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code>functions to call on `MockActualCall` objects from the C/C++ types according to the following table:
+CppUMockGen deduces the <code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code> functions to call on `MockActualCall` objects from the C/C++ types according to the following table:
 
 | C/C++ type                                                        | CppUTest parameter function | CppUTest return function |
 | -                                                                 | - | - |
@@ -63,7 +63,7 @@ If the resulting call for a parameter is `withParameterOfType` or `withOutputPar
 
 ### Specific Mocked Parameter / Return Type Override
 
-To override the<code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code>method to call on<code>MockActualCall</code>objects for a specific parameter or return value of a mocked function or method, an  override specification can be passed on the command line using the `-p` / `--param-override` option.
+To override the <code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code> method to call on `MockActualCall` objects for a specific parameter or return value of a mocked function or method, an override specification can be passed on the command line using the `-p` / `--param-override` option.
 
 ##### Specific parameter type override
 
@@ -75,7 +75,7 @@ Where:
 - <code><i>&lt;QualifiedFunctionName></i></code> is the fully qualified name of a mocked function or method, including namespace (e.g. `namespace1::class1::method1`).
 - <code><i>&lt;ParameterName></i></code> is the name of the parameter.
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output.
-- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the<code><b>'$'</b></code>character. If defined, it will be passed as the argument for the CppUMock actual call parameter function replacing<code><b>'$'</b></code>by the mocked function parameter name.
+- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain th **'$'** character. If defined, it will be passed as the argument for the CppUMock actual call parameter function replacing **'$'** by the mocked function parameter name.
 
 ##### Specific return type override
 
@@ -86,11 +86,11 @@ Specific return type override options take the form:
 Where:
 - <code><i>&lt;QualifiedFunctionName></i></code> is the fully qualified name of a mocked function or method, including namespace (e.g. `namespace1::class1::method1`).
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the return value, admitted values are: Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer.
-- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the<code><b>'$'</b></code>character. If defined, it will be used as the return value of the mocked function or method, replacing<code><b>'$'</b></code>by the CppUMock actual call sequence.
+- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the **'$'** character. If defined, it will be used as the return value of the mocked function or method, replacing **'$'** by the CppUMock actual call sequence.
 
 ### Generic Mocked Parameter / Return Type Override
 
-To override the<code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code>method to call on<code>MockActualCall</code>objects for parameter or return values of a mocked functions or methods based on its data type, an  override specification can be passed on the command line using the `-t` / `--type-override` option.
+To override the <code>with<i>&lt;MockedType></i>Parameter</code>/<code>return<i>&lt;MockedType></i>Value</code> method to call on `MockActualCall` objects for parameter or return values of a mocked functions or methods based on its data type, an override specification can be passed on the command line using the `-t` / `--type-override` option.
 
 ##### Generic parameter type override
 
@@ -101,7 +101,7 @@ Generic parameter type override options take the form:
 Where:
 - <code><i>&lt;ParameterType></i></code> is a C/C++ data type.
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output.
-- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the<code><b>'$'</b></code>character. If defined, it will be passed as the argument for the CppUMock actual call parameter function replacing<code><b>'$'</b></code>by the mocked function parameter name.
+- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the **'$'** character. If defined, it will be passed as the argument for the CppUMock actual call parameter function replacing **'$'** by the mocked function parameter name.
 
 ##### Generic return type override
 
@@ -112,7 +112,7 @@ Generic return type override options take the form:
 Where:
 - <code><i>&lt;ReturnType></i></code> is a C/C++ data type.
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the return value, admitted values are: Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer.
-- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the<code><b>'$'</b></code>character. If defined, it will be used as the return value of the mocked function or method, replacing<code><b>'$'</b></code>by the CppUMock actual call sequence.
+- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the **'$'** character. If defined, it will be used as the return value of the mocked function or method, replacing **'$'** by the CppUMock actual call sequence.
 
 #### Mocked Type Override Examples
 
