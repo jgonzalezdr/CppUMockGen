@@ -36,9 +36,10 @@ static const std::vector<std::string> validOverrideTypes =
     "Pointer",
     "ConstPointer",
     "Output",
+    "Skip",
 };
 
-static const std::set<std::string> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 1 );
+static const std::set<std::string> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
 static const std::set<std::string> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
 Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )

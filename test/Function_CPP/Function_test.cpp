@@ -5454,3 +5454,45 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
     // Cleanup
 }
 
+/*
+ * Check mock generation of a function with parameter override that skips a parameter.
+ */
+TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
+{
+    // Prepare
+    mock().installCopier( "std::string", stdStringCopier );
+
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+    const std::string overrideType = "Skip";
+    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p2").andReturnValue(override);
+    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
+    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short").andReturnValue((const void*)0);
+
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char *, signed char * p3, short p4)\n{\n"
+                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
+                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+                  "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+

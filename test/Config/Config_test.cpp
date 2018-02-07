@@ -159,7 +159,8 @@ TEST( Config, ParameterOverrideOptions_AllowedTypes )
         "function1#p7=Pointer",
         "function1#p8=ConstPointer",
         "function1#p9=Output",
-        "function1#p10=Double"
+        "function1#p10=Double",
+        "function1#p11=Skip",
     }, std::vector<std::string>() );
 
     // Verify
@@ -173,6 +174,7 @@ TEST( Config, ParameterOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetParameterOverride("function1#p8") != NULL );
     CHECK( testConfig.GetParameterOverride("function1#p9") != NULL );
     CHECK( testConfig.GetParameterOverride("function1#p10") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p11") != NULL );
 
     // Cleanup
 }
@@ -196,7 +198,8 @@ TEST( Config, TypeOverrideOptions_AllowedTypes )
         "#type7=Pointer",
         "#type8=ConstPointer",
         "#type9=Output",
-        "#type10=Double"
+        "#type10=Double",
+        "#type11=Skip",
     } );
 
     // Verify
@@ -210,6 +213,7 @@ TEST( Config, TypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("#type8") != NULL );
     CHECK( testConfig.GetTypeOverride("#type9") != NULL );
     CHECK( testConfig.GetTypeOverride("#type10") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type11") != NULL );
 
     // Cleanup
 }
@@ -310,6 +314,9 @@ TEST( Config, Exception_ParameterOverrideBadFormat )
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "function1@=Output" }, std::vector<std::string>() ) );
 
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1@=Skip" }, std::vector<std::string>() ) );
+
     // Cleanup
 }
 
@@ -344,6 +351,9 @@ TEST( Config, Exception_TypeOverrideBadFormat )
 
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Output" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Skip" } ) );
 
     // Cleanup
 }

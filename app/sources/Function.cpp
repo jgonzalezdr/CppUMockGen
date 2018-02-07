@@ -52,7 +52,7 @@ public:
     void Process( const std::string funcName, const CXCursor &arg, int argNum );
 
 private:
-    void ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr );
+    bool ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr );
     void ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst, std::string &argExpr );
     void ProcessTypePointer( const CXType &argType, const CXType &origArgType, std::string &argExpr );
     void ProcessTypeRVReference( const CXType &argType, const CXType &origArgType, std::string &argExpr );
@@ -481,7 +481,6 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
         argNameStream << "_unnamedArg" << argNum;
         argName = argNameStream.str();
     }
-    m_signature += " " + argName;
 
     std::string argExpr = argName;
 
@@ -496,24 +495,43 @@ void FunctionArgument::Process( const std::string funcName, const CXCursor &arg,
         override = m_config.GetTypeOverride( overrideKey );
     }
 
+    bool skip = false;
+
     if( override == NULL )
     {
         ProcessType( argType, argType, false, argExpr );
     }
     else
     {
-        ProcessOverride( override, argExpr );
+        skip = ProcessOverride( override, argExpr );
     }
 
-    // Add arguments name and value
-    m_body += "\"" + argName + "\", ";
-    m_body += argExpr + ")";
+    if( !skip )
+    {
+        // Add arguments name to signature
+        m_signature += " " + argName;
+
+        // Add arguments name and value to body
+        m_body += "\"" + argName + "\", ";
+        m_body += argExpr + ")";
+    }
 }
 
-void FunctionArgument::ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr )
+bool FunctionArgument::ProcessOverride( const Config::OverrideSpec *override, std::string &argExpr )
 {
-    m_body += ".with" + override->GetType() + "Parameter(";
-    argExpr = override->GetArgExprModFront() + argExpr + override->GetArgExprModBack();
+    std::string overrideType = override->GetType();
+
+    if( overrideType == "Skip" )
+    {
+        return true;
+    }
+    else
+    {
+        m_body += ".with" + overrideType + "Parameter(";
+        argExpr = override->GetArgExprModFront() + argExpr + override->GetArgExprModBack();
+
+        return false;
+    }
 }
 
 void FunctionArgument::ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst, std::string &argExpr )
