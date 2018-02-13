@@ -47,9 +47,8 @@ TEST_GROUP( Method )
         {
             methodCount++;
 
-            Method method( cursor, config );
-
-            if( method.IsMockable() )
+            Method method;
+            if( method.Parse( cursor, config ) )
             {
                 results.push_back( method.GenerateMock() );
             }
@@ -64,9 +63,9 @@ TEST_GROUP( Method )
  *===========================================================================*/
 
 /*
- * Check that a method with definition inside the class declaration is not mocked.
+ * Check that a public method with definition inside the class declaration is not mocked.
  */
-TEST( Method, WithDefinitionInsideClass )
+TEST( Method, PublicNonVirtualWithDefinitionInsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -75,6 +74,34 @@ TEST( Method, WithDefinitionInsideClass )
             "class class1 {\n"
             "public:\n"
             "    void method1() {}\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 0, results.size() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a non-virtual protected method with definition inside the class declaration is not mocked.
+ */
+TEST( Method, ProtectedVirtualWithDefinitionInsideClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "protected:\n"
+            "    class1();\n"
+            "    ~class1();\n"
+            "protected:\n"
+            "    virtual bool method1() const { return true; }\n"
             "};";
 
     // Exercise
@@ -115,9 +142,9 @@ TEST( Method, WithDefinitionOutsideClass )
 }
 
 /*
- * Check that a private method is not mocked.
+ * Check that a non-virtual private method is not mocked.
  */
-TEST( Method, PrivateMethod )
+TEST( Method, NonVirtualPrivateMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -140,9 +167,9 @@ TEST( Method, PrivateMethod )
 }
 
 /*
- * Check that a protected method is not mocked.
+ * Check that a non-virtual protected method is not mocked.
  */
-TEST( Method, ProtectedMethod )
+TEST( Method, NonVirtualProtectedMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -190,9 +217,9 @@ TEST( Method, PureVirtualMethod )
 }
 
 /*
- * Check that a public method is mocked properly.
+ * Check that a non-virtual public method is mocked properly.
  */
-TEST( Method, PublicMethod )
+TEST( Method, NonVirtualPublicMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -211,7 +238,91 @@ TEST( Method, PublicMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void class1::method1()\n{\n"
-                  "    mock().actualCall(\"class1::method1\");\n"
+                  "    mock().actualCall(\"class1::method1\").onObject(this);\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a virtual public method is mocked properly.
+ */
+TEST( Method, VirtualPublicMethod )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "public:\n"
+            "    virtual void method1();\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "void class1::method1()\n{\n"
+                  "    mock().actualCall(\"class1::method1\").onObject(this);\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a virtual private method is mocked properly.
+ */
+TEST( Method, VirtualPrivateMethod )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "private:\n"
+            "    virtual void method1();\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "void class1::method1()\n{\n"
+                  "    mock().actualCall(\"class1::method1\").onObject(this);\n"
+                  "}\n", results[0].c_str() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a virtual private method is mocked properly.
+ */
+TEST( Method, VirtualProtectedMethod )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "protected:\n"
+            "    virtual void method1();\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "void class1::method1()\n{\n"
+                  "    mock().actualCall(\"class1::method1\").onObject(this);\n"
                   "}\n", results[0].c_str() );
 
     // Cleanup
@@ -239,7 +350,7 @@ TEST( Method, PublicConstMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void class1::method1() const\n{\n"
-                  "    mock().actualCall(\"class1::method1\");\n"
+                  "    mock().actualCall(\"class1::method1\").onObject(this);\n"
                   "}\n", results[0].c_str() );
 
     // Cleanup
@@ -269,7 +380,7 @@ TEST( Method, MethodWithinNamespace )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void ns1::class1::method1()\n{\n"
-                  "    mock().actualCall(\"ns1::class1::method1\");\n"
+                  "    mock().actualCall(\"ns1::class1::method1\").onObject(this);\n"
                   "}\n", results[0].c_str() );
 
     // Cleanup

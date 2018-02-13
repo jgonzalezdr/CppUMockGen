@@ -24,23 +24,23 @@ const Config::OverrideSpec* Config::GetTypeOverride( const std::string& key ) co
     return m_typeOverrideMap.GetOverride(key);
 }
 
-static const std::vector<std::string> validOverrideTypes =
+static const std::vector<std::pair<std::string, MockedType>> validOverrideTypes =
 {
-    "Bool",
-    "Int",
-    "UnsignedInt",
-    "LongInt",
-    "UnsignedLongInt",
-    "Double",
-    "String",
-    "Pointer",
-    "ConstPointer",
-    "Output",
-    "Skip",
+    { "Bool", MockedType::Bool },
+    { "Int", MockedType::Int },
+    { "UnsignedInt", MockedType::UnsignedInt },
+    { "LongInt", MockedType::Long },
+    { "UnsignedLongInt", MockedType::UnsignedLong },
+    { "Double", MockedType::Double },
+    { "String", MockedType::String },
+    { "Pointer", MockedType::Pointer },
+    { "ConstPointer", MockedType::ConstPointer },
+    { "Output", MockedType::Output },
+    { "Skip", MockedType::Skip },
 };
 
-static const std::set<std::string> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
-static const std::set<std::string> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
+static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
+static const std::map<std::string, MockedType> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
 Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )
 {
@@ -50,11 +50,12 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         throw std::runtime_error( errorMsg );
     }
 
-    size_t sepPos = value.find('/');
+    std::string type;
+    size_t sepPos = value.find( EXPR_MOD_SEPARATOR );
     if( sepPos != std::string::npos )
     {
-        m_type = value.substr(0, sepPos);
-        if( m_type.empty() )
+        type = value.substr(0, sepPos);
+        if( type.empty() )
         {
             std::string errorMsg = "Override option type cannot be empty <" + option + ">";
             throw std::runtime_error( errorMsg );
@@ -67,24 +68,29 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
             throw std::runtime_error( errorMsg );
         }
 
-        size_t placeholderPos = argExprMod.find('$');
+        size_t placeholderPos = argExprMod.find( EXPR_MOD_PLACEHOLDER );
         if( placeholderPos == std::string::npos )
         {
             std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) <" + option + ">";
             throw std::runtime_error( errorMsg );
         }
 
-        m_argExprModFront = argExprMod.substr( 0, placeholderPos );
-        m_argExprModBack = argExprMod.substr( placeholderPos + 1 );
+        m_exprModFront = argExprMod.substr( 0, placeholderPos );
+        m_exprModBack = argExprMod.substr( placeholderPos + 1 );
     }
     else
     {
-        m_type = value;
+        type = value;
     }
 
     if( isReturn )
     {
-        if( validReturnOverrideTypes.count( m_type ) == 0 )
+        auto it = validReturnOverrideTypes.find( type );
+        if( it != validReturnOverrideTypes.end() )
+        {
+            m_type = it->second;
+        }
+        else
         {
             std::string errorMsg = "Invalid return override option type <" + option + ">.";
             throw std::runtime_error( errorMsg );
@@ -92,7 +98,12 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
     }
     else
     {
-        if( validParameterOverrideTypes.count( m_type ) == 0 )
+        auto it = validParameterOverrideTypes.find( type );
+        if( it != validParameterOverrideTypes.end() )
+        {
+            m_type = it->second;
+        }
+        else
         {
             std::string errorMsg = "Invalid parameter override option type <" + option + ">.";
             throw std::runtime_error( errorMsg );
@@ -138,17 +149,17 @@ const Config::OverrideSpec* Config::OverrideMap::GetOverride( const std::string&
     return ( it != m_map.end() ) ? &(it->second) : NULL;
 }
 
-const std::string& Config::OverrideSpec::GetType() const
+MockedType Config::OverrideSpec::GetType() const
 {
     return m_type;
 }
 
-const std::string& Config::OverrideSpec::GetArgExprModFront() const
+const std::string& Config::OverrideSpec::GetExprModFront() const
 {
-    return m_argExprModFront;
+    return m_exprModFront;
 }
 
-const std::string& Config::OverrideSpec::GetArgExprModBack() const
+const std::string& Config::OverrideSpec::GetExprModBack() const
 {
-    return m_argExprModBack;
+    return m_exprModBack;
 }

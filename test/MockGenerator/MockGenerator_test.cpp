@@ -92,8 +92,7 @@ TEST( MockGenerator, MockedFunction )
            "void function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectOneCall("Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-   mock().expectOneCall("Function::IsMockable").andReturnValue(true);
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
@@ -127,10 +126,8 @@ TEST( MockGenerator, MockedMethod )
             "};";
     SetupTempFile( testHeader );
 
-    mock().expectOneCall("Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-    mock().expectOneCall("Method::Method").withConstPointerParameter("config", config).ignoreOtherParameters();
-    mock().expectOneCall("Method::IsMockable").andReturnValue(true);
-    mock().expectOneCall("Method::GenerateMock").andReturnValue(testMock);
+    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
     // Exercise
     std::vector<std::string> results;
@@ -165,14 +162,12 @@ TEST( MockGenerator, MultipleFunctionsAndMethods )
             "};";
     SetupTempFile( testHeader );
 
-    mock().expectNCalls(4, "Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-    mock().expectNCalls(2, "Function::IsMockable").andReturnValue(true);
+    mock().expectNCalls(2, "Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[0]);
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[1]);
-    mock().expectNCalls(2, "Method::Method").withConstPointerParameter("config", config).ignoreOtherParameters();
-    mock().expectNCalls(2, "Method::IsMockable").andReturnValue(true);
-    mock().expectOneCall("Method::GenerateMock").andReturnValue(testMock[2]);
-    mock().expectOneCall("Method::GenerateMock").andReturnValue(testMock[3]);
+    mock().expectNCalls(2, "Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[2]);
+    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[3]);
 
     // Exercise
     std::vector<std::string> results;
@@ -203,8 +198,7 @@ TEST( MockGenerator, NonMockable )
            "void function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectOneCall("Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-   mock().expectOneCall("Function::IsMockable").andReturnValue(false);
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
 
    // Exercise
    std::vector<std::string> results;
@@ -263,8 +257,7 @@ TEST( MockGenerator, Warning )
    SetupTempFile( testHeader );
 
    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
-   mock().expectOneCall("Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-   mock().expectOneCall("Function::IsMockable").andReturnValue(true);
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
@@ -332,10 +325,8 @@ TEST( MockGenerator, PathWithoutDirectories )
 
    chdir( tempFileDir.c_str() );
 
-   mock().expectOneCall("Function::Function").withConstPointerParameter("config", config).ignoreOtherParameters();
-   mock().expectOneCall("Method::Method").withConstPointerParameter("config", config).ignoreOtherParameters();
-   mock().expectOneCall("Method::IsMockable").andReturnValue(true);
-   mock().expectOneCall("Method::GenerateMock").andReturnValue(testMock);
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+   mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
    std::vector<std::string> results;

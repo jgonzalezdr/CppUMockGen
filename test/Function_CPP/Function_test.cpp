@@ -72,7 +72,7 @@ StdStringCopier stdStringCopier;
 
 TEST_GROUP_EX( TEST_GROUP_NAME )
 {
-    struct primitiveTypeData
+    struct PrimitiveTypeData
     {
         std::string originalType;
         std::string mockedType;
@@ -80,7 +80,7 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
         std::string cpputestFunctionType;
     };
 
-    const std::vector< struct primitiveTypeData > primitiveTypes {
+    const std::vector< struct PrimitiveTypeData > primitiveTypes {
         { "int", "int", false, "Int" },
         { "unsigned int", "unsigned int", false, "UnsignedInt" },
         { "signed int", "int", false, "Int" },
@@ -103,13 +103,13 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
 #endif
     };
 
-    struct primitivePointedTypeData
+    struct PrimitivePointedTypeData
     {
         std::string originalType;
         std::string mockedType;
     };
 
-    const std::vector< struct primitivePointedTypeData > primitivePointedTypesWithoutString {
+    const std::vector< struct PrimitivePointedTypeData > primitivePointedTypesWithoutString {
         { "int", "int" },
         { "unsigned int", "unsigned int" },
         { "signed int", "int" },
@@ -131,11 +131,11 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
 #endif
     };
 
-    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithString = primitivePointedTypesWithoutString;
+    std::vector< struct PrimitivePointedTypeData > primitivePointedTypesWithString = primitivePointedTypesWithoutString;
 
-    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithStringAndVoid = primitivePointedTypesWithoutString;
+    std::vector< struct PrimitivePointedTypeData > primitivePointedTypesWithStringAndVoid = primitivePointedTypesWithoutString;
 
-    std::vector< struct primitivePointedTypeData > primitivePointedTypesWithoutStringWithVoid = primitivePointedTypesWithoutString;
+    std::vector< struct PrimitivePointedTypeData > primitivePointedTypesWithoutStringWithVoid = primitivePointedTypesWithoutString;
 
     unsigned int ParseHeader( const SimpleString &testHeader, const Config &config, std::vector<std::string> &results )
     {
@@ -145,9 +145,8 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
         {
             functionCount++;
 
-            Function function( cursor, config );
-
-            if( function.IsMockable() )
+            Function function;
+            if( function.Parse( cursor, config ) )
             {
                 results.push_back( function.GenerateMock() );
             }
@@ -319,9 +318,9 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@%s", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s function1();", typeData.originalType.c_str() );
 
@@ -363,8 +362,8 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@" ENUM_TAG "Enum1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@" ENUM_TAG "Enum1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum Enum1 { A, B, C };\n"
@@ -394,8 +393,8 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Enum1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Enum1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { A, B, C };\n"
@@ -424,8 +423,8 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -454,8 +453,8 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1<int>").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1<int>").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -485,8 +484,8 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@" STRUCT_TAG "Struct1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@" STRUCT_TAG "Struct1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -521,8 +520,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -556,8 +555,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef enum { X, Y, Z } Type1;\n"
@@ -587,8 +586,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z };\n"
@@ -618,8 +617,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -649,8 +648,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -681,8 +680,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -716,8 +715,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@void *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@void *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void* function1();";
 
@@ -744,8 +743,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const void *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const void *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const void* function1();";
 
@@ -774,9 +773,9 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@%s *", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s* function1();", typeData.originalType.c_str() );
 
@@ -809,9 +808,9 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@const %s *", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s* function1();", typeData.originalType.c_str() );
 
@@ -842,8 +841,8 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const char *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const char* function1();";
 
@@ -871,8 +870,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -901,8 +900,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -931,8 +930,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1<int> *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1<int> *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -961,8 +960,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1<char> *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1<char> *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -992,8 +991,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@struct Struct1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@struct Struct1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1022,8 +1021,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const struct Struct1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const struct Struct1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1059,9 +1058,9 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@%s &", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s& function1();", typeData.originalType.c_str() );
 
@@ -1094,9 +1093,9 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@const %s &", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s& function1();", typeData.originalType.c_str() );
 
@@ -1127,8 +1126,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1159,8 +1158,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1191,8 +1190,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1<int> &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1<int> &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1223,8 +1222,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1<int> &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1<int> &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1255,8 +1254,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@struct Struct1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@struct Struct1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1287,8 +1286,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const struct Struct1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const struct Struct1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1325,9 +1324,9 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@%s &&", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "%s&& function1();", typeData.originalType.c_str() );
 
@@ -1360,9 +1359,9 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "@const %s &&", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "const %s&& function1();", typeData.originalType.c_str() );
 
@@ -1393,8 +1392,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1425,8 +1424,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1457,8 +1456,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Class1<int> &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Class1<int> &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1489,8 +1488,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Class1<int> &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Class1<int> &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -1521,8 +1520,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@struct Struct1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@struct Struct1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1553,8 +1552,8 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const struct Struct1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const struct Struct1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -1592,8 +1591,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1627,8 +1626,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
@@ -1662,8 +1661,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1697,8 +1696,8 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1 *const").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1 *const").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -1731,8 +1730,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1762,8 +1761,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1793,8 +1792,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -1831,8 +1830,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -1866,8 +1865,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -1901,8 +1900,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* const Type1;\n"
@@ -1936,8 +1935,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -1969,8 +1968,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -1999,8 +1998,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2030,8 +2029,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -2061,8 +2060,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -2092,8 +2091,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -2123,8 +2122,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -2158,44 +2157,76 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a typedef for a reference to a non-const primitive type.
+ * Check mock generation of a function without parameters and returning a typedef for a left-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForReferenceToPrimitiveTypeReturnNoParameters )
+TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters )
 {
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
+    for( auto typeData : primitivePointedTypesWithString )
     {
-        for( auto typeData : primitivePointedTypesWithString )
-        {
-            // Prepare
-            Config* config = GetMockConfig();
-            mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-            mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+        // Prepare
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
 
-            SimpleString testHeader = StringFromFormat(
-                    "typedef %s%s Type1;\n"
-                    "Type1 function1();",
-                    typeData.originalType.c_str(), referenceType.c_str() );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s& Type1;\n"
+                "Type1 function1();",
+                typeData.originalType.c_str() );
 
-            // Exercise
-            std::vector<std::string> results;
-            unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
-            // Verify
-            mock().checkExpectations();
-            CHECK_EQUAL( 1, functionCount );
-            CHECK_EQUAL( 1, results.size() );
-            SimpleString expectedResult = StringFromFormat(
-                    "Type1 function1()\n{\n"
-                    "    return static_cast<Type1>( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
-                    "}\n", typeData.mockedType.c_str() );
-            STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-            CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult = StringFromFormat(
+                "Type1 function1()\n{\n"
+                "    return static_cast<Type1>( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+                "}\n", typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
 
-            // Cleanup
-            mock().clear();
-        }
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a typedef for a right-value reference to a non-const primitive type.
+ */
+TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters )
+{
+    for( auto typeData : primitivePointedTypesWithString )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type1").andReturnValue((const void*)0);
+
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s&& Type1;\n"
+                "Type1 function1();",
+                typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult = StringFromFormat(
+                "Type1 function1()\n{\n"
+                "    return static_cast<Type1>( std::move( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) ) );\n"
+                "}\n", typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
     }
 }
 #endif
@@ -2211,8 +2242,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@int **").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@int **").andReturnValue((const void*)0);
 
     SimpleString testHeader = "int* *function1();";
 
@@ -2239,8 +2270,8 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const unsigned char **").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const unsigned char **").andReturnValue((const void*)0);
 
     SimpleString testHeader = "const unsigned char* *function1();";
 
@@ -2267,8 +2298,8 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@short *const *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@short *const *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "short* const *function1();";
 
@@ -2300,8 +2331,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@double *&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@double *&").andReturnValue((const void*)0);
 
     SimpleString testHeader = "double* &function1();";
 
@@ -2328,8 +2359,8 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@bool *const &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@bool *const &").andReturnValue((const void*)0);
 
     SimpleString testHeader = "bool* const &function1();";
 
@@ -2363,8 +2394,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -2405,8 +2436,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2441,8 +2472,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2477,8 +2508,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -2513,8 +2544,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2549,8 +2580,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2585,8 +2616,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -2619,8 +2650,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2650,8 +2681,8 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2681,8 +2712,8 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@const Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -2724,9 +2755,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#%s", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat( "void function1(%s p);", typeData.originalType.c_str() );
 
@@ -2757,8 +2788,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#" ENUM_TAG "Enum1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#" ENUM_TAG "Enum1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum Enum1 { X, Y, Z };\n"
@@ -2788,8 +2819,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Enum1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Enum1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z };\n"
@@ -2818,9 +2849,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -2849,9 +2880,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1<short>").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1<short>").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -2881,9 +2912,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#" STRUCT_TAG "Struct1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#" STRUCT_TAG "Struct1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -2918,8 +2949,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -2953,8 +2984,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef enum { X, Y, Z, K } Type1;\n"
@@ -2984,8 +3015,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "enum class Enum1 { X, Y, Z, W };\n"
@@ -3015,9 +3046,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3047,9 +3078,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(true);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3079,9 +3110,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -3111,9 +3142,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(true);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template <class T1> class Class1 { T1 member1[100]; };\n"
@@ -3144,9 +3175,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3176,9 +3207,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(true);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(true);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3212,8 +3243,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#void *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#void *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void function1(void* p);";
 
@@ -3242,9 +3273,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#%s *", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s* p);",
@@ -3279,9 +3310,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#const %s *", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s* p);",
@@ -3314,8 +3345,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const char *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void function1(const char* p);";
 
@@ -3343,9 +3374,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3374,9 +3405,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3405,9 +3436,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1<short> *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1<short> *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -3436,9 +3467,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1<short> *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1<short> *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -3468,9 +3499,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#struct Struct1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#struct Struct1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3499,9 +3530,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const struct Struct1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const struct Struct1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3537,9 +3568,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#%s &", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s& p);",
@@ -3574,9 +3605,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#const %s &", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s& p);",
@@ -3609,9 +3640,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3642,9 +3673,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3675,9 +3706,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1<short> &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1<short> &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -3708,9 +3739,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1<short> &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1<short> &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -3741,9 +3772,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#struct Struct1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#struct Struct1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3774,9 +3805,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const struct Struct1 &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const struct Struct1 &").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -3813,9 +3844,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#%s &&", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(%s&& p);",
@@ -3850,9 +3881,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
         SimpleString typeKey = StringFromFormat( "#const %s &&", typeData.mockedType.c_str() );
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", typeKey.asCharString()).andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "void function1(const %s&& p);",
@@ -3885,9 +3916,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3918,9 +3949,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -3951,9 +3982,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Class1<short> &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Class1<short> &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -3984,9 +4015,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Class1<short> &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Class1<short> &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "template<class T1> class Class1 { T1 member1[100]; };\n"
@@ -4017,9 +4048,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#struct Struct1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#struct Struct1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -4050,9 +4081,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const struct Struct1 &&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const struct Struct1 &&").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "struct Struct1 { int member1[100]; };\n"
@@ -4088,8 +4119,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef void Type1;\n"
@@ -4118,8 +4149,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef void Type1;\n"
@@ -4150,8 +4181,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -4184,8 +4215,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s Type1;\n"
@@ -4218,8 +4249,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type1 *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type1 *").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -4252,8 +4283,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -4285,9 +4316,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4317,9 +4348,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4349,9 +4380,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type1 *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type1 *").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4381,9 +4412,9 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::UseUnderlyingTypedefType").andReturnValue(false);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::UseUnderlyingTypedefType").onObject(config).andReturnValue(false);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1 *const").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4420,8 +4451,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -4455,8 +4486,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -4490,8 +4521,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* const Type1;\n"
@@ -4525,8 +4556,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -4558,8 +4589,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -4588,8 +4619,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -4619,8 +4650,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4650,8 +4681,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4681,8 +4712,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4712,8 +4743,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type1").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "class Class1 { int member1[100]; };\n"
@@ -4757,8 +4788,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
         {
             // Prepare
             Config* config = GetMockConfig();
-            mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-            mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+            mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+            mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
             SimpleString testHeader = StringFromFormat(
                     "typedef %s%s Type1;\n"
@@ -4796,8 +4827,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#param").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#int **").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#param").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#int **").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void function1(signed int* * param);";
 
@@ -4824,8 +4855,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "functionX#x").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const struct ExternStruct **").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "functionX#x").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const struct ExternStruct **").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void functionX(const struct ExternStruct* *x);";
 
@@ -4852,8 +4883,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "functionY#arg").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short *const *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "functionY#arg").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short *const *").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void functionY(short* const * arg);";
 
@@ -4885,8 +4916,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#i").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#double *&").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#i").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#double *&").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void function1(double* &i);";
 
@@ -4913,8 +4944,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#j").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#bool *const &").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#j").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#bool *const &").andReturnValue((const void*)0);
 
     SimpleString testHeader = "void function1(bool* const &j);";
 
@@ -4948,8 +4979,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s Type1;\n"
@@ -4990,8 +5021,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -5026,8 +5057,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -5062,8 +5093,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef %s* Type1;\n"
@@ -5098,8 +5129,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -5134,8 +5165,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -5170,8 +5201,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
     {
         // Prepare
         Config* config = GetMockConfig();
-        mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-        mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
 
         SimpleString testHeader = StringFromFormat(
                 "typedef const %s* Type1;\n"
@@ -5204,8 +5235,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -5235,8 +5266,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -5266,8 +5297,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const Type2").andReturnValue((const void*)0);
 
     SimpleString testHeader =
             "typedef const char* Type1;\n"
@@ -5303,16 +5334,16 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
 
     SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);";
 
@@ -5340,16 +5371,16 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#_unnamedArg0").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#_unnamedArg1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#_unnamedArg3").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#_unnamedArg0").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#_unnamedArg1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#_unnamedArg3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
 
     SimpleString testHeader = "unsigned long function1(const signed int*, const char*, signed char* p3, short);";
 
@@ -5375,44 +5406,72 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
  */
 TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 {
-    // Prepare
-    mock().installCopier( "std::string", stdStringCopier );
+    struct ArgumentOverrideData
+    {
+        MockedType mockedType;
+        std::string cpputestFunctionType;
+        std::string argExprFront;
+        std::string argExprBack;
+    };
 
-    Config* config = GetMockConfig();
-    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    const std::string overrideType = "ConstPointer";
-    const std::string overrideArgExprFront = "&";
-    const std::string overrideArgExprBack = "[0]";
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p2").andReturnValue(override);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
-    mock().expectOneCall("Config::OverrideSpec::GetArgExprModFront").onObject((void*)override).andReturnValue(&overrideArgExprFront);
-    mock().expectOneCall("Config::OverrideSpec::GetArgExprModBack").onObject((void*)override).andReturnValue(&overrideArgExprBack);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short").andReturnValue((const void*)0);
+    const std::vector< struct ArgumentOverrideData > overrideOptions
+    {
+        { MockedType::Bool, "Bool", "(*", "!=0)" },
+        { MockedType::Int, "Int", "*", "" },
+        { MockedType::UnsignedInt, "UnsignedInt", "(unsigned)*", "" },
+        { MockedType::Long, "LongInt", "*", "" },
+        { MockedType::UnsignedLong, "UnsignedLongInt", "(unsigned)*", "" },
+        { MockedType::Double, "Double", "*", "" },
+        { MockedType::String, "String", "StringFromFormat(\"%c\", *", ").asCharString()" },
+        { MockedType::Pointer, "Pointer", "", "" },
+        { MockedType::ConstPointer, "ConstPointer", "", "" },
+        { MockedType::Output, "Output", "", "" },
+    };
 
-    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
+    for( auto overrideOption : overrideOptions )
+    {
+        // Prepare
+        mock().installCopier( "std::string", stdStringCopier );
 
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        Config* config = GetMockConfig();
+        const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue(override);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
 
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2, signed char * p3, short p4)\n{\n"
-                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withConstPointerParameter(\"p2\", &p2[0])"
-                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
 
-    // Cleanup
+        mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)overrideOption.mockedType);
+        mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprFront);
+        mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprBack);
+
+        SimpleString testHeader = "unsigned long function1(const signed int* p1, char* p2, signed char* p3, short p4);\n";
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult = StringFromFormat(
+            "unsigned long function1(const int * p1, char * p2, signed char * p3, short p4)\n{\n"
+            "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
+                 ".with%sParameter(\"p2\", %sp2%s)"
+                 ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+            "}\n", overrideOption.cpputestFunctionType.c_str(), overrideOption.argExprFront.c_str(), overrideOption.argExprBack.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
 }
 
 /*
@@ -5420,38 +5479,66 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
  */
 TEST_EX( TEST_GROUP_NAME,ReturnOverride )
 {
-    // Prepare
-    Config* config = GetMockConfig();
-    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(199);
-    const std::string overrideType = "ConstPointer";
-    const std::string overrideArgExprFront = "(*(unsigned long*)";
-    const std::string overrideArgExprBack = ")+1";
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue(override);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
-    mock().expectOneCall("Config::OverrideSpec::GetArgExprModFront").onObject((void*)override).andReturnValue(&overrideArgExprFront);
-    mock().expectOneCall("Config::OverrideSpec::GetArgExprModBack").onObject((void*)override).andReturnValue(&overrideArgExprBack);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const char *").andReturnValue((const void*)0);
+    struct ReturnOverrideData
+    {
+        MockedType mockedType;
+        std::string cpputestFunctionType;
+        std::string argExprFront;
+        std::string argExprBack;
+    };
 
-    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
+    const std::vector< struct ReturnOverrideData > overrideOptions
+    {
+        { MockedType::Bool, "Bool", "( ", " ? 123 : 0 )" },
+        { MockedType::Int, "Int", "(unsigned long) ", "" },
+        { MockedType::UnsignedInt, "UnsignedInt", "", "" },
+        { MockedType::Long, "LongInt", "(unsigned long) ", "" },
+        { MockedType::UnsignedLong, "UnsignedLongInt", "(", " + 1)" },
+        { MockedType::Double, "Double", "(unsigned long) ", "" },
+        { MockedType::String, "String", "(unsigned long) ", "[0]" },
+        { MockedType::Pointer, "Pointer", "(* (unsigned long *) ", ")" },
+        { MockedType::ConstPointer, "ConstPointer", "((unsigned long *) ", ")[0]" },
+    };
 
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    for( auto overrideOption : overrideOptions )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(199);
+        const std::string overrideArgExprFront = "(*(unsigned long*)";
+        const std::string overrideArgExprBack = ")+1";
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue(override);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
 
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char * p2)\n{\n"
-                  "    return (*(unsigned long*)mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withStringParameter(\"p2\", p2)"
-                       ".returnConstPointerValue())+1;\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const char *").andReturnValue((const void*)0);
 
-    // Cleanup
+        mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)overrideOption.mockedType);
+        mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprFront);
+        mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprBack);
+
+        SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult = StringFromFormat(
+                "unsigned long function1(const int * p1, const char * p2)\n{\n"
+                "    return %smock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withStringParameter(\"p2\", p2)"
+                     ".return%sValue()%s;\n"
+                "}\n", overrideOption.argExprFront.c_str(), overrideOption.cpputestFunctionType.c_str(), overrideOption.argExprBack.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
 }
 
 /*
@@ -5464,17 +5551,18 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
 
     Config* config = GetMockConfig();
     const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    const std::string overrideType = "Skip";
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1@").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p2").andReturnValue(override);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetParameterOverride").withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue(&overrideType);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#const int *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
-    mock().expectOneCall("Config::GetTypeOverride").withStringParameter("key", "#short").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue(override);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)MockedType::Skip);
 
     SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
 

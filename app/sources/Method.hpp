@@ -4,21 +4,23 @@
 #include "Function.hpp"
 
 /**
- * Mock generator for methods.
+ * Class used to parse methods and generate mocks.
  */
 class Method : public Function
 {
 public:
     /**
-     * Constructs a Method object.
-     *
-     * @param cursor [in] Cursor representing a method
-     * @param config [in] Configuration to be used for mock generation
+     * Default constructor.
      */
-    Method( const CXCursor &cursor, const Config &config );
+    Method();
 
-    virtual bool IsMockable() const override;
-    virtual std::string GenerateMock() const override;
+protected:
+    virtual bool IsMockable( const CXCursor &cursor ) const override;
+
+    virtual bool IsMethod() const override
+    {
+        return true;
+    }
 };
 
 #endif // header guard

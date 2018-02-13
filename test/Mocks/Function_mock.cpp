@@ -8,22 +8,30 @@
 
 #include <CppUTestExt/MockSupport.h>
 
-Function::Function( const CXCursor &cursor, const Config &config )
-: m_cursor( cursor ), m_config( config )
-{
-    mock().actualCall("Function::Function").withConstPointerParameter("cursor", &cursor).withConstPointerParameter("config", &config) ;
-}
+class Function::Argument
+{};
+
+class Function::Return
+{};
+
+Function::Function()
+: m_isConst( false )
+{}
 
 Function::~Function()
-{
-}
+{}
 
-bool Function::IsMockable() const
+bool Function::Parse(const CXCursor & cursor, const Config & config)
 {
-    return mock().actualCall("Function::IsMockable").returnBoolValue();
+    return mock().actualCall("Function::Parse").withConstPointerParameter("cursor", &cursor).withConstPointerParameter("config", &config).returnBoolValue();
 }
 
 std::string Function::GenerateMock() const
 {
     return mock().actualCall("Function::GenerateMock").returnStringValue();
+}
+
+bool Function::IsMockable(const CXCursor & cursor) const
+{
+    return mock().actualCall("Function::IsMockable").withConstPointerParameter("cursor", &cursor).returnBoolValue();
 }

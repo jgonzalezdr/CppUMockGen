@@ -4,24 +4,21 @@
 #include <sstream>
 #include "ClangHelper.hpp"
 
-Method::Method( const CXCursor &cursor, const Config &config )
-    : Function( cursor, config )
+Method::Method()
 {}
 
-bool Method::IsMockable() const
+bool Method::IsMockable( const CXCursor &cursor ) const
 {
     // Only public methods should be mocked
-    bool isPublic = ( clang_getCXXAccessSpecifier( m_cursor ) == CX_CXXPublic );
+    bool isPublic = ( clang_getCXXAccessSpecifier( cursor ) == CX_CXXPublic );
 
     // Pure virtual methods should not be mocked
-    bool isPureVirtual = clang_CXXMethod_isPureVirtual( m_cursor );
+    bool isVirtual = clang_CXXMethod_isVirtual( cursor );
+
+    // Pure virtual methods should not be mocked
+    bool isPureVirtual = clang_CXXMethod_isPureVirtual( cursor );
 
     // TODO: Print warning if not mockable
 
-    return Function::IsMockable() && isPublic && !isPureVirtual;
-}
-
-std::string Method::GenerateMock() const
-{
-    return Function::GenerateMock(true);
+    return Function::IsMockable( cursor ) && (isPublic || isVirtual) && !isPureVirtual;
 }

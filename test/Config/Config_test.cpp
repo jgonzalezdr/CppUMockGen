@@ -87,13 +87,13 @@ TEST( Config, ParameterOverrideOptions_Simple )
     const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function2@");
 
     // Verify
-    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "", override1->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override1->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
+    STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
 
-    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
+    STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
@@ -122,13 +122,13 @@ TEST( Config, TypeOverrideOptions_Simple )
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@class2 *");
 
     // Verify
-    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "", override1->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override1->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
+    STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
 
-    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
+    STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
@@ -233,13 +233,13 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
     const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function1@");
 
     // Verify
-    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "(", override1->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( ")", override1->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
+    STRCMP_EQUAL( "(", override1->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
 
-    STRCMP_EQUAL( "ConstPointer", override2->GetType().c_str() );
-    STRCMP_EQUAL( "&", override2->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
+    STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
@@ -266,13 +266,13 @@ TEST( Config, TypeOverrideOptions_ArgumentExpression )
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@const int *");
 
     // Verify
-    STRCMP_EQUAL( "Int", override1->GetType().c_str() );
-    STRCMP_EQUAL( "(*", override1->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( ")", override1->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
+    STRCMP_EQUAL( "(*", override1->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
 
-    STRCMP_EQUAL( "LongInt", override2->GetType().c_str() );
-    STRCMP_EQUAL( "&", override2->GetArgExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetArgExprModBack().c_str() );
+    CHECK_EQUAL( (int)MockedType::Long, (int)override2->GetType() );
+    STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("const int *") );

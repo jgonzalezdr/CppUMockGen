@@ -6,18 +6,36 @@
 #include <vector>
 #include <utility>
 
+enum class MockedType
+{
+    Bool,
+    Int,
+    UnsignedInt,
+    Long,
+    UnsignedLong,
+    Double,
+    String,
+    Pointer,
+    ConstPointer,
+    Output,
+    Skip,
+};
+
 /**
- * Configuration to be used for mock generation.
+ * Configuration to be used for function and method parsing, and mock generation.
  */
 class Config
 {
 public:
     /**
-     * Specification of the override to be applied to a function or method parameter.
+     * Specification of the override to be applied to a function or method parameter / return type.
      */
     class OverrideSpec
     {
     public:
+        static const char EXPR_MOD_SEPARATOR = '/';
+        static const char EXPR_MOD_PLACEHOLDER = '$';
+
         /**
          * Constructs a OverrideSpec object.
          *
@@ -32,24 +50,24 @@ public:
         /**
          * Returns the type identifier.
          */
-        const std::string& GetType() const;
+        MockedType GetType() const;
 
         /**
-         * Returns the argument expression modifier part before the character '$'.
-         * @return String with the front argument expression modifier part
+         * Returns the expression modifier part before the character '$'.
+         * @return String with the front expression modifier part
          */
-        const std::string& GetArgExprModFront() const;
+        const std::string& GetExprModFront() const;
 
         /**
-         * Returns the argument expression modifier part after the character '$'.
-         * @return String with the back argument expression modifier part
+         * Returns the expression modifier part after the character '$'.
+         * @return String with the back expression modifier part
          */
-        const std::string& GetArgExprModBack() const;
+        const std::string& GetExprModBack() const;
 
     private:
-        std::string m_type;
-        std::string m_argExprModFront;
-        std::string m_argExprModBack;
+        MockedType m_type;
+        std::string m_exprModFront;
+        std::string m_exprModBack;
     };
 
     /**

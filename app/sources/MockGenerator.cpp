@@ -50,8 +50,8 @@ void GenerateMock( CXTranslationUnit tu, const Config &config, std::ostream &out
                 CXCursorKind cursorKind = clang_getCursorKind( cursor );
                 if( cursorKind == CXCursor_FunctionDecl )
                 {
-                    Function function( cursor, parseData->config );
-                    if( function.IsMockable() )
+                    Function function;
+                    if( function.Parse( cursor, parseData->config ) )
                     {
                         parseData->output << function.GenerateMock() << std::endl;
                     }
@@ -59,8 +59,8 @@ void GenerateMock( CXTranslationUnit tu, const Config &config, std::ostream &out
                 }
                 else if( cursorKind == CXCursor_CXXMethod )
                 {
-                    Method method( cursor, parseData->config );
-                    if( method.IsMockable() )
+                    Method method;
+                    if( method.Parse( cursor, parseData->config ) )
                     {
                         parseData->output << method.GenerateMock() << std::endl;
                     }
@@ -100,10 +100,12 @@ bool GenerateMock( const std::string &inputFilename, const Config &config, bool 
     }
 
     CXTranslationUnit tu;
+    // Note: Use of CXTranslationUnit_SkipFunctionBodies is not allowed, otherwise libclang
+    // will not detect properly methods defined inline (which must not be mocked).
     CXErrorCode tuError = clang_parseTranslationUnit2( index, inputFilename.c_str(),
                                                        clangOpts.data(), (int) clangOpts.size(),
                                                        nullptr, 0,
-                                                       CXTranslationUnit_SkipFunctionBodies,
+                                                       CXTranslationUnit_None,
                                                        &tu );
     if( tuError != CXError_Success )
     {

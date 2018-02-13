@@ -21,12 +21,14 @@ std::string& operator+=( std::string &string, const CXString &cxstr )
     return string;
 }
 
+// LCOV_EXCL_START
 std::string operator+( const std::string &string, const CXString &cxstr )
 {
     std::string ret = string;
     ret += toString( cxstr );
     return ret;
 }
+// LCOV_EXCL_STOP
 
 std::string operator+( const char *string, const CXString &cxstr )
 {

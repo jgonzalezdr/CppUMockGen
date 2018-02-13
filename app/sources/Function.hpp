@@ -3,41 +3,62 @@
 
 #include <clang-c/Index.h>
 #include <string>
+#include <vector>
+#include <memory>
 #include "Config.hpp"
 
 /**
- * Mock generator for functions.
+ * Class used to parse functions and generate mocks.
  */
 class Function
 {
 public:
     /**
-     * Constructs a Function object.
-     *
-     * @param cursor [in] Cursor representing a function
-     * @param config [in] Configuration to be used for mock generation
+     * Default constructor.
      */
-    Function( const CXCursor &cursor, const Config &config );
+    Function();
 
+    /**
+     * Default destructor.
+     */
     virtual ~Function();
 
     /**
-     * Returns whether the function (or method) can be mocked.
+     * Parses a function or method.
+     *
+     * @param cursor [in] Cursor representing a function
+     * @param config [in] Configuration to be used for parsing
      */
-    virtual bool IsMockable() const;
+    bool Parse( const CXCursor &cursor, const Config &config );
 
     /**
      * Generates a mock for the function (or method).
      *
      * @return String containing the generated mock
      */
-    virtual std::string GenerateMock() const;
+    std::string GenerateMock() const;
+
+    class Argument;
+    class Return;
 
 protected:
-    const CXCursor &m_cursor;
-    const Config &m_config;
+    /**
+     * Returns whether the function (or method) can be mocked.
+     */
+    virtual bool IsMockable( const CXCursor &cursor ) const;
 
-    std::string GenerateMock( bool isMethod ) const;
+    /**
+     * Returns whether the object is a method.
+     */
+    virtual bool IsMethod() const
+    {
+        return false;
+    }
+
+    std::string m_functionName;
+    std::unique_ptr<Return> m_return;
+    std::vector<std::unique_ptr<Argument>> m_arguments;
+    bool m_isConst;
 };
 
 #endif // header guard
