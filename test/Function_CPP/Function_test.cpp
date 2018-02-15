@@ -236,10 +236,10 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 
     // Exercise
     std::vector<std::string> results;
-    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
 
     // Verify
-    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "void ns1::function1()\n{\n"
                   "    mock().actualCall(\"ns1::function1\");\n"

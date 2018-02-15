@@ -50,7 +50,7 @@ std::string operator+( const std::string &string, const CXString& cxstr );
 std::string operator+( const char *string, const CXString& cxstr );
 
 /**
- * Returns the qualified name of a function, method or attribute (i.e., prefixed with namespaces and class names).
+ * Returns the qualified name of a function or variable (i.e., prefixed with namespaces and class names).
  *
  * @param cursor [in] A cursor
  * @return A string with the fill qualified name of the cursor

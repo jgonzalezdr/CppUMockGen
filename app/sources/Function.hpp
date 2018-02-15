@@ -24,7 +24,7 @@ public:
     virtual ~Function();
 
     /**
-     * Parses a function or method.
+     * Parses a function.
      *
      * @param cursor [in] Cursor representing a function
      * @param config [in] Configuration to be used for parsing
@@ -32,7 +32,7 @@ public:
     bool Parse( const CXCursor &cursor, const Config &config );
 
     /**
-     * Generates a mock for the function (or method).
+     * Generates a mock for the function.
      *
      * @return String containing the generated mock
      */
@@ -43,12 +43,12 @@ public:
 
 protected:
     /**
-     * Returns whether the function (or method) can be mocked.
+     * Returns whether the function can be mocked.
      */
     virtual bool IsMockable( const CXCursor &cursor ) const;
 
     /**
-     * Returns whether the object is a method.
+     * Returns whether the object is a method (a.k.a member function).
      */
     virtual bool IsMethod() const
     {

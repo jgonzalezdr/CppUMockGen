@@ -8,7 +8,7 @@ Mock generator for [CppUTest/CppUMock](http://cpputest.github.io/).
 
 ## What is CppUMockGen?
 
-CppUMockGen generates automatically mocks for functions and methods defined in C/C++ header files to avoid the burden of having to write these mocks manually when writing units tests using the CppUTest/CppUMock unit testing framework.
+CppUMockGen generates automatically mocks for member and non-member functions defined in C/C++ header files to avoid the burden of having to write these mocks manually when writing units tests using the CppUTest/CppUMock unit testing framework.
 
 ## Download Binaries
 
@@ -31,13 +31,13 @@ CppUMockGen generates automatically mocks for functions and methods defined in C
 | `-t, --type-override <expr>`  | Override generic type                         |
 | `-h, --help`                  | Print help                                    |
 
-To generate a mock from a header file containing the functions and methods that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path to the file where you want the mocked functions to be generated as output (second parameter or explicitly with the `-o` / `--output` option). If the output file is not specified, the mock is printed to the console.
+To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path to the file where you want the mocked functions to be generated as output (second parameter or explicitly with the `-o` / `--output` option). If the output file is not specified, the mock is printed to the console.
 
 CppUMock by default interprets header files with the extensions .hh, .hpp or .hxx as C\++. Other extensions are interpreted by default as C. To force the interpretation of a header file as C++ use the `-x` / `--cpp` option.
 
 CppUMock, just as any C/C++ compiler, needs to know where to find other include files referenced by the input file in order to interpret it properly. Pass the paths to the necessary include directories by using the `-I` / `--include-path` option. Like with most compilers, you may use this option several times to indicate multiple include directories.
 
-CppUMockGen deduces the data types to use with CppUMock from the actual function and method parameters and return types. If the API that you are mocking is well designed (e.g. pointers to non-const values are not used for input parameters), CppUMockGen will guess properly in most cases the correct types. Nevertheless, mocked data types can be overriden by using `-p` / `--param-override` options to override the type to use for specific functions or methods parameters and return types, and using `-t` / `--type-override` options to override the type to use for matching parameter or return types in any mocked function or method.
+CppUMockGen deduces the data types to use with CppUMock from the actual function parameters and return types. If the API that you are mocking is well designed (e.g. pointers to non-const values are not used for input parameters), CppUMockGen will guess properly in most cases the correct types. Nevertheless, mocked data types can be overriden by using `-p` / `--param-override` options to override the type to use for specific function's parameters and return types, and using `-t` / `--type-override` options to override the type to use for matching parameter or return types in any mocked function.
 
 For more information check the [CppUMockGen Usage Manual](MANUAL.md).
 

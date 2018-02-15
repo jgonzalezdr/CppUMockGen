@@ -4,7 +4,7 @@
 #include "Function.hpp"
 
 /**
- * Class used to parse methods and generate mocks.
+ * Class used to parse methods (a.k.a member functions) and generate mocks.
  */
 class Method : public Function
 {

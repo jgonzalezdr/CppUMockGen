@@ -22,13 +22,13 @@ enum class MockedType
 };
 
 /**
- * Configuration to be used for function and method parsing, and mock generation.
+ * Configuration to be used for function parsing, and mock generation.
  */
 class Config
 {
 public:
     /**
-     * Specification of the override to be applied to a function or method parameter / return type.
+     * Specification of the override to be applied to a function parameter / return type.
      */
     class OverrideSpec
     {
@@ -74,24 +74,24 @@ public:
      * Constructs a Config object.
      *
      * @param useUnderlyingTypedefType [in] Indicates whether to use the underlying type of typedefs or the typedef name
-     *                                      to identify function or method parameters types
-     * @param paramOverrideOptions [in] Override options for specific function or method parameter or return types (see OverrideMap)
+     *                                      to identify function parameters types
+     * @param paramOverrideOptions [in] Override options for specific function parameter or return types (see OverrideMap)
      * @param typeOverrideOptions [in] Override options for generic parameter or return types (see OverrideMap)
      */
     Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
             const std::vector<std::string> &typeOverrideOptions );
 
     /**
-     * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function or method
+     * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function
      * parameters types
      */
     bool UseUnderlyingTypedefType() const;
 
     /**
-     * Returns the override spec related to the specific function or method parameter or return
+     * Returns the override spec related to the specific function parameter or return
      * type represented by @p key (if it exists).
      *
-     * @param key [in] Identifier for a specific function or method parameter or return type
+     * @param key [in] Identifier for a specific function parameter or return type
      * @return A pointer to an override spec, or NULL if it does not exist
      */
     const OverrideSpec* GetParameterOverride( const std::string& key ) const;
