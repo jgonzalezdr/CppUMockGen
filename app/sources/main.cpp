@@ -19,6 +19,45 @@ static void PrintError( const char *msg )
     std::cerr << msg;
 }
 
+std::string QuotifyOption( const std::string &option )
+{
+    if( option.find(' ') != std::string::npos )
+    {
+        return "\"" + option + "\"";
+    }
+    else
+    {
+        return option;
+    }
+}
+
+std::string GetGenerationOptions( cxxopts::Options &options )
+{
+    std::string ret;
+
+    if( options["cpp"].as<bool>() )
+    {
+        ret += "-x ";
+    }
+
+    if( options["underlying-typedef"].as<bool>() )
+    {
+        ret += "-u ";
+    }
+
+    for( auto paramOverride : options["param-override"].as<std::vector<std::string>>() )
+    {
+        ret += "-p " + QuotifyOption( paramOverride ) + " ";
+    }
+
+    for( auto typeOverride : options["type-override"].as<std::vector<std::string>>() )
+    {
+        ret += "-t " + QuotifyOption( typeOverride ) + " ";
+    }
+
+    return ret;
+}
+
 int main( int argc, char* argv[] )
 {
     int returnCode = 0;
@@ -86,9 +125,12 @@ int main( int argc, char* argv[] )
                        options["param-override"].as<std::vector<std::string>>(),
                        options["type-override"].as<std::vector<std::string>>() );
 
+        std::string genOpts = GetGenerationOptions( options );
+
         std::ostringstream output;
 
-        if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), output, std::cerr ) )
+        if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), genOpts,
+                          output, std::cerr ) )
         {
             if( options.count( "output" ) )
             {

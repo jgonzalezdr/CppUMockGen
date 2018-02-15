@@ -97,7 +97,7 @@ TEST( MockGenerator, MockedFunction )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), output, error );
+   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -131,7 +131,7 @@ TEST( MockGenerator, MockedMethod )
 
     // Exercise
     std::vector<std::string> results;
-    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, output, error );
+    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, "", output, error );
 
     // Verify
     CHECK_EQUAL( true, result );
@@ -171,7 +171,7 @@ TEST( MockGenerator, MultipleFunctionsAndMethods )
 
     // Exercise
     std::vector<std::string> results;
-    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, output, error );
+    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, "", output, error );
 
     // Verify
     CHECK_EQUAL( true, result );
@@ -202,7 +202,7 @@ TEST( MockGenerator, NonMockable )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), output, error );
+   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -229,7 +229,7 @@ TEST( MockGenerator, SyntaxError )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), output, error );
+   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -262,7 +262,7 @@ TEST( MockGenerator, Warning )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), output, error );
+   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -289,7 +289,7 @@ TEST( MockGenerator, NonExistingInputFile )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( nonexistingFilePath, *config, false, std::vector<std::string>(), output, error );
+   bool result = GenerateMock( nonexistingFilePath, *config, false, std::vector<std::string>(), "", output, error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -330,7 +330,7 @@ TEST( MockGenerator, PathWithoutDirectories )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFileName, *config, true, std::vector<std::string> {".."}, output, error );
+   bool result = GenerateMock( tempFileName, *config, true, std::vector<std::string> {".."}, "", output, error );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -339,3 +339,34 @@ TEST( MockGenerator, PathWithoutDirectories )
 
    // Cleanup
 }
+
+/*
+ * Check that regeneration options are printed properly.
+ */
+TEST( MockGenerator, WithRegenOpts )
+{
+   // Prepare
+   Config* config = GetMockConfig();
+   std::ostringstream output;
+   std::ostringstream error;
+   const char* testRegenOpts = "####REGEN_OPTS######";
+
+   SimpleString testHeader =
+           "void function1(int a);";
+   SetupTempFile( testHeader );
+
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+   mock().expectOneCall("Function::GenerateMock").andReturnValue("");
+
+   // Exercise
+   std::vector<std::string> results;
+   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), testRegenOpts, output, error );
+
+   // Verify
+   CHECK_EQUAL( true, result );
+   STRCMP_CONTAINS( StringFromFormat( "Generation options: %s", testRegenOpts ).asCharString(), output.str().c_str() );
+   CHECK_EQUAL( 0, error.tellp() )
+
+   // Cleanup
+}
+
