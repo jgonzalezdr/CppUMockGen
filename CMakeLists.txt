@@ -2,18 +2,15 @@ cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen.Top )
 
-option( TEST "Enable building tests" ON )
-option( COVERAGE "Enable coverage analysis" ON )
+option( ENABLE_TEST "Enable building tests" ON )
 
-set( DEFAULT_BUILD_TYPE "Release" )
+if( CMAKE_CONFIGURATION_TYPES )
+    option( COVERAGE "Enable coverage analysis" ON )
+else()
+    set( DEFAULT_BUILD_TYPE "Release" )
 
-set( BUILD_TYPES_LIST "Debug" "Release" "RelWithDebInfo" "MinSizeRel" )
+    set( BUILD_TYPES_LIST "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Coverage" )
 
-if( COVERAGE )
-    set( BUILD_TYPES_LIST ${BUILD_TYPES_LIST} "Coverage" )
-endif()
-
-if( NOT CMAKE_CONFIGURATION_TYPES )
     string( REPLACE ";" " " BUILD_TYPES_STRLIST "${BUILD_TYPES_LIST}" )
     
     if( NOT CMAKE_BUILD_TYPE )
@@ -26,13 +23,15 @@ if( NOT CMAKE_CONFIGURATION_TYPES )
     if( NOT CMAKE_BUILD_TYPE IN_LIST BUILD_TYPES_LIST )
         message( FATAL_ERROR "Unknown build type '${CMAKE_BUILD_TYPE}', please choose a supported build type: ${BUILD_TYPES_STRLIST}" )
     endif()
-endif()
 
-if( CMAKE_BUILD_TYPE )
     set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${BUILD_TYPES_LIST} )
-endif()
+    
+    if( CMAKE_BUILD_TYPE STREQUAL "Coverage" )
+        set( COVERAGE ON )
+    else()
+        set( COVERAGE OFF )
+    endif()
 
-if( NOT MSVC )
     set( CMAKE_CXX_FLAGS_COVERAGE ${CMAKE_CXX_FLAGS_DEBUG} )
     set( CMAKE_C_FLAGS_COVERAGE ${CMAKE_C_FLAGS_DEBUG} )
     set( CMAKE_EXE_LINKER_FLAGS_COVERAGE ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
@@ -46,6 +45,6 @@ add_custom_target( build )
 
 add_subdirectory( app )
 
-if( TEST )
+if( ENABLE_TEST )
     add_subdirectory( test )
 endif()

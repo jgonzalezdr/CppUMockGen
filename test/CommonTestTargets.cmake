@@ -114,7 +114,7 @@ if( COVERAGE AND NOT MSVC )
 
     elseif( NOT CI_MODE )
 
-        find_program( GENHTML genhtml PATHS ${LCOV_PATH} )
+        find_program( GENHTML genhtml PATHS ${LCOV_PATHS} )
         if( NOT EXISTS ${GENHTML} )
             message( FATAL_ERROR "genhtml is not installed" )
         endif()
