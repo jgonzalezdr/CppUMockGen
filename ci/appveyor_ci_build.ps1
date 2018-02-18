@@ -23,7 +23,12 @@ $coverage = if ($env:Configuration -eq 'Coverage') {'ON'} else {'OFF'}
 $check_compilation = if ($env:CheckCompilation) {'ON'} else {'OFF'}
 $test = if ($env:Test -eq 'False') {'OFF'} else {'ON'}
 
-$cmake_options = "-Wno-dev -DCI_MODE=ON -DTEST=$test -DCOVERAGE=$coverage -DCHECK_COMPILATION=$check_compilation"
+$cmake_options = "-Wno-dev -DCI_MODE=ON -DENABLE_TEST=$test"
+
+if( $test -eq 'ON')
+{
+    $cmake_options += " -DCOVERAGE=$coverage -DCHECK_COMPILATION=$check_compilation"
+}
 
 switch -Wildcard ($env:Platform)
 {
