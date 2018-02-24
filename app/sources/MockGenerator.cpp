@@ -8,6 +8,7 @@
 #include "Method.hpp"
 #include "ClangHelper.hpp"
 #include "ConsoleColorizer.hpp"
+#include "FileHelper.hpp"
 #include "VersionInfo.h"
 
 struct ParseData
@@ -15,25 +16,6 @@ struct ParseData
     const Config& config;
     std::ostream &output;
 };
-
-#ifdef WIN32
-#define PATH_SEPARATOR '\\'
-#else
-#define PATH_SEPARATOR '/'
-#endif
-
-static std::string GetFilenameFromPath( const std::string& filepath )
-{
-    size_t sepPos = filepath.rfind( PATH_SEPARATOR );
-    if( sepPos == std::string::npos )
-    {
-        return filepath;
-    }
-    else
-    {
-        return filepath.substr( sepPos + 1 );
-    }
-}
 
 void GenerateMock( CXTranslationUnit tu, const Config &config, std::ostream &output )
 {

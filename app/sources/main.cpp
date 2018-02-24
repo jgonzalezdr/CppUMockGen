@@ -8,6 +8,7 @@
 #include "Config.hpp"
 #include "MockGenerator.hpp"
 #include "ConsoleColorizer.hpp"
+#include "FileHelper.hpp"
 
 const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
@@ -16,7 +17,7 @@ static void PrintError( const char *msg )
     cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
     std::cerr << "ERROR: ";
     cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
-    std::cerr << msg;
+    std::cerr << msg << std::endl;
 }
 
 std::string QuotifyOption( const std::string &option )
@@ -66,7 +67,7 @@ int main( int argc, char* argv[] )
 
     options.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
-        ( "o,output", "Output file", cxxopts::value<std::string>(), "<output>" )
+        ( "m,mock-output", "Mock output path", cxxopts::value<std::string>()->implicit_value(""), "<mock-output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
         ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
@@ -74,8 +75,8 @@ int main( int argc, char* argv[] )
         ( "t,type-override", "Override generic type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
         ( "h,help", "Print help" );
 
-    options.positional_help( "[<input>] [<output>]" );
-    options.parse_positional( std::vector<std::string> { "input", "output" } );
+    options.positional_help( "<input>" );
+    options.parse_positional( std::vector<std::string> { "input" } );
 
     try
     {
@@ -94,15 +95,27 @@ int main( int argc, char* argv[] )
 
         std::string inputFilename = options["input"].as<std::string>();
 
-        std::ofstream outputFile;
-        if( options.count( "output" ) )
+        if( options.count( "mock-output" ) == 0 )
         {
-            std::string outputFilename = options["output"].as<std::string>();
-            outputFile.open( outputFilename );
-            if( !outputFile.is_open() )
+            throw std::runtime_error( "At least the mock generation option (-m) must be specified." );
+        }
+
+        std::ofstream mockOutputFile;
+        if( options.count( "mock-output" ) )
+        {
+            std::string mockOutputFilepath = options["mock-output"].as<std::string>();
+            if( mockOutputFilepath != "@" )
             {
-                std::string errorMsg = "Output file '" + outputFilename + "' could not be opened.";
-                throw std::runtime_error( errorMsg );
+                if( mockOutputFilepath.empty() || IsDirPath(mockOutputFilepath) )
+                {
+                    mockOutputFilepath += RemoveFilenameExtension( GetFilenameFromPath(inputFilename) ) + "_mock.cpp";
+                }
+                mockOutputFile.open( mockOutputFilepath );
+                if( !mockOutputFile.is_open() )
+                {
+                    std::string errorMsg = "Mock output file '" + mockOutputFilepath + "' could not be opened.";
+                    throw std::runtime_error( errorMsg );
+                }
             }
         }
 
@@ -132,9 +145,9 @@ int main( int argc, char* argv[] )
         if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), genOpts,
                           output, std::cerr ) )
         {
-            if( options.count( "output" ) )
+            if( mockOutputFile.is_open() )
             {
-                outputFile << output.str();
+                mockOutputFile << output.str();
             }
             else
             {

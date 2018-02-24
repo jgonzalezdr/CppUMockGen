@@ -35,6 +35,7 @@ set( SRC_LIST
      sources/Method.cpp
      sources/ConsoleColorizer.cpp
      sources/Config.cpp
+     sources/FileHelper.cpp
 )
 
 set( PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}" )

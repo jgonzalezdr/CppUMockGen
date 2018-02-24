@@ -14,6 +14,7 @@ include_directories(
 set( PROD_SRC_FILES
      ${PROD_DIR}/sources/MockGenerator.cpp
      ${PROD_DIR}/sources/ClangHelper.cpp
+     ${PROD_DIR}/sources/FileHelper.cpp
 )
 
 set( TEST_SRC_FILES

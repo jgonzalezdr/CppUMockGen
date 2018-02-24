@@ -8,7 +8,7 @@ CppUMockGen generates automatically mocks for member functions (a.k.a. class met
 
 ## Getting Started
 
-To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path to the file where you want the mocked functions to be generated as output (second parameter or explicitly with the `-o` / `--output` option). If the output file is not specified, the mock is printed to the console.
+To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path where you want the file with the mocked functions to be generated as output (second parameter or explicitly with the `-m` / `--mock-output` option). If the option parameter is empty or is a directory path (i.e. ending with a path separator) then the output file name will be deduced from the input file name by replacing its extension by *"_mock.cpp"*. If the option parameter is **'@'**, the mock is printed to the console.
 
 CppUMock by default interprets header files with the extensions .hh, .hpp or .hxx as C\++. Other extensions are interpreted by default as C. To force the interpretation of a header file as C++ use the `-x` / `--cpp` option.
 
@@ -18,18 +18,17 @@ CppUMockGen deduces the data types to use with CppUMock from the actual function
 
 ## Command-Line Options
 
-`CppUMockGen [OPTION...] [<input>] [<output>]`
+`CppUMockGen [OPTION...] [<input>]`
 
-| OPTION                        | Description                                   |
-| -                             | -                                             |
-| `-i, --input <input> `        | Input file                                    |
-| `-o, --output <output>`       | Output file                                   |
-| `-x, --cpp`                   | Force interpretation of the input file as C++ |
-| `-u, --underlying-typedef`    | Use underlying typedef type                   |
-| `-I, --include-path <path>`   | Include path                                  |
-| `-p, --param-override <expr>` | Override parameter type                       |
-| `-t, --type-override <expr>`  | Override generic type                         |
-| `-h, --help`                  | Print help                                    |
+| OPTION                            | Description                                   |
+| -                                 | -                                             |
+| `-i, --input <input> `            | Input file                                    |
+| `-m, --mock-output <mock-output>` | Mock output path                              |
+| `-x, --cpp`                       | Force interpretation of the input file as C++ |
+| `-I, --include-path <path>`       | Include path                                  |
+| `-p, --param-override <expr>`     | Override parameter type                       |
+| `-t, --type-override <expr>`      | Override generic type                         |
+| `-h, --help`                      | Print help                                    |
 
 ## Mocked Parameter and Return Types
 
@@ -76,7 +75,7 @@ Where:
 - <code><i>&lt;ParameterName></i></code> is the name of the parameter.
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output, Skip_.
   - When set to _Skip_ the corresponding method call on the `MockActualCall` object for the parameter will be skipped.
-- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain th **'$'** character. If defined, it will be passed as the argument for the CppUMock actual call parameter method, replacing **'$'** by the mocked function parameter name.
+- <code><i>&lt;ArgExpr></i></code> is an optional argument expression that must contain the **'$'** character. If defined, it will be passed as the argument for the CppUMock actual call parameter method, replacing **'$'** by the mocked function parameter name.
 
 ##### Specific return type override
 
