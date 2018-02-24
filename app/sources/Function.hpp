@@ -1,5 +1,5 @@
-#ifndef FUNCTION_HPP_
-#define FUNCTION_HPP_
+#ifndef CPPUMOCKGEN_FUNCTION_HPP_
+#define CPPUMOCKGEN_FUNCTION_HPP_
 
 #include <clang-c/Index.h>
 #include <string>

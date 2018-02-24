@@ -1,5 +1,5 @@
-#ifndef CLANGHELPER_HPP_
-#define CLANGHELPER_HPP_
+#ifndef CPPUMOCKGEN_CLANGHELPER_HPP_
+#define CPPUMOCKGEN_CLANGHELPER_HPP_
 
 #include <iostream>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef MOCKGENERATOR_HPP_
-#define MOCKGENERATOR_HPP_
+#ifndef CPPUMOCKGEN_MOCKGENERATOR_HPP_
+#define CPPUMOCKGEN_MOCKGENERATOR_HPP_
 
 #include <vector>
 #include <string>

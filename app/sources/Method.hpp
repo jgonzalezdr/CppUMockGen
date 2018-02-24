@@ -1,5 +1,5 @@
-#ifndef METHOD_HPP_
-#define METHOD_HPP_
+#ifndef CPPUMOCKGEN_METHOD_HPP_
+#define CPPUMOCKGEN_METHOD_HPP_
 
 #include "Function.hpp"
 

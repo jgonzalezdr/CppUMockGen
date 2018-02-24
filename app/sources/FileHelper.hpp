@@ -1,5 +1,5 @@
-#ifndef FILEHELPER_HPP_
-#define FILEHELPER_HPP_
+#ifndef CPPUMOCKGEN_FILEHELPER_HPP_
+#define CPPUMOCKGEN_FILEHELPER_HPP_
 
 #include <string>
 

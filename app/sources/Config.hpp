@@ -1,5 +1,5 @@
-#ifndef CONFIG_HPP_
-#define CONFIG_HPP_
+#ifndef CPPUMOCKGEN_CONFIG_HPP_
+#define CPPUMOCKGEN_CONFIG_HPP_
 
 #include <string>
 #include <map>
