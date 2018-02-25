@@ -1,6 +1,5 @@
 #include "App.hpp"
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -14,12 +13,17 @@
 
 const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
-static void PrintError( const char *msg )
+App::App( std::ostream &cout, std::ostream &cerr )
+: m_cout(cout), m_cerr(cerr)
+{
+}
+
+void App::PrintError( const char *msg )
 {
     cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
-    std::cerr << "ERROR: ";
+    m_cerr << "ERROR: ";
     cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
-    std::cerr << msg << std::endl;
+    m_cerr << msg << std::endl;
 }
 
 std::string QuotifyOption( const std::string &option )
@@ -61,7 +65,7 @@ std::string GetGenerationOptions( cxxopts::Options &options )
     return ret;
 }
 
-int ExecuteApp( int argc, char* argv[] )
+int App::Execute( int argc, char* argv[] )
 {
     int returnCode = 0;
 
@@ -86,7 +90,7 @@ int ExecuteApp( int argc, char* argv[] )
 
         if( options.count("help") )
         {
-            std::cout << options.help();
+            m_cout << options.help();
             exit(0);
         }
 
@@ -145,7 +149,7 @@ int ExecuteApp( int argc, char* argv[] )
         std::ostringstream output;
 
         if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), genOpts,
-                          output, std::cerr ) )
+                          output, m_cerr ) )
         {
             if( mockOutputFile.is_open() )
             {
@@ -153,7 +157,7 @@ int ExecuteApp( int argc, char* argv[] )
             }
             else
             {
-                std::cout << output.str();
+                m_cout << output.str();
             }
         }
         else
