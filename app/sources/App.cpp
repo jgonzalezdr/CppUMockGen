@@ -106,10 +106,11 @@ int App::Execute( int argc, char* argv[] )
             throw std::runtime_error( "At least the mock generation option (-m) must be specified." );
         }
 
+        std::string mockOutputFilepath;
         std::ofstream mockOutputFile;
         if( options.count( "mock-output" ) )
         {
-            std::string mockOutputFilepath = options["mock-output"].as<std::string>();
+            mockOutputFilepath = options["mock-output"].as<std::string>();
             if( mockOutputFilepath != "@" )
             {
                 if( mockOutputFilepath.empty() || IsDirPath(mockOutputFilepath) )
@@ -154,6 +155,11 @@ int App::Execute( int argc, char* argv[] )
             if( mockOutputFile.is_open() )
             {
                 mockOutputFile << output.str();
+
+                cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_GREEN );
+                m_cerr << "SUCCESS: ";
+                cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+                m_cerr << "Mock generated into '" << mockOutputFilepath << "'" << std::endl;
             }
             else
             {
