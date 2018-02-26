@@ -28,6 +28,7 @@
 #include "ClangCompileHelper.hpp"
 
 #include "MockGenerator.hpp"
+#include "FileHelper.hpp"
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4996 )
@@ -46,8 +47,10 @@ Config* GetMockConfig()
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
-static std::string tempFilePath = std::string(std::getenv("TEMP")) + "\\CppUMockGen_MockGenerator.h";
-static std::string nonexistingFilePath = std::string(std::getenv("TEMP")) + "\\CppUMockGen_MockGenerator_NotExisting.h";
+static const std::string tempDirPath = std::string(std::getenv("TEMP"));
+static const std::string tempFilename = "CppUMockGen_MockGenerator.h";
+static const std::string tempFilePath = tempDirPath + PATH_SEPARATOR + tempFilename;
+static const std::string nonexistingFilePath = tempDirPath + PATH_SEPARATOR + "CppUMockGen_MockGenerator_NotExisting.h";
 
 TEST_GROUP( MockGenerator )
 {
@@ -319,18 +322,14 @@ TEST( MockGenerator, PathWithoutDirectories )
            "};";
    SetupTempFile( testHeader );
 
-   size_t sepPos = tempFilePath.rfind("\\");
-   std::string tempFileDir = tempFilePath.substr( 0, sepPos );
-   std::string tempFileName = tempFilePath.substr( sepPos + 1 );
-
-   chdir( tempFileDir.c_str() );
+   chdir( tempDirPath.c_str() );
 
    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFileName, *config, true, std::vector<std::string> {".."}, "", output, error );
+   bool result = GenerateMock( tempFilename, *config, true, std::vector<std::string> {".."}, "", output, error );
 
    // Verify
    CHECK_EQUAL( true, result );
