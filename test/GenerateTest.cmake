@@ -8,7 +8,7 @@ endif()
 
 if( NOT MSVC )
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall --no-rtti" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
 endif()
 
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUNIT_TEST" )

@@ -1,11 +1,5 @@
 #include "FileHelper.hpp"
 
-#ifdef WIN32
-#define PATH_SEPARATOR '\\'
-#else
-#define PATH_SEPARATOR '/'
-#endif
-
 std::string GetFilenameFromPath( const std::string& filepath )
 {
     size_t sepPos = filepath.rfind( PATH_SEPARATOR );

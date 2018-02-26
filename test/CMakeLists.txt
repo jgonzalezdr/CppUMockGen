@@ -14,8 +14,9 @@ endif()
 
 # Test modules
 
+add_subdirectory( App )
+add_subdirectory( MockGenerator )
+add_subdirectory( Config )
 add_subdirectory( Function_CPP )
 add_subdirectory( Function_C )
 add_subdirectory( Method )
-add_subdirectory( Config )
-add_subdirectory( MockGenerator )

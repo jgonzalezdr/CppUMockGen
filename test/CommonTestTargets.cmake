@@ -79,7 +79,7 @@ if( COVERAGE AND NOT MSVC )
     endif()
 
     if( NOT COVERAGE_INCLUDED )
-        set( COVERAGE_INCLUDED \"*\\app\\*\" )
+        set( COVERAGE_INCLUDED \"*\\app\\sources\\*\" )
     endif()
 
     add_custom_target( coverage_clean

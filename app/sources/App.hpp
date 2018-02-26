@@ -8,7 +8,7 @@ class App
 public:
     App( std::ostream &cout, std::ostream &cerr );
 
-    int Execute( int argc, char* argv[] );
+    int Execute( int argc, const char* argv[] );
 
 private:
     void PrintError( const char *msg );

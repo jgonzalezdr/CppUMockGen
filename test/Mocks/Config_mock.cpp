@@ -8,6 +8,19 @@
 
 #include <CppUTestExt/MockSupport.h>
 
+Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
+                const std::vector<std::string> &typeOverrideOptions )
+: m_paramOverrideMap( std::vector<std::string>(), false ), m_typeOverrideMap( std::vector<std::string>(), false )
+{
+    mock().actualCall("Config::Config").withParameter("useUnderlyingTypedefType", useUnderlyingTypedefType)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+}
+
+Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool typeOverride )
+{
+}
+
 MockedType Config::OverrideSpec::GetType() const
 {
     return static_cast<MockedType>( mock().actualCall("Config::OverrideSpec::GetType").onObject(this).returnIntValue() );

@@ -65,7 +65,7 @@ std::string GetGenerationOptions( cxxopts::Options &options )
     return ret;
 }
 
-int App::Execute( int argc, char* argv[] )
+int App::Execute( int argc, const char* argv[] )
 {
     int returnCode = 0;
 
@@ -86,12 +86,12 @@ int App::Execute( int argc, char* argv[] )
 
     try
     {
-        options.parse( argc, argv );
+        options.parse( argc, const_cast<char**&>(argv) );
 
         if( options.count("help") )
         {
-            m_cout << options.help();
-            exit(0);
+            m_cerr << options.help();
+            return 0;
         }
 
         if( !options.count( "input" ) )
@@ -169,7 +169,8 @@ int App::Execute( int argc, char* argv[] )
         else
         {
             returnCode = 2;
-            throw std::runtime_error( "Mock could not be generated due to errors parsing the input file." );
+            std::string errorMsg = "Mock could not be generated due to errors parsing the input file '" + inputFilename + "'.";
+            throw std::runtime_error( errorMsg );
         }
     }
     catch(std::exception &e)
