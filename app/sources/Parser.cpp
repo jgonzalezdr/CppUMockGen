@@ -111,12 +111,12 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
         std::ifstream inputFile( inputFilepath.c_str() );
         if( !inputFile.good() )
         {
-            error << "Input file '" << inputFilepath.c_str() << "' does not exist" << std::endl;
+            error << "Input file '" << inputFilepath.c_str() << "' does not exist." << std::endl;
         }
 // LCOV_EXCL_START
         else
         {
-            error << "Unable to parse input file (Error code = " << tuError << ")" << std::endl;
+            error << "Unable to parse input file (Error code = " << tuError << ")." << std::endl;
         }
 // LCOV_EXCL_STOP
 
@@ -164,12 +164,20 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
     if( numErrors == 0 )
     {
         ::Parse( tu, config, m_functions );
+
+        if( m_functions.size() == 0 )
+        {
+            cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
+            error << "INPUT ERROR: ";
+            cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+            error << "The input file does not contain any mockable function." << std::endl;
+        }
     }
 
     clang_disposeTranslationUnit( tu );
     clang_disposeIndex( index );
 
-    return (numErrors == 0);
+    return (numErrors == 0) && (m_functions.size() > 0);
 }
 
 void Parser::GenerateMock( const std::string &genOpts, std::ostream &output ) const
