@@ -29,6 +29,9 @@ if( MSVC )
     add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 endif()
 
+string( REPLACE \\ \\\\ C_PROD_DIR ${PROD_DIR} ) 
+add_definitions( -DPROD_DIR="${C_PROD_DIR}" )
+
 # Generate test target
 
 include( ../GenerateTest.cmake )
