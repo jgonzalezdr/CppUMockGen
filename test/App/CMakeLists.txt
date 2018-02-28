@@ -18,7 +18,7 @@ set( PROD_SRC_FILES
 
 set( TEST_SRC_FILES
      App_test.cpp
-     ${CMAKE_SOURCE_DIR}/test/Mocks/MockGenerator_mock.cpp
+     ${CMAKE_SOURCE_DIR}/test/Mocks/Parser_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/ConsoleColorizer_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp
 )

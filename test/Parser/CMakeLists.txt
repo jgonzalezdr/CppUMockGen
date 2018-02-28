@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen.Test.MockGenerator )
+project( CppUMockGen.Test.Parser )
 
 # Test configuration
 
@@ -12,13 +12,13 @@ include_directories(
 )
 
 set( PROD_SRC_FILES
-     ${PROD_DIR}/sources/MockGenerator.cpp
+     ${PROD_DIR}/sources/Parser.cpp
      ${PROD_DIR}/sources/ClangHelper.cpp
      ${PROD_DIR}/sources/FileHelper.cpp
 )
 
 set( TEST_SRC_FILES
-     MockGenerator_test.cpp
+     Parser_test.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Function_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Method_mock.cpp

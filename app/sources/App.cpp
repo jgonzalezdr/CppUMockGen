@@ -6,8 +6,8 @@
 #include <set>
 #include <cxxopts.hpp>
 
+#include "Parser.hpp"
 #include "Config.hpp"
-#include "MockGenerator.hpp"
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
 
@@ -149,9 +149,12 @@ int App::Execute( int argc, const char* argv[] )
 
         std::ostringstream output;
 
-        if( GenerateMock( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), genOpts,
-                          output, m_cerr ) )
+        Parser parser;
+
+        if( parser.Parse( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
         {
+            parser.GenerateMock( genOpts, output );
+
             if( mockOutputFile.is_open() )
             {
                 mockOutputFile << output.str();

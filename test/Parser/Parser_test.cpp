@@ -27,7 +27,7 @@
 #include "ClangParseHelper.hpp"
 #include "ClangCompileHelper.hpp"
 
-#include "MockGenerator.hpp"
+#include "Parser.hpp"
 #include "FileHelper.hpp"
 
 #ifdef _MSC_VER
@@ -99,8 +99,9 @@ TEST( MockGenerator, MockedFunction )
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   parser.GenerateMock( "", output );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -133,8 +134,9 @@ TEST( MockGenerator, MockedMethod )
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
     // Exercise
-    std::vector<std::string> results;
-    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, "", output, error );
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string> {".."}, error );
+    parser.GenerateMock( "", output );
 
     // Verify
     CHECK_EQUAL( true, result );
@@ -173,8 +175,9 @@ TEST( MockGenerator, MultipleFunctionsAndMethods )
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[3]);
 
     // Exercise
-    std::vector<std::string> results;
-    bool result = GenerateMock( tempFilePath, *config, true, std::vector<std::string> {".."}, "", output, error );
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string> {".."}, error );
+    parser.GenerateMock( "", output );
 
     // Verify
     CHECK_EQUAL( true, result );
@@ -190,7 +193,7 @@ TEST( MockGenerator, MultipleFunctionsAndMethods )
 /*
  * Check that mocking a non-mockable function works as expected.
  */
-TEST( MockGenerator, NonMockable )
+TEST( MockGenerator, FunctionNonMockable )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -204,8 +207,9 @@ TEST( MockGenerator, NonMockable )
    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   parser.GenerateMock( "", output );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -215,13 +219,43 @@ TEST( MockGenerator, NonMockable )
 }
 
 /*
- * Check that a syntax error is aborts mock generation.
+ * Check that mocking a non-mockable method works as expected.
+ */
+TEST( MockGenerator, MethodNonMockable )
+{
+   // Prepare
+   Config* config = GetMockConfig();
+   std::ostringstream output;
+   std::ostringstream error;
+
+   SimpleString testHeader =
+           "class class1 {\n"
+           "public:\n"
+           "    void method1();\n"
+           "};";
+   SetupTempFile( testHeader );
+
+   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
+
+   // Exercise
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
+   parser.GenerateMock( "", output );
+
+   // Verify
+   CHECK_EQUAL( true, result );
+   CHECK_EQUAL( 0, error.tellp() )
+
+   // Cleanup
+}
+
+/*
+ * Check that a syntax error aborts mock generation.
  */
 TEST( MockGenerator, SyntaxError )
 {
    // Prepare
    Config* config = GetMockConfig();
-   std::ostringstream output;
    std::ostringstream error;
 
    SimpleString testHeader =
@@ -231,12 +265,11 @@ TEST( MockGenerator, SyntaxError )
    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
-   CHECK_EQUAL( 0, output.tellp() )
    STRCMP_CONTAINS( "PARSE ERROR:", error.str().c_str() );
    STRCMP_CONTAINS( "CppUMockGen_MockGenerator.h:1:1: error: unknown type name 'foo'", error.str().c_str() );
 
@@ -265,7 +298,9 @@ TEST( MockGenerator, Warning )
 
    // Exercise
    std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), "", output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   parser.GenerateMock( "", output );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -283,7 +318,6 @@ TEST( MockGenerator, NonExistingInputFile )
 {
    // Prepare
    Config* config = GetMockConfig();
-   std::ostringstream output;
    std::ostringstream error;
 
    std::remove( nonexistingFilePath.c_str() );
@@ -291,12 +325,11 @@ TEST( MockGenerator, NonExistingInputFile )
    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( nonexistingFilePath, *config, false, std::vector<std::string>(), "", output, error );
+   Parser parser;
+   bool result = parser.Parse( nonexistingFilePath, *config, false, std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
-   CHECK_EQUAL( 0, output.tellp() )
    STRCMP_CONTAINS( "INPUT ERROR: Input file '", error.str().c_str() );
    STRCMP_CONTAINS( "CppUMockGen_MockGenerator_NotExisting.h' does not exist", error.str().c_str() );
 
@@ -328,8 +361,9 @@ TEST( MockGenerator, PathWithoutDirectories )
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( tempFilename, *config, true, std::vector<std::string> {".."}, "", output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilename, *config, true, std::vector<std::string> {".."}, error );
+   parser.GenerateMock( "", output );
 
    // Verify
    CHECK_EQUAL( true, result );
@@ -358,8 +392,9 @@ TEST( MockGenerator, WithRegenOpts )
    mock().expectOneCall("Function::GenerateMock").andReturnValue("");
 
    // Exercise
-   std::vector<std::string> results;
-   bool result = GenerateMock( tempFilePath, *config, false, std::vector<std::string>(), testRegenOpts, output, error );
+   Parser parser;
+   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   parser.GenerateMock( testRegenOpts, output );
 
    // Verify
    CHECK_EQUAL( true, result );
