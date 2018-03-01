@@ -74,6 +74,7 @@ int App::Execute( int argc, const char* argv[] )
     options.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
         ( "m,mock-output", "Mock output path", cxxopts::value<std::string>()->implicit_value(""), "<mock-output>" )
+        ( "e,expect-output", "Expectation output path", cxxopts::value<std::string>()->implicit_value(""), "<expect-output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
         ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
@@ -101,9 +102,9 @@ int App::Execute( int argc, const char* argv[] )
 
         std::string inputFilename = options["input"].as<std::string>();
 
-        if( options.count( "mock-output" ) == 0 )
+        if( ( options.count( "mock-output" ) + options.count( "expect-output" ) ) == 0 )
         {
-            throw std::runtime_error( "At least the mock generation option (-m) must be specified." );
+            throw std::runtime_error( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified." );
         }
 
         std::string mockOutputFilepath;
@@ -121,6 +122,44 @@ int App::Execute( int argc, const char* argv[] )
                 if( !mockOutputFile.is_open() )
                 {
                     std::string errorMsg = "Mock output file '" + mockOutputFilepath + "' could not be opened.";
+                    throw std::runtime_error( errorMsg );
+                }
+            }
+        }
+
+        std::string expectHeaderOutputFilepath;
+        std::string expectImplOutputFilepath;
+        std::ofstream expectHeaderOutputFile;
+        std::ofstream expectImplOutputFile;
+        if( options.count( "expect-output" ) )
+        {
+            expectHeaderOutputFilepath = options["expect-output"].as<std::string>();
+            if( expectHeaderOutputFilepath != "@" )
+            {
+                if( expectHeaderOutputFilepath.empty() || IsDirPath(expectHeaderOutputFilepath) )
+                {
+                    std::string baseFilename = RemoveFilenameExtension( GetFilenameFromPath(inputFilename) );
+                    expectImplOutputFilepath = expectHeaderOutputFilepath + baseFilename + "_expect.cpp";
+                    expectHeaderOutputFilepath += baseFilename + "_expect.hpp";
+                }
+                else
+                {
+                    std::string baseFilename = RemoveFilenameExtension( expectHeaderOutputFilepath );
+                    expectImplOutputFilepath = baseFilename + ".cpp";
+                    expectHeaderOutputFilepath = baseFilename + ".hpp";
+                }
+
+                expectHeaderOutputFile.open( expectHeaderOutputFilepath );
+                if( !expectHeaderOutputFile.is_open() )
+                {
+                    std::string errorMsg = "Expectation header output file '" + expectHeaderOutputFilepath + "' could not be opened.";
+                    throw std::runtime_error( errorMsg );
+                }
+
+                expectImplOutputFile.open( expectImplOutputFilepath );
+                if( !expectImplOutputFile.is_open() )
+                {
+                    std::string errorMsg = "Expectation implementation output file '" + expectImplOutputFilepath + "' could not be opened.";
                     throw std::runtime_error( errorMsg );
                 }
             }
@@ -147,32 +186,58 @@ int App::Execute( int argc, const char* argv[] )
 
         std::string genOpts = GetGenerationOptions( options );
 
-        std::ostringstream output;
-
         Parser parser;
 
         if( parser.Parse( inputFilename, config, interpretAsCpp, options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
         {
-            parser.GenerateMock( genOpts, output );
-
-            if( mockOutputFile.is_open() )
+            if( !mockOutputFilepath.empty() )
             {
-                mockOutputFile << output.str();
+                std::ostringstream output;
+                parser.GenerateMock( genOpts, output );
 
-                cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_GREEN );
-                m_cerr << "SUCCESS: ";
-                cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
-                m_cerr << "Mock generated into '" << mockOutputFilepath << "'" << std::endl;
+                if( mockOutputFile.is_open() )
+                {
+                    mockOutputFile << output.str();
+
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_GREEN );
+                    m_cerr << "SUCCESS: ";
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+                    m_cerr << "Mock generated into '" << mockOutputFilepath << "'" << std::endl;
+                }
+                else
+                {
+                    m_cout << output.str();
+                }
             }
-            else
+
+            if( !expectHeaderOutputFilepath.empty() )
             {
-                m_cout << output.str();
+                std::ostringstream headerOutput;
+                std::ostringstream implOutput;
+                parser.GenerateExpectationHeader( genOpts, headerOutput );
+                parser.GenerateExpectationImpl( genOpts, implOutput );
+
+                if( expectHeaderOutputFile.is_open() )
+                {
+                    expectHeaderOutputFile << headerOutput.str();
+                    expectImplOutputFile << implOutput.str();
+
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_GREEN );
+                    m_cerr << "SUCCESS: ";
+                    cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
+                    m_cerr << "Expectations generated into '" << expectHeaderOutputFilepath << "' and '" << expectImplOutputFilepath << "'" << std::endl;
+                }
+                else
+                {
+                    m_cout << headerOutput.str();
+                    m_cout << implOutput.str();
+                }
             }
         }
         else
         {
             returnCode = 2;
-            std::string errorMsg = "Mock could not be generated due to errors parsing the input file '" + inputFilename + "'.";
+            std::string errorMsg = "Output could not be generated due to errors parsing the input file '" + inputFilename + "'.";
             throw std::runtime_error( errorMsg );
         }
     }

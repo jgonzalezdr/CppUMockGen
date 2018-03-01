@@ -34,7 +34,25 @@ public:
      */
     void GenerateMock( const std::string &genOpts, std::ostream &output ) const;
 
+    /**
+     * Generates expectation functions header for the C/C++ header parsed previously.
+     *
+     * @param genOpts [in] String containing the generation options
+     * @param output [out] Stream where the generated expectations header will be written
+     */
+    void GenerateExpectationHeader( const std::string &genOpts, std::ostream &output ) const;
+
+    /**
+     * Generates expectation functions implementation for the C/C++ header parsed previously.
+     *
+     * @param genOpts [in] String containing the generation options
+     * @param output [out] Stream where the generated expectations implementation will be written
+     */
+    void GenerateExpectationImpl( const std::string &genOpts, std::ostream &output ) const;
+
 private:
+    void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const;
+
     std::vector<std::unique_ptr<const Function>> m_functions;
     std::string m_inputFilepath;
     bool m_interpretAsCpp;

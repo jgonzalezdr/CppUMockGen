@@ -38,6 +38,14 @@ public:
      */
     std::string GenerateMock() const;
 
+    /**
+     * Generates an expectation function prototype or implementation for the function.
+     *
+     * @param proto [in] Generate function prototype if @c true, or function implementation otherwise.
+     * @return String containing the generated expectation function prototype
+     */
+    std::string GenerateExpectation( bool proto ) const;
+
     class Argument;
     class Return;
 
@@ -54,6 +62,8 @@ protected:
     {
         return false;
     }
+
+    std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const;
 
     std::string m_functionName;
     std::unique_ptr<Return> m_return;

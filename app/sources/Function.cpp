@@ -37,9 +37,9 @@ public:
         return m_originalType;
     }
 
-    virtual std::string GetMockBodyFront() = 0;
+    virtual std::string GetMockBodyFront() const = 0;
 
-    virtual std::string GetMockBodyBack() = 0;
+    virtual std::string GetMockBodyBack() const = 0;
 
 protected:
     std::string m_originalType;
@@ -52,12 +52,12 @@ class ReturnVoid : public Function::Return
 public:
     virtual ~ReturnVoid() {};
 
-    virtual std::string GetMockBodyFront()
+    virtual std::string GetMockBodyFront() const override
     {
         return "";
     }
 
-    virtual std::string GetMockBodyBack()
+    virtual std::string GetMockBodyBack() const override
     {
         return "";
     }
@@ -68,17 +68,17 @@ class ReturnStandard : public Function::Return
 public:
     virtual ~ReturnStandard() {};
 
-    virtual std::string GetMockBodyFront()
+    virtual std::string GetMockBodyFront() const override
     {
         return "return " + m_mockRetExprFront;
     }
 
-    virtual std::string GetMockBodyBack()
+    virtual std::string GetMockBodyBack() const override
     {
         return GetMockCall() + m_mockRetExprBack;
     }
 
-    virtual std::string GetMockCall() = 0;
+    virtual std::string GetMockCall() const = 0;
 };
 
 class ReturnBool : public ReturnStandard
@@ -86,7 +86,7 @@ class ReturnBool : public ReturnStandard
 public:
     virtual ~ReturnBool() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnBoolValue()";
     }
@@ -97,7 +97,7 @@ class ReturnInt : public ReturnStandard
 public:
     virtual ~ReturnInt() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnIntValue()";
     }
@@ -108,7 +108,7 @@ class ReturnUnsignedInt : public ReturnStandard
 public:
     virtual ~ReturnUnsignedInt() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnUnsignedIntValue()";
     }
@@ -119,7 +119,7 @@ class ReturnLong : public ReturnStandard
 public:
     virtual ~ReturnLong() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnLongIntValue()";
     }
@@ -130,7 +130,7 @@ class ReturnUnsignedLong : public ReturnStandard
 public:
     virtual ~ReturnUnsignedLong() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnUnsignedLongIntValue()";
     }
@@ -141,7 +141,7 @@ class ReturnDouble : public ReturnStandard
 public:
     virtual ~ReturnDouble() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnDoubleValue()";
     }
@@ -152,7 +152,7 @@ class ReturnString : public ReturnStandard
 public:
     virtual ~ReturnString() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnStringValue()";
     }
@@ -163,7 +163,7 @@ class ReturnConstPointer : public ReturnStandard
 public:
     virtual ~ReturnConstPointer() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnConstPointerValue()";
     }
@@ -174,7 +174,7 @@ class ReturnPointer : public ReturnStandard
 public:
     virtual ~ReturnPointer() {};
 
-    virtual std::string GetMockCall()
+    virtual std::string GetMockCall() const override
     {
         return ".returnPointerValue()";
     }
@@ -512,9 +512,9 @@ public:
         m_mockArgExprBack.append( expr );
     }
 
-    virtual std::string GetMockSignature() = 0;
+    virtual std::string GetSignature(bool mock) const = 0;
 
-    virtual std::string GetMockBody() = 0;
+    virtual std::string GetBody(bool mock) const = 0;
 
 protected:
     std::string m_name;
@@ -528,12 +528,12 @@ class ArgumentSkip : public Function::Argument
 public:
     virtual ~ArgumentSkip() {}
 
-    virtual std::string GetMockSignature()
+    virtual std::string GetSignature(bool) const override
     {
         return m_originalType;
     }
 
-    virtual std::string GetMockBody()
+    virtual std::string GetBody(bool) const override
     {
         return "";
     }
@@ -544,19 +544,19 @@ class ArgumentStandard : public Function::Argument
 public:
     virtual ~ArgumentStandard() {}
 
-    virtual std::string GetMockSignature()
+    virtual std::string GetSignature(bool) const override
     {
         return m_originalType + " " + m_name;
     }
 
-    virtual std::string GetMockBody()
+    virtual std::string GetBody(bool mock) const override
     {
-        return GetMockCallFront() + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetMockCallBack();
+        return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetCallBack(mock);
     }
 
-    virtual std::string GetMockCallFront() = 0;
+    virtual std::string GetCallFront(bool mock) const = 0;
 
-    virtual std::string GetMockCallBack()
+    virtual std::string GetCallBack(bool) const
     {
         return ")";
     }
@@ -567,7 +567,7 @@ class ArgumentBool : public ArgumentStandard
 public:
     virtual ~ArgumentBool() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withBoolParameter(";
     }
@@ -578,7 +578,7 @@ class ArgumentInt : public ArgumentStandard
 public:
     virtual ~ArgumentInt() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withIntParameter(";
     }
@@ -589,7 +589,7 @@ class ArgumentUnsignedInt : public ArgumentStandard
 public:
     virtual ~ArgumentUnsignedInt() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withUnsignedIntParameter(";
     }
@@ -600,7 +600,7 @@ class ArgumentLong : public ArgumentStandard
 public:
     virtual ~ArgumentLong() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withLongIntParameter(";
     }
@@ -611,7 +611,7 @@ class ArgumentUnsignedLong : public ArgumentStandard
 public:
     virtual ~ArgumentUnsignedLong() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withUnsignedLongIntParameter(";
     }
@@ -622,7 +622,7 @@ class ArgumentDouble : public ArgumentStandard
 public:
     virtual ~ArgumentDouble() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withDoubleParameter(";
     }
@@ -633,7 +633,7 @@ class ArgumentString : public ArgumentStandard
 public:
     virtual ~ArgumentString() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withStringParameter(";
     }
@@ -644,7 +644,7 @@ class ArgumentPointer : public ArgumentStandard
 public:
     virtual ~ArgumentPointer() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withPointerParameter(";
     }
@@ -655,7 +655,7 @@ class ArgumentConstPointer : public ArgumentStandard
 public:
     virtual ~ArgumentConstPointer() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withConstPointerParameter(";
     }
@@ -666,9 +666,26 @@ class ArgumentOutput : public ArgumentStandard
 public:
     virtual ~ArgumentOutput() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetSignature(bool mock) const override
     {
-        return ".withOutputParameter(";
+        std::string ret = m_originalType + " " + m_name;
+        if( !mock )
+        {
+            ret += ", size_t __size_" + m_name;
+        }
+        return ret;
+    }
+
+    virtual std::string GetCallFront(bool mock) const override
+    {
+        if( mock )
+        {
+            return ".withOutputParameter(";
+        }
+        else
+        {
+            return ".withOutputParameterReturning(";
+        }
     }
 };
 
@@ -677,7 +694,7 @@ class ArgumentOfType : public ArgumentStandard
 public:
     virtual ~ArgumentOfType() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool) const override
     {
         return ".withParameterOfType(\"" + m_exposedType + "\", ";
     }
@@ -696,9 +713,16 @@ class ArgumentOutputOfType : public ArgumentOfType
 public:
     virtual ~ArgumentOutputOfType() {}
 
-    virtual std::string GetMockCallFront()
+    virtual std::string GetCallFront(bool mock) const override
     {
-        return ".withOutputParameterOfType(\"" + m_exposedType + "\", ";
+        if( mock )
+        {
+            return ".withOutputParameterOfType(\"" + m_exposedType + "\", ";
+        }
+        else
+        {
+            return ".withOutputParameterOfTypeReturning(\"" + m_exposedType + "\", ";
+        }
     }
 };
 
@@ -1149,9 +1173,9 @@ std::string Function::GenerateMock() const
             signature += ", ";
         }
 
-        signature += m_arguments[i]->GetMockSignature();
+        signature += m_arguments[i]->GetSignature(true);
 
-        body += m_arguments[i]->GetMockBody();
+        body += m_arguments[i]->GetBody(true);
     }
 
     signature += ")";
@@ -1164,4 +1188,126 @@ std::string Function::GenerateMock() const
     body += m_return->GetMockBodyBack();
 
     return signature + "\n{\n    " + body + ";\n}\n";
+}
+
+static std::string namespaceSeparator = "::";
+
+static std::vector<std::string> GetNamespaceDecomposition( const std::string &qualifiedName )
+{
+    std::vector<std::string> ret;
+
+    size_t initPos = 0;
+    size_t endPos = 0;
+
+    while( endPos != std::string::npos )
+    {
+        endPos = qualifiedName.find(namespaceSeparator, initPos);
+        if( endPos != std::string::npos )
+        {
+            ret.push_back( qualifiedName.substr( initPos, (endPos - initPos) ) );
+        }
+        else
+        {
+            ret.push_back( qualifiedName.substr( initPos ) );
+        }
+        initPos = endPos + namespaceSeparator.size();
+    }
+
+    return ret;
+}
+
+std::string Function::GenerateExpectation( bool proto ) const
+{
+// LCOV_EXCL_START
+    if( m_functionName.empty() )
+    {
+        return "";
+    }
+// LCOV_EXCL_STOP
+
+    // Namespace opening
+    std::string ret = "namespace expect {";
+
+    std::vector<std::string> namespaces = GetNamespaceDecomposition( m_functionName );
+    for( size_t i = 0; i < (namespaces.size() - 1); i++ )
+    {
+        ret += " namespace " + namespaces[i] + " {";
+    }
+    ret += "\n";
+
+    // Function processing
+    ret += GenerateExpectation( proto, namespaces[namespaces.size()-1], true );
+    ret += GenerateExpectation( proto, namespaces[namespaces.size()-1], false );
+
+    // Namespace closing
+    for( size_t i = 0; i < (namespaces.size() - 1); i++ )
+    {
+        ret += "} ";
+    }
+    ret += "}\n";
+
+    return ret;
+}
+
+std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
+{
+    std::string ret = "void " + functionName + "(";
+
+    if( !oneCall )
+    {
+        ret += "unsigned int __numCalls__";
+    }
+
+    if( IsMethod() )
+    {
+        if( !oneCall )
+        {
+            ret += ", ";
+        }
+        ret += "void *__object__";
+    }
+
+    std::string body;
+    if( !proto )
+    {
+        if( oneCall )
+        {
+            body = "mock().expectOneCall(\"" + m_functionName + "\")";
+        }
+        else
+        {
+            body = "mock().expectNCalls(__numCalls__, \"" + m_functionName + "\")";
+        }
+
+        if( IsMethod() )
+        {
+            body += ".onObject(__object__)";
+        }
+    }
+
+    for( size_t i = 0; i < m_arguments.size(); i++ )
+    {
+        if( ( i > 0 ) || IsMethod() || !oneCall )
+        {
+            ret += ", ";
+        }
+
+        ret += m_arguments[i]->GetSignature(false);
+
+        if( !proto )
+        {
+            body += m_arguments[i]->GetBody(false);
+        }
+    }
+
+    if( proto )
+    {
+        ret += ");\n";
+    }
+    else
+    {
+        ret += ")\n{\n    " + body + ";\n}\n";
+    }
+
+    return ret;
 }
