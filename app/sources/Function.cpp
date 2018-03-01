@@ -671,7 +671,7 @@ public:
         std::string ret = m_originalType + " " + m_name;
         if( !mock )
         {
-            ret += ", size_t __size_" + m_name;
+            ret += ", size_t __sizeof_" + m_name;
         }
         return ret;
     }
@@ -685,6 +685,18 @@ public:
         else
         {
             return ".withOutputParameterReturning(";
+        }
+    }
+
+    virtual std::string GetCallBack(bool mock) const
+    {
+        if( mock )
+        {
+            return ")";
+        }
+        else
+        {
+            return ", __sizeof_" + m_name + ")";
         }
     }
 };
