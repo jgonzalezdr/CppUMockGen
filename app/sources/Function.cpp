@@ -1263,7 +1263,7 @@ std::string Function::GenerateExpectation( bool proto ) const
 
 std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
 {
-    std::string ret = "void " + functionName + "(";
+    std::string ret = "MockExpectedCall& " + functionName + "(";
 
     if( !oneCall )
     {
@@ -1284,11 +1284,11 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     {
         if( oneCall )
         {
-            body = "mock().expectOneCall(\"" + m_functionName + "\")";
+            body = "return mock().expectOneCall(\"" + m_functionName + "\")";
         }
         else
         {
-            body = "mock().expectNCalls(__numCalls__, \"" + m_functionName + "\")";
+            body = "return mock().expectNCalls(__numCalls__, \"" + m_functionName + "\")";
         }
 
         if( IsMethod() )
