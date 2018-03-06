@@ -215,7 +215,7 @@ int App::Execute( int argc, const char* argv[] )
                 std::ostringstream headerOutput;
                 std::ostringstream implOutput;
                 parser.GenerateExpectationHeader( genOpts, headerOutput );
-                parser.GenerateExpectationImpl( genOpts, implOutput );
+                parser.GenerateExpectationImpl( genOpts, expectHeaderOutputFilepath, implOutput );
 
                 if( expectHeaderOutputFile.is_open() )
                 {

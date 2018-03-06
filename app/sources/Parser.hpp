@@ -46,9 +46,10 @@ public:
      * Generates expectation functions implementation for the C/C++ header parsed previously.
      *
      * @param genOpts [in] String containing the generation options
+     * @param headerFilepath [in] Filename for the expectation functions header file
      * @param output [out] Stream where the generated expectations implementation will be written
      */
-    void GenerateExpectationImpl( const std::string &genOpts, std::ostream &output ) const;
+    void GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const;
 
 private:
     void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const;

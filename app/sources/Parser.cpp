@@ -207,17 +207,30 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
 {
     GenerateFileHeading( genOpts, output );
 
+    if( !m_interpretAsCpp )
+    {
+        output << "extern \"C\" {" << std::endl;
+    }
+    output << "#include \"" <<  GetFilenameFromPath( m_inputFilepath ) << "\"" << std::endl;
+    if( !m_interpretAsCpp )
+    {
+        output << "}" << std::endl;
+    }
+    output << std::endl;
+
     for( const std::unique_ptr<const Function> &function : m_functions )
     {
         output << function->GenerateExpectation(true) << std::endl;
     }
 }
 
-void Parser::GenerateExpectationImpl( const std::string &genOpts, std::ostream &output ) const
+void Parser::GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const
 {
     GenerateFileHeading( genOpts, output );
 
     output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
+    output << std::endl;
+    output << "#include \"" <<  GetFilenameFromPath( headerFilepath ) << "\"" << std::endl;
     output << std::endl;
 
     for( const std::unique_ptr<const Function> &function : m_functions )
