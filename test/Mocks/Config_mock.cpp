@@ -10,7 +10,7 @@
 
 Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
                 const std::vector<std::string> &typeOverrideOptions )
-: m_paramOverrideMap( std::vector<std::string>(), false ), m_typeOverrideMap( std::vector<std::string>(), false )
+: m_useUnderlyingTypedefType(false), m_paramOverrideMap( std::vector<std::string>(), false ), m_typeOverrideMap( std::vector<std::string>(), false )
 {
     mock().actualCall("Config::Config").withParameter("useUnderlyingTypedefType", useUnderlyingTypedefType)
             .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)

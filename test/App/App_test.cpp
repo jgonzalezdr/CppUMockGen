@@ -179,7 +179,8 @@ TEST( App, NoOutput )
     // Verify
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
-    STRCMP_CONTAINS( "At least the mock generation option (-m) must be specified", error.str().c_str() );
+    STRCMP_CONTAINS( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified",
+                     error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() )
 
     // Cleanup
@@ -632,7 +633,7 @@ TEST( App, MockOutput_ParseError )
     // Verify
     CHECK_EQUAL( 2, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
-    STRCMP_CONTAINS( ("Mock could not be generated due to errors parsing the input file '" + inputFilename + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Output could not be generated due to errors parsing the input file '" + inputFilename + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() )
 
     // Cleanup

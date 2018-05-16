@@ -31,6 +31,11 @@ std::string Function::GenerateMock() const
     return mock().actualCall("Function::GenerateMock").returnStringValue();
 }
 
+std::string Function::GenerateExpectation(bool proto) const
+{
+    return mock().actualCall("Function::GenerateExpectation").withBoolParameter("proto", proto).returnStringValue();
+}
+
 bool Function::IsMockable(const CXCursor & cursor) const
 {
     return mock().actualCall("Function::IsMockable").withConstPointerParameter("cursor", &cursor).returnBoolValue();

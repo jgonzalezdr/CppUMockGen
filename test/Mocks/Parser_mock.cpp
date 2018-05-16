@@ -20,3 +20,12 @@ void Parser::GenerateMock(const std::string & genOpts, std::ostream & output) co
     mock().actualCall("Parser::GenerateMock").withStringParameter("genOpts", genOpts.c_str()).withOutputParameterOfType("std::ostream", "output", &output);
 }
 
+void Parser::GenerateExpectationHeader(const std::string & genOpts, std::ostream & output) const
+{
+    mock().actualCall("Parser::GenerateExpectationHeader").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withOutputParameterOfType("std::ostream", "output", &output);
+}
+
+void Parser::GenerateExpectationImpl(const std::string & genOpts, const std::string & headerFilepath, std::ostream & output) const
+{
+    mock().actualCall("Parser::GenerateExpectationImpl").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withStringParameter("headerFilepath", headerFilepath.c_str()).withOutputParameterOfType("std::ostream", "output", &output);
+}
