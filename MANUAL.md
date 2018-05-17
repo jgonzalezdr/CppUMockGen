@@ -6,9 +6,13 @@ CppUMockGen Usage Manual
 
 CppUMockGen generates automatically mocks for member functions (a.k.a. class methods) and non-member functions (a.k.a. free functions) defined in C/C++ header files to avoid the burden of having to write these mocks manually when writing units tests using the CppUTest/CppUMock unit testing framework.
 
+CppUMockGen additionally generates automatically expectation helper functions to improve and ease the declaration of expectations for functions in tests, making expectation declarations simpler, shorter, more readable and less error prone.
+
 ## Getting Started
 
-To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path where you want the file with the mocked functions to be generated as output (second parameter or explicitly with the `-m` / `--mock-output` option). If the option parameter is empty or is a directory path (i.e. ending with a path separator) then the output file name will be deduced from the input file name by replacing its extension by *"_mock.cpp"*. If the option parameter is **'@'**, the mock is printed to the console.
+##### Generating Mocks
+
+To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input in the first non-option parameter or explicitly with the `-i` / `--input` option, and the path where you want the file with the mocked functions to be generated as output using the `-m` / `--mock-output` option. If the output option parameter is a directory path (i.e. ending with a path separator) then the output file name will be deduced from the input file name by replacing its extension by *"_mock.cpp"* and appended to the passed directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output option parameter is considered the output file name.
 
 CppUMock by default interprets header files with the extensions .hh, .hpp or .hxx as C\++. Other extensions are interpreted by default as C. To force the interpretation of a header file as C++ use the `-x` / `--cpp` option.
 
@@ -16,19 +20,32 @@ CppUMock, just as any C/C++ compiler, needs to know where to find other include 
 
 CppUMockGen deduces the data types to use with CppUMock from the actual function parameters and return types. If the API that you are mocking is well designed (e.g. pointers to non-const values are not used for input parameters), CppUMockGen will guess properly in most cases the correct types. Nevertheless, mocked data types can be overriden by using `-p` / `--param-override` options to override the type to use for specific function's parameters and return types, and using `-t` / `--type-override` options to override the type to use for matching parameter or return types in any mocked function (see [Overriding Mocked Parameter and Return Types](#overriding-mocked-parameter-and-return-types) below).
 
+### Expectation Helper Functions
+
+##### What are Expectation Helper Functions?
+
+CppUTest/CppUMock offers a very powerful mechanism to declare function call expectations in unit tests, however, defining and maintaining these expectation declarations is a cumbersome, tedious and error prone task: the user has to keep the symbolic ("stringified") name of the functions and its parameters in sync with the actual C/C\++ signature and also with the actual names used in mock definitions.
+
+CppUMockGen can automatically generate for each mockable function its corresponding expectation helper functions that encapsulates the expectation cumbersome details into functions with a signature that closely resemble the mocked function's signature.
+
+##### Generating Expectation Helper Functions
+
+To generate expectation helper functions, pass the path where you want the files with the expectation helper functions to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option). If the output option parameter is a directory path (i.e. ending with a path separator) then the output file names will be deduced from the input file name by replacing its extension by *"_expect.cpp"* / *"_expect.hpp"* and appended to the passed directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output file names will be deduced from the output option parameter by replacing its extension by *".cpp"* / *".hpp"*.
+
 ## Command-Line Options
 
 `CppUMockGen [OPTION...] [<input>]`
 
-| OPTION                            | Description                                   |
-| -                                 | -                                             |
-| `-i, --input <input> `            | Input file                                    |
-| `-m, --mock-output <mock-output>` | Mock output path                              |
-| `-x, --cpp`                       | Force interpretation of the input file as C++ |
-| `-I, --include-path <path>`       | Include path                                  |
-| `-p, --param-override <expr>`     | Override parameter type                       |
-| `-t, --type-override <expr>`      | Override generic type                         |
-| `-h, --help`                      | Print help                                    |
+| OPTION                                | Description                                   |
+| -                                     | -                                             |
+| `-i, --input <input> `                | Input file                                    |
+| `-m, --mock-output <mock-output>`     | Mock output path                              |
+| `-e, --expect-output <expect-output>` | Expectation output path                              |
+| `-x, --cpp`                           | Force interpretation of the input file as C++ |
+| `-I, --include-path <path>`           | Include path                                  |
+| `-p, --param-override <expr>`         | Override parameter type                       |
+| `-t, --type-override <expr>`          | Override generic type                         |
+| `-h, --help`                          | Print help                                    |
 
 ## Mocked Parameter and Return Types
 

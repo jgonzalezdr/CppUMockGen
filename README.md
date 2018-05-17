@@ -10,6 +10,68 @@ Mock generator for [CppUTest/CppUMock](http://cpputest.github.io/).
 
 CppUMockGen generates automatically mocks for member and non-member functions defined in C/C++ header files to avoid the burden of having to write these mocks manually when writing units tests using the CppUTest/CppUMock unit testing framework.
 
+CppUMockGen additionally generates automatically expectation helper functions to improve and ease the declaration of expectations for functions in tests, making expectation declarations shorter and less error prone.
+
+## Why using CppUMockGen?
+
+In real world projects with many components (e.g. classes) which interfaces often change, there will be many mocked functions and unit tests that have to be created and maintained.
+
+CppUTest/CppUMock provides a very powerful mechanism to define mocks for C/C\++ functions using `MockSupport::actualCall` and to declare function call expectations in unit tests using `MockSupport::expectOneCall` / `MockSupport::expectNCalls`.
+
+However, defining and maintaining these mock definitions is a cumbersome, tedious and error prone task: the user has to ensure that the C/C\++ signature of the mocking function is in sync with the function declaration (at least the compiler will moan if not), keep the symbolic ("stringified") name of the function in sync with the actual C/C\++ name, declare each parameter individually and keep the parameter's symbolic names and data type usage in sync with the function parameters declarations, etc. Additionally, the expected call declarations have also to be maintained, keeping the symbolic names of the functions and parameters in sync with the ones used in mock definitions, etc.
+
+The previously described manual tasks are highly systematic, and can be automated using CppUMockGen: this tool can generate automatically mock definitions for functions declared in C/C\++ header files, and also their corresponding expectation helper functions that encapsulate the expectation cumbersome details.
+
+#### Example
+
+Assuming that we have the following function that we want to test:
+
+###### MyFunction.h
+```cpp
+char* myFunction( const char *p );
+```
+
+CppUMockGen would generate the following mock:
+
+###### MyFunction_mock.cpp
+```cpp
+char * myFunction(const char * p)
+{
+    return static_cast<char*>(mock().actualCall("myFunction").withConstPointerParameter("p", p).returnStringValue());
+}
+```
+
+CppUMockGen would generate the following expectation helper function:
+
+###### MyFunction_expect.h
+```cpp
+namespace expect {
+MockExpectedCall& myFunction(const char * p);
+}
+```
+
+###### MyFunction_expect.cpp
+```cpp
+namespace expect {
+MockExpectedCall& myFunction(const char * p)
+{
+    return mock().expectOneCall("myFunction").withConstPointerParameter("p", p);
+}
+}
+```
+
+And we could use these in an unit test like this:
+
+###### MyFunction_test.cpp
+```cpp
+TEST( myTestSuite, myOtherFunction )
+{
+    expect::myFunction("ABC").andReturnValue("123");
+    CHECK_EQUAL( true, myOtherFunction("ABC") );
+    mock().checkExpectations();
+}
+```
+
 ## Download Binaries
 
 * [GitHub Releases](https://github.com/jgonzalezdr/CppUMockGen/releases)
@@ -21,19 +83,20 @@ CppUMockGen generates automatically mocks for member and non-member functions de
 
 `CppUMockGen [OPTION...] [<input>]`
 
-| OPTION                            | Description                                   |
-| -                                 | -                                             |
-| `-i, --input <input> `            | Input file                                    |
-| `-m, --mock-output <mock-output>` | Mock output path                              |
-| `-x, --cpp`                       | Force interpretation of the input file as C++ |
-| `-I, --include-path <path>`       | Include path                                  |
-| `-p, --param-override <expr>`     | Override parameter type                       |
-| `-t, --type-override <expr>`      | Override generic type                         |
-| `-h, --help`                      | Print help                                    |
+| OPTION                                | Description                                   |
+| -                                     | -                                             |
+| `-i, --input <input> `                | Input file                                    |
+| `-m, --mock-output <mock-output>`     | Mock output path                              |
+| `-e, --expect-output <expect-output>` | Expectation output path                              |
+| `-x, --cpp`                           | Force interpretation of the input file as C++ |
+| `-I, --include-path <path>`           | Include path                                  |
+| `-p, --param-override <expr>`         | Override parameter type                       |
+| `-t, --type-override <expr>`          | Override generic type                         |
+| `-h, --help`                          | Print help                                    |
 
-To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input (first parameter or explicitly with the `-i` / `--input` option) and the path where you want the file with the mocked functions to be generated as output (second parameter or explicitly with the `-m` / `--mock-output` option). If the option parameter is empty or is a directory path (i.e. ending with a path separator) then the output file name will be deduced from the input file name by replacing its extension by *"_mock.cpp"*. If the option parameter is **'@'**, the mock is printed to the console.
+To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input in the first non-option parameter or explicitly with the `-i` / `--input` option, and the path where you want the file with the mocked functions to be generated as output using the `-m` / `--mock-output` option.
 
-CppUMock by default interprets header files with the extensions .hh, .hpp or .hxx as C\++. Other extensions are interpreted by default as C. To force the interpretation of a header file as C++ use the `-x` / `--cpp` option.
+To generate expectation helper functions, pass the path where you want the files with the expectation helper functions to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option).
 
 CppUMock, just as any C/C++ compiler, needs to know where to find other include files referenced by the input file in order to interpret it properly. Pass the paths to the necessary include directories by using the `-I` / `--include-path` option. Like with most compilers, you may use this option several times to indicate multiple include directories.
 
