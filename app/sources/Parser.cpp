@@ -207,6 +207,9 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
 {
     GenerateFileHeading( genOpts, output );
 
+    output << "#include <CppUMockGen.h>" << std::endl;
+    output << std::endl;
+
     if( !m_interpretAsCpp )
     {
         output << "extern \"C\" {" << std::endl;

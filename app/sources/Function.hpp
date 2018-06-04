@@ -65,6 +65,9 @@ protected:
 
     std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const;
 
+    bool hasIgnorableArguments() const;
+    bool hasSkippedArguments() const;
+
     std::string m_functionName;
     std::unique_ptr<Return> m_return;
     std::vector<std::unique_ptr<Argument>> m_arguments;

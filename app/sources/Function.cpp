@@ -490,6 +490,8 @@ Function::Return* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bo
 class Function::Argument
 {
 public:
+    Argument() : m_forceNotIgnored(false) {}
+
     virtual ~Argument() {}
 
     void SetName( const std::string &name )
@@ -516,11 +518,26 @@ public:
 
     virtual std::string GetBody(bool mock) const = 0;
 
+    bool canBeIgnored() const
+    {
+        return !m_forceNotIgnored && isInput();
+    }
+
+    void forceNotIgnored(bool forceNotIgnored)
+    {
+        m_forceNotIgnored = forceNotIgnored;
+    }
+
+    virtual bool isSkipped() const = 0;
+
 protected:
     std::string m_name;
     std::string m_originalType;
     std::string m_mockArgExprFront;
     std::string m_mockArgExprBack;
+    bool m_forceNotIgnored;
+
+    virtual bool isInput() const = 0;
 };
 
 class ArgumentSkip : public Function::Argument
@@ -528,14 +545,24 @@ class ArgumentSkip : public Function::Argument
 public:
     virtual ~ArgumentSkip() {}
 
-    virtual std::string GetSignature(bool) const override
+    virtual std::string GetSignature(bool mock) const override
     {
-        return m_originalType;
+        return mock ? m_originalType : "";
     }
 
     virtual std::string GetBody(bool) const override
     {
         return "";
+    }
+
+    virtual bool isInput() const override
+    {
+        return false;
+    }
+
+    virtual bool isSkipped() const
+    {
+        return true;
     }
 };
 
@@ -544,21 +571,57 @@ class ArgumentStandard : public Function::Argument
 public:
     virtual ~ArgumentStandard() {}
 
-    virtual std::string GetSignature(bool) const override
+    virtual std::string GetSignature(bool mock) const override
     {
-        return m_originalType + " " + m_name;
+        if( mock || !canBeIgnored() )
+        {
+            return m_originalType + " " + m_name;
+        }
+        else
+        {
+            return "CppUMockGen::Parameter<" + m_originalType + "> " + m_name;
+        }
     }
 
     virtual std::string GetBody(bool mock) const override
     {
-        return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetCallBack(mock);
+        if( mock )
+        {
+            return GetBodyCall(mock, "");
+        }
+        else if( canBeIgnored() )
+        {
+            return "    if(" + m_name + ".isIgnored()) { ignoreOtherParams = true; } else { expectedCall" +
+                   GetBodyCall(mock, ".getValue()") + "; }\n";
+        }
+        else
+        {
+            return "    expectedCall" + GetBodyCall(mock, "") + ";\n";
+        }
     }
 
+    virtual bool isInput() const override
+    {
+        return true;
+    }
+
+    virtual bool isSkipped() const
+    {
+        return false;
+    }
+
+protected:
     virtual std::string GetCallFront(bool mock) const = 0;
 
     virtual std::string GetCallBack(bool) const
     {
         return ")";
+    }
+
+private:
+    std::string GetBodyCall(bool mock, const std::string& getter) const
+    {
+        return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + GetCallBack(mock);
     }
 };
 
@@ -676,6 +739,11 @@ public:
         return ret;
     }
 
+    virtual bool isInput() const override
+    {
+        return false;
+    }
+
     virtual std::string GetCallFront(bool mock) const override
     {
         if( mock )
@@ -724,6 +792,11 @@ class ArgumentOutputOfType : public ArgumentOfType
 {
 public:
     virtual ~ArgumentOutputOfType() {}
+
+    virtual bool isInput() const override
+    {
+        return false;
+    }
 
     virtual std::string GetCallFront(bool mock) const override
     {
@@ -987,8 +1060,12 @@ Function::Argument* ArgumentParser::ProcessTypePointer( const CXType &argType, c
                 case CXType_Void:
                 case CXType_Pointer:
                 case CXType_LValueReference:
+                    ret = new ArgumentPointer;
+                    break;
+
                 case CXType_RValueReference:
                     ret = new ArgumentPointer;
+                    ret->forceNotIgnored(true);
                     break;
 
                 case CXType_Record:
@@ -1034,6 +1111,7 @@ Function::Argument* ArgumentParser::ProcessTypeRVReference( const CXType &argTyp
         ret = ProcessType( pointeeType, origArgType, isPointeeConst );
     }
 
+    ret->forceNotIgnored(true);
     return ret;
 }
 
@@ -1063,6 +1141,11 @@ Function::Argument* ArgumentParser::ProcessTypeTypedef( const CXType &argType, c
         else
         {
             ret = new ArgumentPointer;
+        }
+
+        if( underlyingType.kind == CXType_RValueReference )
+        {
+            ret->forceNotIgnored(true);
         }
 
         if( underlyingType.kind != CXType_Pointer )
@@ -1243,7 +1326,7 @@ std::string Function::GenerateExpectation( bool proto ) const
     std::vector<std::string> namespaces = GetNamespaceDecomposition( m_functionName );
     for( size_t i = 0; i < (namespaces.size() - 1); i++ )
     {
-        ret += " namespace " + namespaces[i] + " {";
+        ret += " namespace " + namespaces[i] + "$ {";
     }
     ret += "\n";
 
@@ -1263,48 +1346,66 @@ std::string Function::GenerateExpectation( bool proto ) const
 
 std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
 {
+    bool addSignatureSeparator = false;
+    bool skippedArguments = hasSkippedArguments();
+    bool checkIgnoredArguments = !skippedArguments && hasIgnorableArguments();
+
     std::string ret = "MockExpectedCall& " + functionName + "(";
 
     if( !oneCall )
     {
         ret += "unsigned int __numCalls__";
+        addSignatureSeparator = true;
     }
 
     if( IsMethod() )
     {
-        if( !oneCall )
+        if( addSignatureSeparator )
         {
             ret += ", ";
         }
-        ret += "void *__object__";
+
+        ret += "CppUMockGen::Parameter<void*> __object__";
+        addSignatureSeparator = true;
     }
 
     std::string body;
     if( !proto )
     {
+        if( checkIgnoredArguments )
+        {
+            body += "    bool ignoreOtherParams = false;\n";
+        }
+
         if( oneCall )
         {
-            body = "return mock().expectOneCall(\"" + m_functionName + "\")";
+            body += "    MockExpectedCall& expectedCall = mock().expectOneCall(\"" + m_functionName + "\");\n";
         }
         else
         {
-            body = "return mock().expectNCalls(__numCalls__, \"" + m_functionName + "\")";
+            body += "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"" + m_functionName + "\");\n";
         }
 
         if( IsMethod() )
         {
-            body += ".onObject(__object__)";
+            body += "    if(!__object__.isIgnored()) { expectedCall.onObject(__object__.getValue()); }\n";
         }
     }
 
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
-        if( ( i > 0 ) || IsMethod() || !oneCall )
-        {
-            ret += ", ";
-        }
+        std::string signature = m_arguments[i]->GetSignature(false);
 
-        ret += m_arguments[i]->GetSignature(false);
+        if( !signature.empty() )
+        {
+            if( addSignatureSeparator )
+            {
+                ret += ", ";
+            }
+
+            ret += signature;
+            addSignatureSeparator = true;
+        }
 
         if( !proto )
         {
@@ -1318,8 +1419,44 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     }
     else
     {
-        ret += ")\n{\n    " + body + ";\n}\n";
+        if( skippedArguments )
+        {
+            body += "    expectedCall.ignoreOtherParameters();\n";
+        }
+        else if( checkIgnoredArguments )
+        {
+            body += "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n";
+        }
+        body += "    return expectedCall;";
+
+        ret += ")\n{\n" + body + "\n}\n";
     }
 
     return ret;
+}
+
+bool Function::hasIgnorableArguments() const
+{
+    for( size_t i = 0; i < m_arguments.size(); i++ )
+    {
+        if( m_arguments[i]->canBeIgnored() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Function::hasSkippedArguments() const
+{
+    for( size_t i = 0; i < m_arguments.size(); i++ )
+    {
+        if( m_arguments[i]->isSkipped() )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
