@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen.Test.Function_CPP )
+project( CppUMockGen.Test.Function_Mock_CPP )
 
 # Test configuration
 
@@ -16,7 +16,7 @@ set( PROD_SRC_FILES
 )
 
 set( TEST_SRC_FILES
-     Function_test.cpp
+     Function_Mock_test.cpp
      ${CMAKE_SOURCE_DIR}/test/TestHelpers/ClangParseHelper.cpp
      ${CMAKE_SOURCE_DIR}/test/TestHelpers/ClangCompileHelper.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp

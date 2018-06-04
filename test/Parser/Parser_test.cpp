@@ -1,9 +1,9 @@
 /**
  * @file
- * @brief      unit tests for the "Method" class
+ * @brief      Unit tests for the "Parser" class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2018 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
