@@ -514,21 +514,21 @@ public:
         m_mockArgExprBack.append( expr );
     }
 
-    void ExpectationArgByRef(bool argByRef)
+    void ExpectationArgByRef( bool argByRef )
     {
         m_expectationArgByRef = argByRef;
     }
 
-    virtual std::string GetSignature(bool mock) const = 0;
+    virtual std::string GetSignature( bool mock ) const = 0;
 
-    virtual std::string GetBody(bool mock) const = 0;
+    virtual std::string GetBody( bool mock, bool argumentsSkipped ) const = 0;
 
     bool canBeIgnored() const
     {
         return !m_forceNotIgnored && isInput();
     }
 
-    void forceNotIgnored(bool forceNotIgnored)
+    void forceNotIgnored( bool forceNotIgnored )
     {
         m_forceNotIgnored = forceNotIgnored;
     }
@@ -551,12 +551,12 @@ class ArgumentSkip : public Function::Argument
 public:
     virtual ~ArgumentSkip() {}
 
-    virtual std::string GetSignature(bool mock) const override
+    virtual std::string GetSignature( bool mock ) const override
     {
         return mock ? m_originalType : "";
     }
 
-    virtual std::string GetBody(bool) const override
+    virtual std::string GetBody( bool, bool ) const override
     {
         return "";
     }
@@ -577,7 +577,7 @@ class ArgumentStandard : public Function::Argument
 public:
     virtual ~ArgumentStandard() {}
 
-    virtual std::string GetSignature(bool mock) const override
+    virtual std::string GetSignature( bool mock ) const override
     {
         if( mock || !canBeIgnored() )
         {
@@ -589,7 +589,7 @@ public:
         }
     }
 
-    virtual std::string GetBody(bool mock) const override
+    virtual std::string GetBody( bool mock, bool argumentsSkipped ) const override
     {
         if( mock )
         {
@@ -597,8 +597,15 @@ public:
         }
         else if( canBeIgnored() )
         {
-            return "    if(" + m_name + ".isIgnored()) { ignoreOtherParams = true; } else { expectedCall" +
-                   GetBodyCall(mock, ".getValue()") + "; }\n";
+            if( argumentsSkipped )
+            {
+                return "    if(!" + m_name + ".isIgnored()) { expectedCall" + GetBodyCall(mock, ".getValue()") + "; }\n";
+            }
+            else
+            {
+                return "    if(" + m_name + ".isIgnored()) { ignoreOtherParams = true; } else { expectedCall" +
+                       GetBodyCall(mock, ".getValue()") + "; }\n";
+            }
         }
         else
         {
@@ -1275,9 +1282,9 @@ std::string Function::GenerateMock() const
             signature += ", ";
         }
 
-        signature += m_arguments[i]->GetSignature(true);
+        signature += m_arguments[i]->GetSignature( true );
 
-        body += m_arguments[i]->GetBody(true);
+        body += m_arguments[i]->GetBody( true, false );
     }
 
     signature += ")";
@@ -1354,8 +1361,8 @@ std::string Function::GenerateExpectation( bool proto ) const
 std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
 {
     bool addSignatureSeparator = false;
-    bool skippedArguments = hasSkippedArguments();
-    bool checkIgnoredArguments = !skippedArguments && hasIgnorableArguments();
+    bool argumentsSkipped = hasSkippedArguments();
+    bool checkIgnoredArguments = !argumentsSkipped && hasIgnorableArguments();
 
     std::string ret = "MockExpectedCall& " + functionName + "(";
 
@@ -1416,7 +1423,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
         if( !proto )
         {
-            body += m_arguments[i]->GetBody(false);
+            body += m_arguments[i]->GetBody( false, argumentsSkipped );
         }
     }
 
@@ -1426,7 +1433,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     }
     else
     {
-        if( skippedArguments )
+        if( argumentsSkipped )
         {
             body += "    expectedCall.ignoreOtherParameters();\n";
         }
