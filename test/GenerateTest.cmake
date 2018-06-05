@@ -22,8 +22,10 @@ include_directories( ${CPPUTEST_HOME}/include ${LibClang_INCLUDE_DIRS} ${CMAKE_S
 link_directories( ${CPPUTEST_HOME}/lib ${LibClang_LIBRARY_DIRS} )
 
 string( REPLACE \\ \\\\ CPPUTEST_INCLUDE_DIR ${CPPUTEST_HOME}\\include )
+string( REPLACE \\ \\\\ CPPUMOCKGEN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}\\app\\include )
 
 add_definitions( -DCPPUTEST_INCLUDE_DIR="${CPPUTEST_INCLUDE_DIR}" )
+add_definitions( -DCPPUMOCKGEN_INCLUDE_DIR="${CPPUMOCKGEN_INCLUDE_DIR}" )
 
 if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )

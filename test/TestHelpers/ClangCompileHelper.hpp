@@ -8,7 +8,8 @@
 class ClangCompileHelper
 {
 public:
-    static bool CheckCompilation( const std::string &testedHeader, const std::string &testedSource );
+    static bool CheckMockCompilation( const std::string &testedHeader, const std::string &testedSource );
+    static bool CheckExpectationCompilation( const std::string &testedHeader, const std::string &testedSource );
 
 private:
     ClangCompileHelper() {};

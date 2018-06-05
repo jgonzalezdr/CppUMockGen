@@ -490,7 +490,7 @@ Function::Return* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bo
 class Function::Argument
 {
 public:
-    Argument() : m_forceNotIgnored(false) {}
+    Argument() : m_expectationArgByRef(false), m_forceNotIgnored(false) {}
 
     virtual ~Argument() {}
 
@@ -514,6 +514,11 @@ public:
         m_mockArgExprBack.append( expr );
     }
 
+    void ExpectationArgByRef(bool argByRef)
+    {
+        m_expectationArgByRef = argByRef;
+    }
+
     virtual std::string GetSignature(bool mock) const = 0;
 
     virtual std::string GetBody(bool mock) const = 0;
@@ -535,6 +540,7 @@ protected:
     std::string m_originalType;
     std::string m_mockArgExprFront;
     std::string m_mockArgExprBack;
+    bool m_expectationArgByRef;
     bool m_forceNotIgnored;
 
     virtual bool isInput() const = 0;
@@ -575,11 +581,11 @@ public:
     {
         if( mock || !canBeIgnored() )
         {
-            return m_originalType + " " + m_name;
+            return m_originalType + (mock || !m_expectationArgByRef ? " " : " &" ) + m_name;
         }
         else
         {
-            return "CppUMockGen::Parameter<" + m_originalType + "> " + m_name;
+            return "CppUMockGen::Parameter<" + m_originalType + (mock || !m_expectationArgByRef ? "" : "&" ) + "> " + m_name;
         }
     }
 
@@ -1003,6 +1009,7 @@ Function::Argument* ArgumentParser::ProcessType( const CXType &argType, const CX
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             ret = ProcessTypeRecord( argType, origArgType, inheritConst, false );
             ret->MockArgExprPrepend("&");
+            ret->ExpectationArgByRef(true);
             break;
 
         case CXType_Elaborated:

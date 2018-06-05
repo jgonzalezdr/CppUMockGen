@@ -8,7 +8,7 @@
 #include "Config.hpp"
 
 /**
- * Class used to parse functions and generate mocks.
+ * Class used to parse functions and generate mocks and expectations.
  */
 class Function
 {
