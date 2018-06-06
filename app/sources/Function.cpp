@@ -7,6 +7,18 @@
 #include "ClangHelper.hpp"
 
 //*************************************************************************************************
+//                                             CONSTANTS
+//*************************************************************************************************
+
+#define RETURN_ARG_NAME         "__return__"
+#define OBJECT_ARG_NAME         "__object__"
+#define NUM_CALLS_ARG_NAME      "__numCalls__"
+#define EXPECTED_CALL_VAR_NAME  "__expectedCall__"
+#define IGNORE_OTHERS_VAR_NAME  "__ignoreOtherParams__"
+#define SIZEOF_VAR_PREFIX       "__sizeof_"
+#define INDENT                  "    "
+
+//*************************************************************************************************
 //
 //                                             RETURN PROCESSING
 //
@@ -22,17 +34,7 @@ public:
         m_originalType = type;
     }
 
-    void MockRetExprPrepend( const std::string &expr )
-    {
-        m_mockRetExprFront.insert( 0, expr );
-    }
-
-    void MockRetExprAppend( const std::string &expr )
-    {
-        m_mockRetExprBack.append( expr );
-    }
-
-    std::string GetMockSignature()
+    std::string GetMockSignature() const
     {
         return m_originalType;
     }
@@ -41,10 +43,12 @@ public:
 
     virtual std::string GetMockBodyBack() const = 0;
 
+    virtual std::string GetExpectationSignature() const = 0;
+
+    virtual std::string GetExpectationBody() const = 0;
+
 protected:
     std::string m_originalType;
-    std::string m_mockRetExprFront;
-    std::string m_mockRetExprBack;
 };
 
 class ReturnVoid : public Function::Return
@@ -61,12 +65,55 @@ public:
     {
         return "";
     }
+
+    virtual std::string GetExpectationSignature() const override
+    {
+        return "";
+    }
+
+    virtual std::string GetExpectationBody() const override
+    {
+        return "";
+    }
 };
 
 class ReturnStandard : public Function::Return
 {
 public:
+    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false) {}
     virtual ~ReturnStandard() {};
+
+    void BothRetExprPrepend( const std::string &expr )
+    {
+        m_mockRetExprFront.insert( 0, expr );
+        m_expectationRetExprFront.insert( 0, expr );
+    }
+
+    void BothRetExprAppend( const std::string &expr )
+    {
+        m_mockRetExprBack.append( expr );
+        m_expectationRetExprBack.append( expr );
+    }
+
+    void MockRetExprPrepend( const std::string &expr )
+    {
+        m_mockRetExprFront.insert( 0, expr );
+    }
+
+    void MockRetExprAppend( const std::string &expr )
+    {
+        m_mockRetExprBack.append( expr );
+    }
+
+    void ExpectationRetExprPrepend( const std::string &expr )
+    {
+        m_expectationRetExprFront.insert( 0, expr );
+    }
+
+    void ExpectationRetExprAppend( const std::string &expr )
+    {
+        m_expectationRetExprBack.append( expr );
+    }
 
     virtual std::string GetMockBodyFront() const override
     {
@@ -75,10 +122,52 @@ public:
 
     virtual std::string GetMockBodyBack() const override
     {
-        return GetMockCall() + m_mockRetExprBack;
+        return "." + GetMockCall() + "()" + m_mockRetExprBack;
     }
 
+    virtual std::string GetExpectationSignature() const override
+    {
+        return m_originalType + (m_expectationArgByRef ? " &" : " ") + RETURN_ARG_NAME;
+    }
+
+    virtual std::string GetExpectationBody() const override
+    {
+        return INDENT EXPECTED_CALL_VAR_NAME ".andReturnValue(" + GetExpectationRetExprFront() +
+               RETURN_ARG_NAME +  GetExpectationRetExprBack() + ");\n";
+    }
+
+    void ExpectationArgByRef( bool argByRef )
+    {
+        m_expectationArgByRef = argByRef;
+    }
+
+    void ExpectationNeedsCast( bool needsCast )
+    {
+        m_expectationNeedsCast = needsCast;
+    }
+
+protected:
     virtual std::string GetMockCall() const = 0;
+
+    virtual std::string GetBaseType() const = 0;
+
+private:
+    std::string GetExpectationRetExprFront() const
+    {
+        return ( m_expectationNeedsCast ? "static_cast<" + GetBaseType() + ">(" : "" ) + m_expectationRetExprFront;
+    }
+
+    std::string GetExpectationRetExprBack() const
+    {
+        return m_expectationRetExprBack +  ( m_expectationNeedsCast ? ")" : "" );
+    }
+
+    std::string m_mockRetExprFront;
+    std::string m_mockRetExprBack;
+    std::string m_expectationRetExprFront;
+    std::string m_expectationRetExprBack;
+    bool m_expectationArgByRef;
+    bool m_expectationNeedsCast;
 };
 
 class ReturnBool : public ReturnStandard
@@ -86,9 +175,15 @@ class ReturnBool : public ReturnStandard
 public:
     virtual ~ReturnBool() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "bool";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnBoolValue()";
+        return "returnBoolValue";
     }
 };
 
@@ -97,9 +192,15 @@ class ReturnInt : public ReturnStandard
 public:
     virtual ~ReturnInt() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "int";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnIntValue()";
+        return "returnIntValue";
     }
 };
 
@@ -108,9 +209,15 @@ class ReturnUnsignedInt : public ReturnStandard
 public:
     virtual ~ReturnUnsignedInt() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "unsigned int";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnUnsignedIntValue()";
+        return "returnUnsignedIntValue";
     }
 };
 
@@ -119,9 +226,15 @@ class ReturnLong : public ReturnStandard
 public:
     virtual ~ReturnLong() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "long";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnLongIntValue()";
+        return "returnLongIntValue";
     }
 };
 
@@ -130,9 +243,15 @@ class ReturnUnsignedLong : public ReturnStandard
 public:
     virtual ~ReturnUnsignedLong() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "unsigned long";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnUnsignedLongIntValue()";
+        return "returnUnsignedLongIntValue";
     }
 };
 
@@ -141,9 +260,15 @@ class ReturnDouble : public ReturnStandard
 public:
     virtual ~ReturnDouble() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "double";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnDoubleValue()";
+        return "returnDoubleValue";
     }
 };
 
@@ -152,9 +277,15 @@ class ReturnString : public ReturnStandard
 public:
     virtual ~ReturnString() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "const char*";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnStringValue()";
+        return "returnStringValue";
     }
 };
 
@@ -163,9 +294,15 @@ class ReturnConstPointer : public ReturnStandard
 public:
     virtual ~ReturnConstPointer() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "const void*";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnConstPointerValue()";
+        return "returnConstPointerValue";
     }
 };
 
@@ -174,9 +311,15 @@ class ReturnPointer : public ReturnStandard
 public:
     virtual ~ReturnPointer() {};
 
+protected:
+    virtual std::string GetBaseType() const override
+    {
+        return "void*";
+    }
+
     virtual std::string GetMockCall() const override
     {
-        return ".returnPointerValue()";
+        return "returnPointerValue";
     }
 };
 
@@ -191,10 +334,10 @@ public:
 
 private:
     Function::Return* ProcessOverride( const Config::OverrideSpec *override );
-    Function::Return* ProcessType( const CXType &returnType, bool inheritConst, bool enableCast );
-    Function::Return* ProcessTypePointer( const CXType & returnType, bool enableCast );
-    Function::Return* ProcessTypeRVReference( const CXType & returnType );
-    Function::Return* ProcessTypeTypedef( const CXType & returnType, bool inheritConst );
+    ReturnStandard* ProcessType( const CXType &returnType, bool inheritConst, bool enableCast );
+    ReturnStandard* ProcessTypePointer( const CXType & returnType, bool enableCast );
+    ReturnStandard* ProcessTypeRVReference( const CXType & returnType );
+    ReturnStandard* ProcessTypeTypedef( const CXType & returnType, bool inheritConst );
 
     const Config &m_config;
 };
@@ -239,7 +382,7 @@ Function::Return* ReturnParser::Process( const std::string funcName, const CXTyp
 
 Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *override )
 {
-    Function::Return *ret;
+    ReturnStandard *ret;
     MockedType overrideType = override->GetType();
 
     switch( overrideType )
@@ -286,17 +429,18 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
 // LCOV_EXCL_STOP
     }
 
-    ret->MockRetExprPrepend( override->GetExprModFront() );
-    ret->MockRetExprAppend( override->GetExprModBack() );
+    ret->BothRetExprPrepend( override->GetExprModFront() );
+    ret->BothRetExprAppend( override->GetExprModBack() );
+    ret->ExpectationNeedsCast( true );
 
     return ret;
 }
 
-Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inheritConst, bool enableCast )
+ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheritConst, bool enableCast )
 {
-    Function::Return *ret;
+    ReturnStandard *ret;
 
-    bool needsCast = false;
+    bool mockNeedsCast = false;
 
     switch( returnType.kind )
     {
@@ -313,8 +457,9 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
         case CXType_Short:
         case CXType_WChar:
         case CXType_Enum:
-            needsCast = true;
             ret = new ReturnInt;
+            ret->ExpectationNeedsCast( true );
+            mockNeedsCast = true;
             break;
 
         case CXType_UInt:
@@ -325,8 +470,9 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
         case CXType_UChar:
         case CXType_UShort:
         case CXType_Char16:
-            needsCast = true;
             ret = new ReturnUnsignedInt;
+            ret->ExpectationNeedsCast( true );
+            mockNeedsCast = true;
             break;
 
         case CXType_Long:
@@ -338,8 +484,9 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
             break;
 
         case CXType_Char32:
-            needsCast = true;
             ret = new ReturnUnsignedLong;
+            ret->ExpectationNeedsCast( true );
+            mockNeedsCast = true;
             break;
 
         case CXType_Double:
@@ -347,8 +494,9 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
             break;
 
         case CXType_Float:
-            needsCast = true;
             ret = new ReturnDouble;
+            ret->ExpectationNeedsCast( true );
+            mockNeedsCast = true;
             break;
 
         case CXType_Pointer:
@@ -361,15 +509,19 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             // Dereference and cast mock return pointer to proper pointer type
             ret = new ReturnConstPointer;
+            ret->ExpectationNeedsCast( true );
+            ret->ExpectationArgByRef(true);
             if( enableCast )
             {
                 ret->MockRetExprPrepend( "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( " );
                 ret->MockRetExprAppend( " )" );
+                ret->ExpectationRetExprPrepend( "&" );
             }
             break;
 
         case CXType_Typedef:
             ret = ProcessTypeTypedef( returnType, inheritConst );
+            ret->ExpectationNeedsCast( true );
             break;
 
         case CXType_Elaborated:
@@ -383,7 +535,7 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
 // LCOV_EXCL_STOP
     }
 
-    if( needsCast && enableCast )
+    if( mockNeedsCast && enableCast )
     {
         ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( returnType ) + ">( " );
         ret->MockRetExprAppend( " )" );
@@ -392,9 +544,9 @@ Function::Return* ReturnParser::ProcessType( const CXType &returnType, bool inhe
     return ret;
 }
 
-Function::Return* ReturnParser::ProcessTypePointer( const CXType &returnType, bool enableCast )
+ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool enableCast )
 {
-    Function::Return *ret;
+    ReturnStandard *ret;
 
     const CXType pointeeType = clang_getPointeeType( returnType );
     bool isPointeeConst = clang_isConstQualifiedType( pointeeType );
@@ -420,11 +572,16 @@ Function::Return* ReturnParser::ProcessTypePointer( const CXType &returnType, bo
             ret = new ReturnPointer;
         }
 
-        if( enableCast && ( pointeeType.kind != CXType_Void ) )
+        if( pointeeType.kind != CXType_Void )
         {
-            // Cast mock return pointer to proper pointer type
-            ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( pointeeType ) + " *>( " );
-            ret->MockRetExprAppend( " )" );
+            ret->ExpectationNeedsCast( true );
+
+            if( enableCast )
+            {
+                // Cast mock return pointer to proper pointer type
+                ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( pointeeType ) + " *>( " );
+                ret->MockRetExprAppend( " )" );
+            }
         }
     }
 
@@ -432,20 +589,22 @@ Function::Return* ReturnParser::ProcessTypePointer( const CXType &returnType, bo
     {
         // Dereference mock return pointer
         ret->MockRetExprPrepend( "* " );
+        ret->ExpectationRetExprPrepend( "&" );
     }
     else if( returnType.kind == CXType_RValueReference )
     {
         // Dereference mock return pointer
         ret->MockRetExprPrepend( "std::move( * " );
         ret->MockRetExprAppend( " )" );
+        ret->ExpectationRetExprPrepend( "&" );
     }
 
     return ret;
 }
 
-Function::Return* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool inheritConst )
+ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool inheritConst )
 {
-    Function::Return *ret;
+    ReturnStandard *ret;
 
     const CXType underlyingType = clang_getCanonicalType( returnType );
 
@@ -468,6 +627,8 @@ Function::Return* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bo
         // Dereference mock return pointer
         ret->MockRetExprPrepend( "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( " );
         ret->MockRetExprAppend( " )" );
+        ret->ExpectationArgByRef(true);
+        ret->ExpectationRetExprPrepend( "&" );
     }
     else
     {
@@ -490,8 +651,6 @@ Function::Return* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bo
 class Function::Argument
 {
 public:
-    Argument() : m_expectationArgByRef(false), m_forceNotIgnored(false) {}
-
     virtual ~Argument() {}
 
     void SetName( const std::string &name )
@@ -504,46 +663,17 @@ public:
         m_originalType = type;
     }
 
-    void MockArgExprPrepend( const std::string &expr )
-    {
-        m_mockArgExprFront.insert( 0, expr );
-    }
-
-    void MockArgExprAppend( const std::string &expr )
-    {
-        m_mockArgExprBack.append( expr );
-    }
-
-    void ExpectationArgByRef( bool argByRef )
-    {
-        m_expectationArgByRef = argByRef;
-    }
-
     virtual std::string GetSignature( bool mock ) const = 0;
 
     virtual std::string GetBody( bool mock, bool argumentsSkipped ) const = 0;
 
-    bool canBeIgnored() const
-    {
-        return !m_forceNotIgnored && isInput();
-    }
-
-    void forceNotIgnored( bool forceNotIgnored )
-    {
-        m_forceNotIgnored = forceNotIgnored;
-    }
+    virtual bool canBeIgnored() const = 0;
 
     virtual bool isSkipped() const = 0;
 
 protected:
     std::string m_name;
     std::string m_originalType;
-    std::string m_mockArgExprFront;
-    std::string m_mockArgExprBack;
-    bool m_expectationArgByRef;
-    bool m_forceNotIgnored;
-
-    virtual bool isInput() const = 0;
 };
 
 class ArgumentSkip : public Function::Argument
@@ -561,31 +691,36 @@ public:
         return "";
     }
 
-    virtual bool isInput() const override
-    {
-        return false;
-    }
-
     virtual bool isSkipped() const
     {
         return true;
+    }
+
+    virtual bool canBeIgnored() const override
+    {
+        return false;
     }
 };
 
 class ArgumentStandard : public Function::Argument
 {
 public:
+    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false) {}
     virtual ~ArgumentStandard() {}
 
     virtual std::string GetSignature( bool mock ) const override
     {
-        if( mock || !canBeIgnored() )
+        if( mock )
         {
-            return m_originalType + (mock || !m_expectationArgByRef ? " " : " &" ) + m_name;
+            return m_originalType + " " + m_name;
+        }
+        else if( canBeIgnored() )
+        {
+            return "CppUMockGen::Parameter<" + m_originalType + (m_expectationArgByRef ? "&> " : "> ") + m_name;
         }
         else
         {
-            return "CppUMockGen::Parameter<" + m_originalType + (mock || !m_expectationArgByRef ? "" : "&" ) + "> " + m_name;
+            return m_originalType + (m_expectationArgByRef ? " &" : " ") + m_name;
         }
     }
 
@@ -593,29 +728,24 @@ public:
     {
         if( mock )
         {
-            return GetBodyCall(mock, "");
+            return "." + GetBodyCall(mock, "");
         }
         else if( canBeIgnored() )
         {
             if( argumentsSkipped )
             {
-                return "    if(!" + m_name + ".isIgnored()) { expectedCall" + GetBodyCall(mock, ".getValue()") + "; }\n";
+                return INDENT "if(!" + m_name + ".isIgnored()) { " EXPECTED_CALL_VAR_NAME "." + GetBodyCall(mock, ".getValue()") + "; }\n";
             }
             else
             {
-                return "    if(" + m_name + ".isIgnored()) { ignoreOtherParams = true; } else { expectedCall" +
+                return INDENT "if(" + m_name + ".isIgnored()) { " IGNORE_OTHERS_VAR_NAME " = true; } else { " EXPECTED_CALL_VAR_NAME "." +
                        GetBodyCall(mock, ".getValue()") + "; }\n";
             }
         }
         else
         {
-            return "    expectedCall" + GetBodyCall(mock, "") + ";\n";
+            return INDENT EXPECTED_CALL_VAR_NAME "." + GetBodyCall(mock, "") + ";\n";
         }
-    }
-
-    virtual bool isInput() const override
-    {
-        return true;
     }
 
     virtual bool isSkipped() const
@@ -623,7 +753,37 @@ public:
         return false;
     }
 
+    void MockArgExprPrepend( const std::string &expr )
+    {
+        m_mockArgExprFront.insert( 0, expr );
+    }
+
+    void MockArgExprAppend( const std::string &expr )
+    {
+        m_mockArgExprBack.append( expr );
+    }
+
+    void ExpectationArgByRef( bool argByRef )
+    {
+        m_expectationArgByRef = argByRef;
+    }
+
+    virtual bool canBeIgnored() const override
+    {
+        return !m_forceNotIgnored && isInput();
+    }
+
+    void forceNotIgnored( bool forceNotIgnored )
+    {
+        m_forceNotIgnored = forceNotIgnored;
+    }
+
 protected:
+    virtual bool isInput() const
+    {
+        return true;
+    }
+
     virtual std::string GetCallFront(bool mock) const = 0;
 
     virtual std::string GetCallBack(bool) const
@@ -636,6 +796,11 @@ private:
     {
         return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + GetCallBack(mock);
     }
+
+    std::string m_mockArgExprFront;
+    std::string m_mockArgExprBack;
+    bool m_expectationArgByRef;
+    bool m_forceNotIgnored;
 };
 
 class ArgumentBool : public ArgumentStandard
@@ -643,9 +808,10 @@ class ArgumentBool : public ArgumentStandard
 public:
     virtual ~ArgumentBool() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withBoolParameter(";
+        return "withBoolParameter(";
     }
 };
 
@@ -654,9 +820,10 @@ class ArgumentInt : public ArgumentStandard
 public:
     virtual ~ArgumentInt() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withIntParameter(";
+        return "withIntParameter(";
     }
 };
 
@@ -665,9 +832,10 @@ class ArgumentUnsignedInt : public ArgumentStandard
 public:
     virtual ~ArgumentUnsignedInt() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withUnsignedIntParameter(";
+        return "withUnsignedIntParameter(";
     }
 };
 
@@ -676,9 +844,10 @@ class ArgumentLong : public ArgumentStandard
 public:
     virtual ~ArgumentLong() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withLongIntParameter(";
+        return "withLongIntParameter(";
     }
 };
 
@@ -687,9 +856,10 @@ class ArgumentUnsignedLong : public ArgumentStandard
 public:
     virtual ~ArgumentUnsignedLong() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withUnsignedLongIntParameter(";
+        return "withUnsignedLongIntParameter(";
     }
 };
 
@@ -698,9 +868,10 @@ class ArgumentDouble : public ArgumentStandard
 public:
     virtual ~ArgumentDouble() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withDoubleParameter(";
+        return "withDoubleParameter(";
     }
 };
 
@@ -709,9 +880,10 @@ class ArgumentString : public ArgumentStandard
 public:
     virtual ~ArgumentString() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withStringParameter(";
+        return "withStringParameter(";
     }
 };
 
@@ -720,9 +892,10 @@ class ArgumentPointer : public ArgumentStandard
 public:
     virtual ~ArgumentPointer() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withPointerParameter(";
+        return "withPointerParameter(";
     }
 };
 
@@ -731,9 +904,10 @@ class ArgumentConstPointer : public ArgumentStandard
 public:
     virtual ~ArgumentConstPointer() {}
 
+protected:
     virtual std::string GetCallFront(bool) const override
     {
-        return ".withConstPointerParameter(";
+        return "withConstPointerParameter(";
     }
 };
 
@@ -747,11 +921,12 @@ public:
         std::string ret = m_originalType + " " + m_name;
         if( !mock )
         {
-            ret += ", size_t __sizeof_" + m_name;
+            ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
         }
         return ret;
     }
 
+protected:
     virtual bool isInput() const override
     {
         return false;
@@ -761,11 +936,11 @@ public:
     {
         if( mock )
         {
-            return ".withOutputParameter(";
+            return "withOutputParameter(";
         }
         else
         {
-            return ".withOutputParameterReturning(";
+            return "withOutputParameterReturning(";
         }
     }
 
@@ -777,7 +952,7 @@ public:
         }
         else
         {
-            return ", __sizeof_" + m_name + ")";
+            return ", " SIZEOF_VAR_PREFIX + m_name + ")";
         }
     }
 };
@@ -787,17 +962,17 @@ class ArgumentOfType : public ArgumentStandard
 public:
     virtual ~ArgumentOfType() {}
 
-    virtual std::string GetCallFront(bool) const override
-    {
-        return ".withParameterOfType(\"" + m_exposedType + "\", ";
-    }
-
     void SetExposedType( const std::string &type )
     {
         m_exposedType = type;
     }
 
 protected:
+    virtual std::string GetCallFront(bool) const override
+    {
+        return "withParameterOfType(\"" + m_exposedType + "\", ";
+    }
+
     std::string m_exposedType;
 };
 
@@ -806,6 +981,7 @@ class ArgumentOutputOfType : public ArgumentOfType
 public:
     virtual ~ArgumentOutputOfType() {}
 
+protected:
     virtual bool isInput() const override
     {
         return false;
@@ -815,11 +991,11 @@ public:
     {
         if( mock )
         {
-            return ".withOutputParameterOfType(\"" + m_exposedType + "\", ";
+            return "withOutputParameterOfType(\"" + m_exposedType + "\", ";
         }
         else
         {
-            return ".withOutputParameterOfTypeReturning(\"" + m_exposedType + "\", ";
+            return "withOutputParameterOfTypeReturning(\"" + m_exposedType + "\", ";
         }
     }
 };
@@ -835,11 +1011,11 @@ public:
 
 private:
     Function::Argument* ProcessOverride( const Config::OverrideSpec *override );
-    Function::Argument* ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    Function::Argument* ProcessTypePointer( const CXType &argType, const CXType &origArgType );
-    Function::Argument* ProcessTypeRVReference( const CXType &argType, const CXType &origArgType );
-    Function::Argument* ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    Function::Argument* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee );
+    ArgumentStandard* ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst );
+    ArgumentStandard* ProcessTypePointer( const CXType &argType, const CXType &origArgType );
+    ArgumentStandard* ProcessTypeRVReference( const CXType &argType, const CXType &origArgType );
+    ArgumentStandard* ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst );
+    ArgumentStandard* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee );
 
     const Config &m_config;
 };
@@ -889,7 +1065,7 @@ Function::Argument* ArgumentParser::Process( const std::string funcName, const C
 
 Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec *override )
 {
-    Function::Argument *ret;
+    ArgumentStandard *ret;
     MockedType overrideType = override->GetType();
 
     switch( overrideType )
@@ -935,8 +1111,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
             break;
 
         case MockedType::Skip:
-            ret = new ArgumentSkip;
-            break;
+            return new ArgumentSkip;
 
 // LCOV_EXCL_START
         default:
@@ -944,18 +1119,15 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
 // LCOV_EXCL_STOP
     }
 
-    if( overrideType != MockedType::Skip )
-    {
-        ret->MockArgExprPrepend( override->GetExprModFront() );
-        ret->MockArgExprAppend( override->GetExprModBack() );
-    }
+    ret->MockArgExprPrepend( override->GetExprModFront() );
+    ret->MockArgExprAppend( override->GetExprModBack() );
 
     return ret;
 }
 
-Function::Argument* ArgumentParser::ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst )
+ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst )
 {
-    Function::Argument *ret;
+    ArgumentStandard *ret;
 
     switch( argType.kind )
     {
@@ -1034,9 +1206,9 @@ Function::Argument* ArgumentParser::ProcessType( const CXType &argType, const CX
     return ret;
 }
 
-Function::Argument* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType )
+ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType )
 {
-    Function::Argument *ret;
+    ArgumentStandard *ret;
 
     const CXType pointeeType = clang_getPointeeType( argType );
     bool isPointeeConst = clang_isConstQualifiedType( pointeeType );
@@ -1102,9 +1274,9 @@ Function::Argument* ArgumentParser::ProcessTypePointer( const CXType &argType, c
     return ret;
 }
 
-Function::Argument* ArgumentParser::ProcessTypeRVReference( const CXType &argType, const CXType &origArgType )
+ArgumentStandard* ArgumentParser::ProcessTypeRVReference( const CXType &argType, const CXType &origArgType )
 {
-    Function::Argument *ret;
+    ArgumentStandard *ret;
 
     CXType pointeeType = clang_getPointeeType( argType );
 
@@ -1129,9 +1301,9 @@ Function::Argument* ArgumentParser::ProcessTypeRVReference( const CXType &argTyp
     return ret;
 }
 
-Function::Argument* ArgumentParser::ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst )
+ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst )
 {
-    Function::Argument *ret;
+    ArgumentStandard *ret;
 
     const CXType underlyingType = clang_getCanonicalType( argType );
 
@@ -1176,7 +1348,7 @@ Function::Argument* ArgumentParser::ProcessTypeTypedef( const CXType &argType, c
     return ret;
 }
 
-Function::Argument* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee )
+ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee )
 {
     ArgumentOfType *ret;
 
@@ -1368,7 +1540,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
     if( !oneCall )
     {
-        ret += "unsigned int __numCalls__";
+        ret += "unsigned int " NUM_CALLS_ARG_NAME;
         addSignatureSeparator = true;
     }
 
@@ -1379,7 +1551,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
             ret += ", ";
         }
 
-        ret += "CppUMockGen::Parameter<void*> __object__";
+        ret += "CppUMockGen::Parameter<void*> " OBJECT_ARG_NAME;
         addSignatureSeparator = true;
     }
 
@@ -1388,36 +1560,36 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     {
         if( checkIgnoredArguments )
         {
-            body += "    bool ignoreOtherParams = false;\n";
+            body += INDENT "bool " IGNORE_OTHERS_VAR_NAME " = false;\n";
         }
 
         if( oneCall )
         {
-            body += "    MockExpectedCall& expectedCall = mock().expectOneCall(\"" + m_functionName + "\");\n";
+            body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectOneCall(\"" + m_functionName + "\");\n";
         }
         else
         {
-            body += "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"" + m_functionName + "\");\n";
+            body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectNCalls(" NUM_CALLS_ARG_NAME ", \"" + m_functionName + "\");\n";
         }
 
         if( IsMethod() )
         {
-            body += "    if(!__object__.isIgnored()) { expectedCall.onObject(__object__.getValue()); }\n";
+            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(" OBJECT_ARG_NAME ".getValue()); }\n";
         }
     }
 
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
-        std::string signature = m_arguments[i]->GetSignature(false);
+        std::string argumentSignature = m_arguments[i]->GetSignature(false);
 
-        if( !signature.empty() )
+        if( !argumentSignature.empty() )
         {
             if( addSignatureSeparator )
             {
                 ret += ", ";
             }
 
-            ret += signature;
+            ret += argumentSignature;
             addSignatureSeparator = true;
         }
 
@@ -1427,21 +1599,35 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
         }
     }
 
+    std::string returnSignature = m_return->GetExpectationSignature();
+
+    if( !returnSignature.empty() )
+    {
+        if( addSignatureSeparator )
+        {
+            ret += ", ";
+        }
+
+        ret += returnSignature;
+    }
+
     if( proto )
     {
         ret += ");\n";
     }
     else
     {
+        body += m_return->GetExpectationBody();
+
         if( argumentsSkipped )
         {
-            body += "    expectedCall.ignoreOtherParameters();\n";
+            body += INDENT EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters();\n";
         }
         else if( checkIgnoredArguments )
         {
-            body += "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n";
+            body += INDENT "if(" IGNORE_OTHERS_VAR_NAME ") { " EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters(); }\n";
         }
-        body += "    return expectedCall;";
+        body += INDENT "return " EXPECTED_CALL_VAR_NAME ";";
 
         ret += ")\n{\n" + body + "\n}\n";
     }

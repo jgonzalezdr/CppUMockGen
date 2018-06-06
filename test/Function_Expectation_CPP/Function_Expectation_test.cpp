@@ -78,28 +78,29 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
         std::string mockedType;
         bool casted;
         std::string cpputestFunctionType;
-    };
+        std::string targetType;
+     };
 
     const std::vector< struct PrimitiveTypeData > primitiveTypes {
-        { "int", "int", false, "Int" },
-        { "unsigned int", "unsigned int", false, "UnsignedInt" },
-        { "signed int", "int", false, "Int" },
-        { "short", "short", true, "Int" },
-        { "unsigned short", "unsigned short", true, "UnsignedInt" },
-        { "signed short", "short", true, "Int" },
-        { "char", "char", true, "Int" },
-        { "unsigned char", "unsigned char", true, "UnsignedInt" },
-        { "signed char", "signed char", true, "Int" },
-        { "long", "long", false, "LongInt" },
-        { "unsigned long", "unsigned long", false, "UnsignedLongInt" },
-        { "signed long", "long", false, "LongInt" },
-        { "float", "float", true, "Double" },
-        { "double", "double", false, "Double" },
+        { "int", "int", false, "Int", "int" },
+        { "unsigned int", "unsigned int", false, "UnsignedInt", "unsigned int" },
+        { "signed int", "int", false, "Int", "int" },
+        { "short", "short", true, "Int", "int" },
+        { "unsigned short", "unsigned short", true, "UnsignedInt", "unsigned int" },
+        { "signed short", "short", true, "Int", "int" },
+        { "char", "char", true, "Int", "int" },
+        { "unsigned char", "unsigned char", true, "UnsignedInt", "unsigned int" },
+        { "signed char", "signed char", true, "Int", "int" },
+        { "long", "long", false, "LongInt", "long" },
+        { "unsigned long", "unsigned long", false, "UnsignedLongInt", "unsigned long" },
+        { "signed long", "long", false, "LongInt", "long" },
+        { "float", "float", true, "Double", "double" },
+        { "double", "double", false, "Double", "double" },
 #ifndef INTERPRET_C
-        { "bool", "bool", false, "Bool" },
-        { "wchar_t", "wchar_t", true, "Int" },
-        { "char16_t", "char16_t", true, "UnsignedInt" },
-        { "char32_t", "char32_t", true, "UnsignedLongInt" },
+        { "bool", "bool", false, "Bool", "bool" },
+        { "wchar_t", "wchar_t", true, "Int", "int" },
+        { "char16_t", "char16_t", true, "UnsignedInt", "unsigned int" },
+        { "char32_t", "char32_t", true, "UnsignedLongInt", "unsigned long" },
 #endif
     };
 
@@ -223,12 +224,12 @@ TEST_EX( TEST_GROUP_NAME, DoubleDeclaration )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1()\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
 
@@ -263,12 +264,12 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace ns1$ {\n"
                   "MockExpectedCall& function1()\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"ns1::function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"ns1::function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"ns1::function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"ns1::function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
 
@@ -310,12 +311,12 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1()\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -348,12 +349,12 @@ TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function()\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function(unsigned int __numCalls__)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function\");\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function\");\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -386,20 +387,37 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, resultsProto.size() );
-        STRCMP_EQUAL( "namespace expect {\n"
-                      "MockExpectedCall& function1();\n"
-                      "MockExpectedCall& function1(unsigned int __numCalls__);\n"
-                      "}\n", resultsProto[0].c_str() );
-        STRCMP_EQUAL( "namespace expect {\n"
-                      "MockExpectedCall& function1()\n{\n"
-                      "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                      "    return expectedCall;\n"
-                      "}\n"
-                      "MockExpectedCall& function1(unsigned int __numCalls__)\n{\n"
-                      "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                      "    return expectedCall;\n"
-                      "}\n"
-                      "}\n", resultsImpl[0].c_str() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s __return__);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s __return__);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString returnParam;
+        if( typeData.casted )
+        {
+            returnParam = StringFromFormat( "static_cast<%s>(__return__)", typeData.targetType.c_str() );
+        }
+        else
+        {
+            returnParam = "__return__";
+        }
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s __return__)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.andReturnValue(%s);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s __return__)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.andReturnValue(%s);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n",
+                typeData.mockedType.c_str(), returnParam.asCharString(),
+                typeData.mockedType.c_str(), returnParam.asCharString() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
         CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
@@ -2835,18 +2853,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
         SimpleString expectedResultImpl = StringFromFormat(
                 "namespace expect {\n"
                 "MockExpectedCall& function1(CppUMockGen::Parameter<%s> p)\n{\n"
-                "    bool ignoreOtherParams = false;\n"
-                "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.with%sParameter(\"p\", p.getValue()); }\n"
-                "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                "    return expectedCall;\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.with%sParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
                 "}\n"
                 "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<%s> p)\n{\n"
-                "    bool ignoreOtherParams = false;\n"
-                "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.with%sParameter(\"p\", p.getValue()); }\n"
-                "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                "    return expectedCall;\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.with%sParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
                 "}\n"
                 "}\n",
                 typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str(),
@@ -2890,18 +2908,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<" ENUM_TAG "Enum1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<" ENUM_TAG "Enum1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -2940,18 +2958,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Enum1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Enum1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -2990,18 +3008,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Class1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Class1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3040,18 +3058,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Class1<short>&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Class1<short>&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3091,18 +3109,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<" STRUCT_TAG "Struct1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<" STRUCT_TAG "Struct1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3149,18 +3167,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
         SimpleString expectedResultImpl = StringFromFormat(
                 "namespace expect {\n"
                 "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
-                "    bool ignoreOtherParams = false;\n"
-                "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.with%sParameter(\"p\", p.getValue()); }\n"
-                "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                "    return expectedCall;\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.with%sParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
                 "}\n"
                 "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
-                "    bool ignoreOtherParams = false;\n"
-                "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.with%sParameter(\"p\", p.getValue()); }\n"
-                "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                "    return expectedCall;\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.with%sParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
                 "}\n"
                 "}\n", typeData.cpputestFunctionType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
@@ -3202,18 +3220,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3253,18 +3271,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p\", static_cast<int>(p.getValue())); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3304,18 +3322,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3355,18 +3373,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3406,18 +3424,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -3457,18 +3475,18 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1<long>\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<long>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
-                  "    bool ignoreOtherParams = false;\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(p.isIgnored()) { ignoreOtherParams = true; } else { expectedCall.withParameterOfType(\"Class1<long>\", \"p\", &p.getValue()); }\n"
-                  "    if(ignoreOtherParams) { expectedCall.ignoreOtherParameters(); }\n"
-                  "    return expectedCall;\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<long>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
@@ -5865,20 +5883,18 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
 
     Config* config = GetMockConfig();
     const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue(override);
     mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
 
-    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
     mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
 
     mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)MockedType::Skip);
 
-    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
+    SimpleString testHeader = "void function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
 
     // Exercise
     std::vector<std::string> resultsProto;
@@ -5895,20 +5911,20 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
                   "}\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect {\n"
                   "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectOneCall(\"function1\");\n"
-                  "    if(!p1.isIgnored()) { expectedCall.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
-                  "    expectedCall.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
-                  "    if(!p4.isIgnored()) { expectedCall.withIntParameter(\"p4\", p4.getValue()); }\n"
-                  "    expectedCall.ignoreOtherParameters();\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(!p1.isIgnored()) { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
+                  "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
+                  "    if(!p4.isIgnored()) { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
+                  "    __expectedCall__.ignoreOtherParameters();\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4)\n{\n"
-                  "    MockExpectedCall& expectedCall = mock().expectNCalls(__numCalls__, \"function1\");\n"
-                  "    if(!p1.isIgnored()) { expectedCall.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
-                  "    expectedCall.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
-                  "    if(!p4.isIgnored()) { expectedCall.withIntParameter(\"p4\", p4.getValue()); }\n"
-                  "    expectedCall.ignoreOtherParameters();\n"
-                  "    return expectedCall;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(!p1.isIgnored()) { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
+                  "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
+                  "    if(!p4.isIgnored()) { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
+                  "    __expectedCall__.ignoreOtherParameters();\n"
+                  "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
