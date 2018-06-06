@@ -288,7 +288,7 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters nor return value.
+ * Check expectation generation of a function without parameters nor return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
 {
@@ -326,7 +326,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function with return and an explicit void parameter.
+ * Check expectation generation of a function with return and an explicit void parameter.
  */
 TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
 {
@@ -364,7 +364,7 @@ TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a primitive type value.
+ * Check expectation generation of a function without parameters and returning a primitive type value.
  */
 TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
 {
@@ -429,7 +429,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
 #if 0
 
 /*
- * Check mock generation of a function without parameters and returning an enum value.
+ * Check expectation generation of a function without parameters and returning an enum value.
  */
 TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 {
@@ -460,7 +460,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a scoped enum value.
+ * Check expectation generation of a function without parameters and returning a scoped enum value.
  */
 TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 {
@@ -490,7 +490,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a class.
+ * Check expectation generation of a function without parameters and returning a class.
  */
 TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 {
@@ -520,7 +520,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a template class.
+ * Check expectation generation of a function without parameters and returning a template class.
  */
 TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 {
@@ -551,7 +551,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 #endif
 
 /*
- * Check mock generation of a function without parameters and returning a struct.
+ * Check expectation generation of a function without parameters and returning a struct.
  */
 TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 {
@@ -585,7 +585,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
 {
@@ -622,7 +622,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for an enum.
+ * Check expectation generation of a function without parameters and returning a typedef for an enum.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 {
@@ -653,7 +653,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a typedef for a scoped enum.
+ * Check expectation generation of a function without parameters and returning a typedef for a scoped enum.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 {
@@ -684,7 +684,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a class.
+ * Check expectation generation of a function without parameters and returning a typedef for a class.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 {
@@ -715,7 +715,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a template class.
+ * Check expectation generation of a function without parameters and returning a typedef for a template class.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 {
@@ -747,7 +747,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 #endif
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a struct.
+ * Check expectation generation of a function without parameters and returning a typedef for a struct.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 {
@@ -782,7 +782,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a non-const void value.
+ * Check expectation generation of a function without parameters and returning a pointer to a non-const void value.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 {
@@ -810,7 +810,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const void value.
+ * Check expectation generation of a function without parameters and returning a pointer to a const void value.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 {
@@ -838,7 +838,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a pointer to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
 {
@@ -873,7 +873,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a pointer to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
 {
@@ -908,7 +908,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a string.
+ * Check expectation generation of a function without parameters and returning a string.
  */
 TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 {
@@ -937,7 +937,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a pointer to a non-const class.
+ * Check expectation generation of a function without parameters and returning a pointer to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 {
@@ -967,7 +967,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const class.
+ * Check expectation generation of a function without parameters and returning a pointer to a const class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 {
@@ -997,7 +997,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a non-const template class.
+ * Check expectation generation of a function without parameters and returning a pointer to a non-const template class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 {
@@ -1027,7 +1027,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const template class.
+ * Check expectation generation of a function without parameters and returning a pointer to a const template class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 {
@@ -1058,7 +1058,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 #endif
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a non-const struct.
+ * Check expectation generation of a function without parameters and returning a pointer to a non-const struct.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 {
@@ -1088,7 +1088,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const struct.
+ * Check expectation generation of a function without parameters and returning a pointer to a const struct.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 {
@@ -1123,7 +1123,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
 {
@@ -1158,7 +1158,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
 {
@@ -1193,7 +1193,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const class.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 {
@@ -1225,7 +1225,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a const class.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a const class.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 {
@@ -1257,7 +1257,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const template class.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a non-const template class.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 {
@@ -1289,7 +1289,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a const template class.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a const template class.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 {
@@ -1321,7 +1321,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const struct.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a non-const struct.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 {
@@ -1353,7 +1353,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a const struct.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a const struct.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 {
@@ -1389,7 +1389,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
 {
@@ -1424,7 +1424,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
 {
@@ -1459,7 +1459,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a non-const class.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 {
@@ -1491,7 +1491,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a const class.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a const class.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 {
@@ -1523,7 +1523,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a non-const template class.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a non-const template class.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 {
@@ -1555,7 +1555,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a const template class.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a const template class.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 {
@@ -1587,7 +1587,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a non-const struct.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a non-const struct.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 {
@@ -1619,7 +1619,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a right-value reference to a const struct.
+ * Check expectation generation of a function without parameters and returning a right-value reference to a const struct.
  */
 TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 {
@@ -1656,7 +1656,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a typedef for a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a pointer to a typedef for a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
 {
@@ -1691,7 +1691,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a typedef for a const primitive type.
+ * Check expectation generation of a function without parameters and returning a pointer to a typedef for a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameters )
 {
@@ -1726,7 +1726,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const typedef for a primitive type.
+ * Check expectation generation of a function without parameters and returning a pointer to a const typedef for a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameters )
 {
@@ -1761,7 +1761,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const pointer to a typedef for a primitive type.
+ * Check expectation generation of a function without parameters and returning a const pointer to a typedef for a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameters )
 {
@@ -1797,7 +1797,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a pointer to a typedef for a class.
+ * Check expectation generation of a function without parameters and returning a pointer to a typedef for a class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 {
@@ -1828,7 +1828,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a pointer to a const typedef for a class.
+ * Check expectation generation of a function without parameters and returning a pointer to a const typedef for a class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 {
@@ -1859,7 +1859,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const pointer to a typedef for a class.
+ * Check expectation generation of a function without parameters and returning a const pointer to a typedef for a class.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 {
@@ -1895,7 +1895,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a pointer to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a pointer to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
 {
@@ -1930,7 +1930,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a pointer to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a pointer to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameters )
 {
@@ -1965,7 +1965,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a const pointer to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a const pointer to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameters )
 {
@@ -2000,7 +2000,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const typedef for a pointer to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a const typedef for a pointer to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameters )
 {
@@ -2035,7 +2035,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a string.
+ * Check expectation generation of a function without parameters and returning a typedef for a string.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 {
@@ -2065,7 +2065,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const typedef for a string.
+ * Check expectation generation of a function without parameters and returning a const typedef for a string.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 {
@@ -2096,7 +2096,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a typedef for a pointer to a non-const class.
+ * Check expectation generation of a function without parameters and returning a typedef for a pointer to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 {
@@ -2127,7 +2127,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a pointer to a const class.
+ * Check expectation generation of a function without parameters and returning a typedef for a pointer to a const class.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 {
@@ -2158,7 +2158,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a const pointer to a non-const class.
+ * Check expectation generation of a function without parameters and returning a typedef for a const pointer to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 {
@@ -2189,7 +2189,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const typedef for a pointer to a non-const class.
+ * Check expectation generation of a function without parameters and returning a const typedef for a pointer to a non-const class.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 {
@@ -2230,7 +2230,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a typedef for a left-value reference to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a left-value reference to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters )
 {
@@ -2267,7 +2267,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
 }
 
 /*
- * Check mock generation of a function without parameters and returning a typedef for a right-value reference to a non-const primitive type.
+ * Check expectation generation of a function without parameters and returning a typedef for a right-value reference to a non-const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters )
 {
@@ -2309,7 +2309,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a non-const pointer to a non-const pointer.
+ * Check expectation generation of a function without parameters and returning a non-const pointer to a non-const pointer.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 {
@@ -2337,7 +2337,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a non-const pointer to a const pointer.
+ * Check expectation generation of a function without parameters and returning a non-const pointer to a const pointer.
  */
 TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 {
@@ -2365,7 +2365,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a const pointer to a non-const pointer.
+ * Check expectation generation of a function without parameters and returning a const pointer to a non-const pointer.
  */
 TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 {
@@ -2398,7 +2398,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const pointer.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a non-const pointer.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 {
@@ -2426,7 +2426,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a left-value reference to a const pointer.
+ * Check expectation generation of a function without parameters and returning a left-value reference to a const pointer.
  */
 TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 {
@@ -2459,7 +2459,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a double typedef for a primitive type.
+ * Check expectation generation of a function without parameters and returning a double typedef for a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
 {
@@ -2501,7 +2501,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
+ * Check expectation generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerReturnNoParameters )
 {
@@ -2537,7 +2537,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
+ * Check expectation generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnNoParameters )
 {
@@ -2573,7 +2573,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a primitive type.
+ * Check expectation generation of a function without parameters and returning a double const / non-const typedef for a pointer to a primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnNoParameters )
 {
@@ -2609,7 +2609,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
 {
@@ -2645,7 +2645,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
 {
@@ -2681,7 +2681,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a const primitive type.
+ * Check expectation generation of a function without parameters and returning a double const / non-const typedef for a pointer to a const primitive type.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
 {
@@ -2717,7 +2717,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const typedef for a string.
+ * Check expectation generation of a function without parameters and returning a double non-const typedef for a string.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 {
@@ -2748,7 +2748,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double non-const / const typedef for a string.
+ * Check expectation generation of a function without parameters and returning a double non-const / const typedef for a string.
  */
 TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 {
@@ -2779,7 +2779,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 }
 
 /*
- * Check mock generation of a function without parameters and returning a double const / non-const typedef for a string.
+ * Check expectation generation of a function without parameters and returning a double const / non-const typedef for a string.
  */
 TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 {
@@ -2822,7 +2822,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a primitive type parameter and without return value.
+ * Check expectation generation of a function with a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
 {
@@ -2880,7 +2880,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with an enum parameter and without return value.
+ * Check expectation generation of a function with an enum parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 {
@@ -2930,7 +2930,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a scoped enum parameter and without return value.
+ * Check expectation generation of a function with a scoped enum parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 {
@@ -2979,7 +2979,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 }
 
 /*
- * Check mock generation of a function with a class parameter and without return value.
+ * Check expectation generation of a function with a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 {
@@ -3029,7 +3029,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 }
 
 /*
- * Check mock generation of a function with a template class parameter and without return value.
+ * Check expectation generation of a function with a template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 {
@@ -3080,7 +3080,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 #endif
 
 /*
- * Check mock generation of a function with a struct parameter and without return value.
+ * Check expectation generation of a function with a struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 {
@@ -3134,7 +3134,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a typedef for primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
 {
@@ -3192,7 +3192,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for an enum parameter and without return value.
+ * Check expectation generation of a function with a typedef for an enum parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 {
@@ -3242,7 +3242,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a typedef for a scoped enum parameter and without return value.
+ * Check expectation generation of a function with a typedef for a scoped enum parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 {
@@ -3292,7 +3292,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 {
@@ -3343,7 +3343,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 {
@@ -3394,7 +3394,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 }
 
 /*
- * Check mock generation of a function with a typedef for a template class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 {
@@ -3445,7 +3445,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a template class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyingType )
 {
@@ -3496,10 +3496,8 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 }
 #endif
 
-#if 0
-
 /*
- * Check mock generation of a function with a typedef for a struct parameter and without return value.
+ * Check expectation generation of a function with a typedef for a struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 {
@@ -3515,23 +3513,42 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", &p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with a typedef for a struct parameter and without return value.
+ * Check expectation generation of a function with a typedef for a struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType )
 {
@@ -3547,17 +3564,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Struct1\", \"p\", &p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1&> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1&> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3567,7 +3603,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a pointer to non-const void parameter and without return value.
+ * Check expectation generation of a function with a pointer to non-const void parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
 {
@@ -3579,23 +3615,42 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
     SimpleString testHeader = "void function1(void* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(void * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<void *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<void *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<void *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<void *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with pointer to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with pointer to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
 {
@@ -3612,19 +3667,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "void function1(%s * p)\n{\n"
-                "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
-                "}\n", typeData.mockedType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s * p, size_t __sizeof_p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s * p, size_t __sizeof_p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s * p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s * p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3632,7 +3704,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
 {
@@ -3649,19 +3721,40 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                "void function1(const %s * p)\n{\n"
-                "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                "}\n", typeData.mockedType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const %s *> p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s *> p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const %s *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3669,7 +3762,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a string parameter and without return value.
+ * Check expectation generation of a function with a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 {
@@ -3681,24 +3774,43 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
     SimpleString testHeader = "void function1(const char* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const char * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const char *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const char *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const char *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const char *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a pointer to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 {
@@ -3713,23 +3825,38 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
             "void function1(Class1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Class1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 * p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 * p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with a pointer to a const class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 {
@@ -3744,23 +3871,42 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
             "void function1(const Class1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const Class1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1 *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1 *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with a pointer to a non-const template class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a non-const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 {
@@ -3775,23 +3921,38 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
             "void function1(Class1<short>* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Class1<short> * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1<short>\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> * p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> * p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with a pointer to a const template class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 {
@@ -3806,24 +3967,43 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
             "void function1(const Class1<short>* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const Class1<short> * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1<short> *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1<short> *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1<short> *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1<short> *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 #endif
 
 /*
- * Check mock generation of a function with a pointer to a non-const struct parameter and without return value.
+ * Check expectation generation of a function with a pointer to a non-const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 {
@@ -3838,23 +4018,38 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
             "void function1(struct Struct1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(struct Struct1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Struct1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 * p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 * p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 * p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
 
 /*
- * Check mock generation of a function with a pointer to a const struct parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 {
@@ -3869,20 +4064,41 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
             "void function1(const struct Struct1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const struct Struct1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Struct1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const struct Struct1 *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const struct Struct1 *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const struct Struct1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const struct Struct1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
+
+#if 0
 
 //*************************************************************************************************
 //                              Simple Left-Value Reference Parameters
@@ -3890,7 +4106,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a left-value reference to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
 {
@@ -3927,7 +4143,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
 {
@@ -3964,7 +4180,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 {
@@ -3997,7 +4213,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a const class parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 {
@@ -4030,7 +4246,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a non-const template class parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a non-const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 {
@@ -4063,7 +4279,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a const template class parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 {
@@ -4096,7 +4312,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a non-const struct parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a non-const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 {
@@ -4129,7 +4345,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a const struct parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 {
@@ -4166,7 +4382,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a right-value reference to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
 {
@@ -4203,7 +4419,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
 {
@@ -4240,7 +4456,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 {
@@ -4273,7 +4489,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a const class parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 {
@@ -4306,7 +4522,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a non-const template class parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a non-const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 {
@@ -4339,7 +4555,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a const template class parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a const template class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 {
@@ -4372,7 +4588,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a non-const struct parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a non-const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 {
@@ -4405,7 +4621,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 }
 
 /*
- * Check mock generation of a function with a right-value reference to a const struct parameter and without return value.
+ * Check expectation generation of a function with a right-value reference to a const struct parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 {
@@ -4443,7 +4659,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a pointer to a typedef for a void type parameter and without return value.
+ * Check expectation generation of a function with a pointer to a typedef for a void type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 {
@@ -4473,7 +4689,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 }
 
 /*
- * Check mock generation of a function with a const pointer to a typedef for a void type parameter and without return value.
+ * Check expectation generation of a function with a const pointer to a typedef for a void type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 {
@@ -4503,7 +4719,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a typedef for a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a pointer to a typedef for a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
 {
@@ -4537,7 +4753,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a typedef for a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a pointer to a typedef for a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParameter )
 {
@@ -4571,7 +4787,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
 }
 
 /*
- * Check mock generation of a function with a pointer to a const typedef for a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const typedef for a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParameter )
 {
@@ -4605,7 +4821,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
 }
 
 /*
- * Check mock generation of a function with a const pointer to a typedef for a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a const pointer to a typedef for a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParameter )
 {
@@ -4640,7 +4856,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a pointer to a typedef for a class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a typedef for a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 {
@@ -4672,7 +4888,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a typedef for a const class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a typedef for a const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 {
@@ -4704,7 +4920,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a const typedef for a class parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const typedef for a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 {
@@ -4736,7 +4952,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 }
 
 /*
- * Check mock generation of a function with a const pointer to a typedef for a class parameter and without return value.
+ * Check expectation generation of a function with a const pointer to a typedef for a class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 {
@@ -4773,7 +4989,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a typedef for a pointer to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for a pointer to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
 {
@@ -4808,7 +5024,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a pointer to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for a pointer to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParameter )
 {
@@ -4843,7 +5059,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
 }
 
 /*
- * Check mock generation of a function with a typedef for a const pointer to a primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for a const pointer to a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParameter )
 {
@@ -4878,7 +5094,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
 }
 
 /*
- * Check mock generation of a function with a const typedef for a pointer to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a const typedef for a pointer to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParameter )
 {
@@ -4913,7 +5129,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
 }
 
 /*
- * Check mock generation of a function with a typedef for a string parameter and without return value.
+ * Check expectation generation of a function with a typedef for a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 {
@@ -4943,7 +5159,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 }
 
 /*
- * Check mock generation of a function with a const typedef for a string parameter and without return value.
+ * Check expectation generation of a function with a const typedef for a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 {
@@ -4974,7 +5190,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a typedef for a pointer to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a pointer to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 {
@@ -5005,7 +5221,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a pointer to a const class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a pointer to a const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 {
@@ -5036,7 +5252,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 }
 
 /*
- * Check mock generation of a function with a typedef for a const pointer to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a typedef for a const pointer to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 {
@@ -5067,7 +5283,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 }
 
 /*
- * Check mock generation of a function with a const typedef for a pointer to a non-const class parameter and without return value.
+ * Check expectation generation of a function with a const typedef for a pointer to a non-const class parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 {
@@ -5106,7 +5322,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a typedef for a reference to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for a reference to a non-const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter )
 {
@@ -5151,7 +5367,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a pointer to a pointer parameter and without return value.
+ * Check expectation generation of a function with a pointer to a pointer parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 {
@@ -5179,7 +5395,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 }
 
 /*
- * Check mock generation of a function with a pointer to a const pointer parameter and without return value.
+ * Check expectation generation of a function with a pointer to a const pointer parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 {
@@ -5207,7 +5423,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 }
 
 /*
- * Check mock generation of a function with a const pointer to a pointer parameter and without return value.
+ * Check expectation generation of a function with a const pointer to a pointer parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 {
@@ -5240,7 +5456,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 
 #ifndef INTERPRET_C
 /*
- * Check mock generation of a function with a left-value reference to a pointer parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a pointer parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 {
@@ -5268,7 +5484,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 }
 
 /*
- * Check mock generation of a function with a left-value reference to a const pointer parameter and without return value.
+ * Check expectation generation of a function with a left-value reference to a const pointer parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 {
@@ -5301,7 +5517,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a double typedef for a primitive type parameter and without return value.
+ * Check expectation generation of a function with a double typedef for a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
 {
@@ -5343,7 +5559,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
+ * Check expectation generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePointerParameter )
 {
@@ -5379,7 +5595,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
 }
 
 /*
- * Check mock generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
+ * Check expectation generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveTypeParameter )
 {
@@ -5415,7 +5631,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
 }
 
 /*
- * Check mock generation of a function with a double const / non-const typedef for a pointer to a primitive type parameter and without return value.
+ * Check expectation generation of a function with a double const / non-const typedef for a pointer to a primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveTypeParameter )
 {
@@ -5451,7 +5667,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
 }
 
 /*
- * Check mock generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveTypeParameter )
 {
@@ -5487,7 +5703,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
 }
 
 /*
- * Check mock generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimitiveTypeParameter )
 {
@@ -5523,7 +5739,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
 }
 
 /*
- * Check mock generation of a function with a double const / non-const typedef for a pointer to a const primitive type parameter and without return value.
+ * Check expectation generation of a function with a double const / non-const typedef for a pointer to a const primitive type parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimitiveTypeParameter )
 {
@@ -5559,7 +5775,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
 }
 
 /*
- * Check mock generation of a function with a double non-const typedef for a string parameter and without return value.
+ * Check expectation generation of a function with a double non-const typedef for a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 {
@@ -5590,7 +5806,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 }
 
 /*
- * Check mock generation of a function with a double non-const / const typedef for a string parameter and without return value.
+ * Check expectation generation of a function with a double non-const / const typedef for a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 {
@@ -5621,7 +5837,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 }
 
 /*
- * Check mock generation of a function with a double const / non-const typedef for a string parameter and without return value.
+ * Check expectation generation of a function with a double const / non-const typedef for a string parameter and without return value.
  */
 TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 {
@@ -5658,7 +5874,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 //*************************************************************************************************
 
 /*
- * Check mock generation of a function with return and multiple parameters.
+ * Check expectation generation of a function with return and multiple parameters.
  */
 TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 {
@@ -5695,7 +5911,7 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 }
 
 /*
- * Check mock generation of a function with return and multiple unnamed parameters.
+ * Check expectation generation of a function with return and multiple unnamed parameters.
  */
 TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 {
@@ -5732,7 +5948,7 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 }
 
 /*
- * Check mock generation of a function with parameter override.
+ * Check expectation generation of a function with parameter override.
  */
 TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 {
@@ -5805,7 +6021,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 }
 
 /*
- * Check mock generation of a function with parameter override.
+ * Check expectation generation of a function with parameter override.
  */
 TEST_EX( TEST_GROUP_NAME,ReturnOverride )
 {
@@ -5874,7 +6090,7 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
 #endif
 
 /*
- * Check mock generation of a function with parameter override that skips a parameter.
+ * Check expectation generation of a function with parameter override that skips a parameter.
  */
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
 {
