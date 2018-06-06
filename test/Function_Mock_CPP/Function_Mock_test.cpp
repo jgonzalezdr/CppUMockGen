@@ -337,7 +337,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
         {
             expectedResult = StringFromFormat(
                     "%s function1()\n{\n"
-                    "    return static_cast<%s>( mock().actualCall(\"function1\").return%sValue() );\n"
+                    "    return static_cast<%s>(mock().actualCall(\"function1\").return%sValue());\n"
                     "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         }
         else
@@ -378,7 +378,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( ENUM_TAG "Enum1 function1()\n{\n"
-                  "    return static_cast<" ENUM_TAG "Enum1>( mock().actualCall(\"function1\").returnIntValue() );\n"
+                  "    return static_cast<" ENUM_TAG "Enum1>(mock().actualCall(\"function1\").returnIntValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -409,7 +409,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Enum1 function1()\n{\n"
-                  "    return static_cast<Enum1>( mock().actualCall(\"function1\").returnIntValue() );\n"
+                  "    return static_cast<Enum1>(mock().actualCall(\"function1\").returnIntValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -439,7 +439,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1 function1()\n{\n"
-                  "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const Class1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -469,7 +469,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1<int> function1()\n{\n"
-                  "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const Class1<int>*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -500,7 +500,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( STRUCT_TAG "Struct1 function1()\n{\n"
-                  "    return * static_cast<const " STRUCT_TAG "Struct1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const " STRUCT_TAG "Struct1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -538,7 +538,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "Type1 function1()\n{\n"
-                "    return static_cast<Type1>( mock().actualCall(\"function1\").return%sValue() );\n"
+                "    return static_cast<Type1>(mock().actualCall(\"function1\").return%sValue());\n"
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -571,7 +571,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnIntValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnIntValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -603,7 +603,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnIntValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnIntValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -634,7 +634,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return * static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -665,7 +665,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return * static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -697,7 +697,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return * static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<const Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -789,7 +789,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "%s * function1()\n{\n"
-                "    return static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                "    return static_cast<%s*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -824,7 +824,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "const %s * function1()\n{\n"
-                "    return static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                "    return static_cast<const %s*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -886,7 +886,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1 * function1()\n{\n"
-                  "    return static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<Class1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -916,7 +916,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Class1 * function1()\n{\n"
-                  "    return static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<const Class1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -946,7 +946,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Class1<int> * function1()\n{\n"
-                  "    return static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<Class1<int>*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -976,7 +976,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Class1<char> * function1()\n{\n"
-                  "    return static_cast<const Class1<char> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<const Class1<char>*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1007,7 +1007,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "struct Struct1 * function1()\n{\n"
-                  "    return static_cast<struct Struct1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<struct Struct1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1037,7 +1037,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const struct Struct1 * function1()\n{\n"
-                  "    return static_cast<const struct Struct1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<const struct Struct1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1074,7 +1074,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "%s & function1()\n{\n"
-                "    return * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                "    return *static_cast<%s*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1109,7 +1109,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "const %s & function1()\n{\n"
-                "    return * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                "    return *static_cast<const %s*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1143,7 +1143,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "Class1 & function1()\n{\n"
-            "    return * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+            "    return *static_cast<Class1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1175,7 +1175,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const Class1 & function1()\n{\n"
-            "    return * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+            "    return *static_cast<const Class1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1207,7 +1207,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "Class1<int> & function1()\n{\n"
-            "    return * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+            "    return *static_cast<Class1<int>*>(mock().actualCall(\"function1\").returnPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1239,7 +1239,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const Class1<int> & function1()\n{\n"
-            "    return * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+            "    return *static_cast<const Class1<int>*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1271,7 +1271,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "struct Struct1 & function1()\n{\n"
-            "    return * static_cast<struct Struct1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+            "    return *static_cast<struct Struct1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1303,7 +1303,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const struct Struct1 & function1()\n{\n"
-            "    return * static_cast<const struct Struct1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+            "    return *static_cast<const struct Struct1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1340,7 +1340,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "%s && function1()\n{\n"
-                "    return std::move( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+                "    return std::move(*static_cast<%s*>(mock().actualCall(\"function1\").returnPointerValue()));\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1375,7 +1375,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "const %s && function1()\n{\n"
-                "    return std::move( * static_cast<const %s *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+                "    return std::move(*static_cast<const %s*>(mock().actualCall(\"function1\").returnConstPointerValue()));\n"
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1409,7 +1409,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "Class1 && function1()\n{\n"
-            "    return std::move( * static_cast<Class1 *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+            "    return std::move(*static_cast<Class1*>(mock().actualCall(\"function1\").returnPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1441,7 +1441,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const Class1 && function1()\n{\n"
-            "    return std::move( * static_cast<const Class1 *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+            "    return std::move(*static_cast<const Class1*>(mock().actualCall(\"function1\").returnConstPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1473,7 +1473,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "Class1<int> && function1()\n{\n"
-            "    return std::move( * static_cast<Class1<int> *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+            "    return std::move(*static_cast<Class1<int>*>(mock().actualCall(\"function1\").returnPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1505,7 +1505,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const Class1<int> && function1()\n{\n"
-            "    return std::move( * static_cast<const Class1<int> *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+            "    return std::move(*static_cast<const Class1<int>*>(mock().actualCall(\"function1\").returnConstPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1537,7 +1537,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "struct Struct1 && function1()\n{\n"
-            "    return std::move( * static_cast<struct Struct1 *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+            "    return std::move(*static_cast<struct Struct1*>(mock().actualCall(\"function1\").returnPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1569,7 +1569,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
     CHECK_EQUAL( 1, results.size() );
     SimpleString expectedResult =
             "const struct Struct1 && function1()\n{\n"
-            "    return std::move( * static_cast<const struct Struct1 *>( mock().actualCall(\"function1\").returnConstPointerValue() ) );\n"
+            "    return std::move(*static_cast<const struct Struct1*>(mock().actualCall(\"function1\").returnConstPointerValue()));\n"
             "}\n";
     STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -1608,7 +1608,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
-                      "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1643,7 +1643,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 * function1()\n{\n"
-                      "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1678,7 +1678,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type1 * function1()\n{\n"
-                      "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<const Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1713,7 +1713,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 *const function1()\n{\n"
-                      "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1747,7 +1747,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 * function1()\n{\n"
-                  "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<Type1*>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1778,7 +1778,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 * function1()\n{\n"
-                  "    return static_cast<Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1809,7 +1809,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 * function1()\n{\n"
-                  "    return static_cast<const Type1 *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<const Type1*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1847,7 +1847,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
-                      "    return static_cast<Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1882,7 +1882,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
-                      "    return static_cast<Type1>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<Type1>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1917,7 +1917,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type1 function1()\n{\n"
-                      "    return static_cast<Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1952,7 +1952,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type1 function1()\n{\n"
-                      "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<const Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -1984,7 +1984,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnStringValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2014,7 +2014,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 function1()\n{\n"
-                  "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "    return static_cast<const Type1>(mock().actualCall(\"function1\").returnStringValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2046,7 +2046,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2077,7 +2077,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2108,7 +2108,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type1 function1()\n{\n"
-                  "    return static_cast<Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2139,7 +2139,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type1 function1()\n{\n"
-                  "    return static_cast<const Type1>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<const Type1>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2183,7 +2183,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "Type1 function1()\n{\n"
-                "    return static_cast<Type1>( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) );\n"
+                "    return static_cast<Type1>(*static_cast<%s*>(mock().actualCall(\"function1\").returnPointerValue()));\n"
                 "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -2220,7 +2220,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "Type1 function1()\n{\n"
-                "    return static_cast<Type1>( std::move( * static_cast<%s *>( mock().actualCall(\"function1\").returnPointerValue() ) ) );\n"
+                "    return static_cast<Type1>(std::move(*static_cast<%s*>(mock().actualCall(\"function1\").returnPointerValue())));\n"
                 "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -2256,7 +2256,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "int ** function1()\n{\n"
-                  "    return static_cast<int * *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<int **>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2284,7 +2284,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const unsigned char ** function1()\n{\n"
-                  "    return static_cast<const unsigned char * *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return static_cast<const unsigned char **>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2312,7 +2312,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "short *const * function1()\n{\n"
-                  "    return static_cast<short *const *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return static_cast<short *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2345,7 +2345,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "double *& function1()\n{\n"
-                  "    return * static_cast<double * *>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                  "    return *static_cast<double **>(mock().actualCall(\"function1\").returnPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2373,7 +2373,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "bool *const & function1()\n{\n"
-                  "    return * static_cast<bool *const *>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                  "    return *static_cast<bool *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2413,7 +2413,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
                 "Type2 function1()\n{\n"
-                "    return static_cast<Type2>( mock().actualCall(\"function1\").return%sValue() );\n"
+                "    return static_cast<Type2>(mock().actualCall(\"function1\").return%sValue());\n"
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
@@ -2454,7 +2454,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
-                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type2>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2490,7 +2490,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
-                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<Type2>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2526,7 +2526,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
-                      "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnPointerValue() );\n"
+                      "    return static_cast<const Type2>(mock().actualCall(\"function1\").returnPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2562,7 +2562,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
-                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<Type2>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2598,7 +2598,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "Type2 function1()\n{\n"
-                      "    return static_cast<Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<Type2>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2634,7 +2634,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         STRCMP_EQUAL( "const Type2 function1()\n{\n"
-                      "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnConstPointerValue() );\n"
+                      "    return static_cast<const Type2>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
                       "}\n", results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2667,7 +2667,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type2 function1()\n{\n"
-                  "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "    return static_cast<Type2>(mock().actualCall(\"function1\").returnStringValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2698,7 +2698,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "Type2 function1()\n{\n"
-                  "    return static_cast<Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "    return static_cast<Type2>(mock().actualCall(\"function1\").returnStringValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -2729,7 +2729,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
     CHECK_EQUAL( 1, functionCount );
     CHECK_EQUAL( 1, results.size() );
     STRCMP_EQUAL( "const Type2 function1()\n{\n"
-                  "    return static_cast<const Type2>( mock().actualCall(\"function1\").returnStringValue() );\n"
+                  "    return static_cast<const Type2>(mock().actualCall(\"function1\").returnStringValue());\n"
                   "}\n", results[0].c_str() );
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 

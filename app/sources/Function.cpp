@@ -513,8 +513,8 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
             ret->ExpectationArgByRef(true);
             if( enableCast )
             {
-                ret->MockRetExprPrepend( "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( " );
-                ret->MockRetExprAppend( " )" );
+                ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
+                ret->MockRetExprAppend( ")" );
                 ret->ExpectationRetExprPrepend( "&" );
             }
             break;
@@ -537,8 +537,8 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
     if( mockNeedsCast && enableCast )
     {
-        ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( returnType ) + ">( " );
-        ret->MockRetExprAppend( " )" );
+        ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( returnType ) + ">(" );
+        ret->MockRetExprAppend( ")" );
     }
 
     return ret;
@@ -579,8 +579,8 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
             if( enableCast )
             {
                 // Cast mock return pointer to proper pointer type
-                ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( pointeeType ) + " *>( " );
-                ret->MockRetExprAppend( " )" );
+                ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( pointeeType ) + "*>(" );
+                ret->MockRetExprAppend( ")" );
             }
         }
     }
@@ -588,14 +588,14 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
     if( returnType.kind == CXType_LValueReference )
     {
         // Dereference mock return pointer
-        ret->MockRetExprPrepend( "* " );
+        ret->MockRetExprPrepend( "*" );
         ret->ExpectationRetExprPrepend( "&" );
     }
     else if( returnType.kind == CXType_RValueReference )
     {
         // Dereference mock return pointer
-        ret->MockRetExprPrepend( "std::move( * " );
-        ret->MockRetExprAppend( " )" );
+        ret->MockRetExprPrepend( "std::move(*" );
+        ret->MockRetExprAppend( ")" );
         ret->ExpectationRetExprPrepend( "&" );
     }
 
@@ -625,16 +625,16 @@ ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool
         ( underlyingType.kind == CXType_Unexposed ) )
     {
         // Dereference mock return pointer
-        ret->MockRetExprPrepend( "* static_cast<const " + clang_getTypeSpelling( returnType ) + " *>( " );
-        ret->MockRetExprAppend( " )" );
+        ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
+        ret->MockRetExprAppend( ")" );
         ret->ExpectationArgByRef(true);
         ret->ExpectationRetExprPrepend( "&" );
     }
     else
     {
         // Just cast
-        ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( returnType ) + ">( " );
-        ret->MockRetExprAppend( " )" );
+        ret->MockRetExprPrepend( "static_cast<" + clang_getTypeSpelling( returnType ) + ">(" );
+        ret->MockRetExprAppend( ")" );
     }
 
     return ret;
