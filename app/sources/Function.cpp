@@ -136,14 +136,14 @@ public:
                RETURN_ARG_NAME +  GetExpectationRetExprBack() + ");\n";
     }
 
-    void ExpectationArgByRef( bool argByRef )
+    void ExpectationArgByRef()
     {
-        m_expectationArgByRef = argByRef;
+        m_expectationArgByRef = true;
     }
 
-    void ExpectationNeedsCast( bool needsCast )
+    void ExpectationNeedsCast()
     {
-        m_expectationNeedsCast = needsCast;
+        m_expectationNeedsCast = true;
     }
 
 protected:
@@ -431,7 +431,7 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
 
     ret->BothRetExprPrepend( override->GetExprModFront() );
     ret->BothRetExprAppend( override->GetExprModBack() );
-    ret->ExpectationNeedsCast( true );
+    ret->ExpectationNeedsCast();
 
     return ret;
 }
@@ -458,7 +458,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_WChar:
         case CXType_Enum:
             ret = new ReturnInt;
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -471,7 +471,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_UShort:
         case CXType_Char16:
             ret = new ReturnUnsignedInt;
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -485,7 +485,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Char32:
             ret = new ReturnUnsignedLong;
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -495,7 +495,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Float:
             ret = new ReturnDouble;
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -509,8 +509,8 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             // Dereference and cast mock return pointer to proper pointer type
             ret = new ReturnConstPointer;
-            ret->ExpectationNeedsCast( true );
-            ret->ExpectationArgByRef(true);
+            ret->ExpectationNeedsCast();
+            ret->ExpectationArgByRef();
             if( enableCast )
             {
                 ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
@@ -521,7 +521,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Typedef:
             ret = ProcessTypeTypedef( returnType, inheritConst );
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
             break;
 
         case CXType_Elaborated:
@@ -574,7 +574,7 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
 
         if( pointeeType.kind != CXType_Void )
         {
-            ret->ExpectationNeedsCast( true );
+            ret->ExpectationNeedsCast();
 
             if( enableCast )
             {
@@ -627,7 +627,7 @@ ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool
         // Dereference mock return pointer
         ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
         ret->MockRetExprAppend( ")" );
-        ret->ExpectationArgByRef(true);
+        ret->ExpectationArgByRef();
         ret->ExpectationRetExprPrepend( "&" );
     }
     else
@@ -667,9 +667,9 @@ public:
 
     virtual std::string GetBody( bool mock, bool argumentsSkipped ) const = 0;
 
-    virtual bool canBeIgnored() const = 0;
+    virtual bool CanBeIgnored() const = 0;
 
-    virtual bool isSkipped() const = 0;
+    virtual bool IsSkipped() const = 0;
 
 protected:
     std::string m_name;
@@ -691,12 +691,12 @@ public:
         return "";
     }
 
-    virtual bool isSkipped() const
+    virtual bool IsSkipped() const
     {
         return true;
     }
 
-    virtual bool canBeIgnored() const override
+    virtual bool CanBeIgnored() const override
     {
         return false;
     }
@@ -714,7 +714,7 @@ public:
         {
             return m_originalType + " " + m_name;
         }
-        else if( canBeIgnored() )
+        else if( CanBeIgnored() )
         {
             return "CppUMockGen::Parameter<" + m_originalType + (m_expectationArgByRef ? "&> " : "> ") + m_name;
         }
@@ -730,7 +730,7 @@ public:
         {
             return "." + GetBodyCall(mock, "");
         }
-        else if( canBeIgnored() )
+        else if( CanBeIgnored() )
         {
             if( argumentsSkipped )
             {
@@ -748,7 +748,7 @@ public:
         }
     }
 
-    virtual bool isSkipped() const
+    virtual bool IsSkipped() const
     {
         return false;
     }
@@ -763,19 +763,19 @@ public:
         m_mockArgExprBack.append( expr );
     }
 
-    void ExpectationArgByRef( bool argByRef )
+    void ExpectationArgByRef()
     {
-        m_expectationArgByRef = argByRef;
+        m_expectationArgByRef = true;
     }
 
-    virtual bool canBeIgnored() const override
+    virtual bool CanBeIgnored() const override
     {
         return !m_forceNotIgnored && isInput();
     }
 
-    void forceNotIgnored( bool forceNotIgnored )
+    void ForceNotIgnored()
     {
-        m_forceNotIgnored = forceNotIgnored;
+        m_forceNotIgnored = true;
     }
 
 protected:
@@ -914,16 +914,22 @@ protected:
 class ArgumentOutput : public ArgumentStandard
 {
 public:
+    ArgumentOutput() : m_calculateSizeFromType(false) {}
     virtual ~ArgumentOutput() {}
 
     virtual std::string GetSignature(bool mock) const override
     {
         std::string ret = m_originalType + " " + m_name;
-        if( !mock )
+        if( !mock && !m_calculateSizeFromType )
         {
             ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
         }
         return ret;
+    }
+
+    void CalculateSizeFromType()
+    {
+        m_calculateSizeFromType = true;
     }
 
 protected:
@@ -950,11 +956,17 @@ protected:
         {
             return ")";
         }
+        else if( m_calculateSizeFromType )
+        {
+            return ", sizeof(" + m_name + "))";
+        }
         else
         {
             return ", " SIZEOF_VAR_PREFIX + m_name + ")";
         }
     }
+
+    bool m_calculateSizeFromType;
 };
 
 class ArgumentOfType : public ArgumentStandard
@@ -1188,7 +1200,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             ret = ProcessTypeRecord( argType, origArgType, inheritConst, false );
             ret->MockArgExprPrepend("&");
-            ret->ExpectationArgByRef(true);
+            ret->ExpectationArgByRef();
             break;
 
         case CXType_Elaborated:
@@ -1251,7 +1263,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
 
                 case CXType_RValueReference:
                     ret = new ArgumentPointer;
-                    ret->forceNotIgnored(true);
+                    ret->ForceNotIgnored();
                     break;
 
                 case CXType_Record:
@@ -1261,6 +1273,10 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
 
                 default:
                     ret = new ArgumentOutput;
+                    if( argType.kind != CXType_Pointer )
+                    {
+                        static_cast<ArgumentOutput*>(ret)->CalculateSizeFromType();
+                    }
                     break;
             }
         }
@@ -1297,7 +1313,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeRVReference( const CXType &argType,
         ret = ProcessType( pointeeType, origArgType, isPointeeConst );
     }
 
-    ret->forceNotIgnored(true);
+    ret->ForceNotIgnored();
     return ret;
 }
 
@@ -1331,7 +1347,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
 
         if( underlyingType.kind == CXType_RValueReference )
         {
-            ret->forceNotIgnored(true);
+            ret->ForceNotIgnored();
         }
 
         if( underlyingType.kind != CXType_Pointer )
@@ -1639,7 +1655,7 @@ bool Function::hasIgnorableArguments() const
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
-        if( m_arguments[i]->canBeIgnored() )
+        if( m_arguments[i]->CanBeIgnored() )
         {
             return true;
         }
@@ -1652,7 +1668,7 @@ bool Function::hasSkippedArguments() const
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
-        if( m_arguments[i]->isSkipped() )
+        if( m_arguments[i]->IsSkipped() )
         {
             return true;
         }

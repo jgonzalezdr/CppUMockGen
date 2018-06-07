@@ -4098,8 +4098,6 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
     // Cleanup
 }
 
-#if 0
-
 //*************************************************************************************************
 //                              Simple Left-Value Reference Parameters
 //*************************************************************************************************
@@ -4123,19 +4121,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                  "void function1(%s & p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameter(\"p\", &p);\n"
-                  "}\n", typeData.mockedType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s & p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s & p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s & p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", &p, sizeof(p));\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s & p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", &p, sizeof(p));\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4160,19 +4175,40 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                  "void function1(const %s & p)\n{\n"
-                  "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", &p);\n"
-                  "}\n", typeData.mockedType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const %s &> p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s &> p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const %s &> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", &p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s &> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", &p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4195,19 +4231,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
             "void function1(Class1& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(Class1 & p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 & p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 & p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4228,19 +4277,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
             "void function1(const Class1& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const Class1 & p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1 &> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1 &> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1 &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1 &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4261,19 +4327,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
             "void function1(Class1<short>& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(Class1<short> & p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1<short>\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> & p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> & p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4294,19 +4373,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
             "void function1(const Class1<short>& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const Class1<short> & p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1<short> &> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1<short> &> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Class1<short> &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Class1<short> &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4327,19 +4423,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
             "void function1(struct Struct1& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(struct Struct1 & p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Struct1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 & p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 & p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 & p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4360,19 +4469,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
             "void function1(const struct Struct1& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const struct Struct1 & p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Struct1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const struct Struct1 &> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const struct Struct1 &> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const struct Struct1 &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const struct Struct1 &> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4399,19 +4525,38 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                  "void function1(%s && p)\n{\n"
-                  "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
-                  "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s && p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s && p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(%s && p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.with%sParameter(\"p\", p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, %s && p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.with%sParameter(\"p\", p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n",
+                typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str(),
+                typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4436,19 +4581,38 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        SimpleString expectedResult = StringFromFormat(
-                  "void function1(const %s && p)\n{\n"
-                  "    mock().actualCall(\"function1\").with%sParameter(\"p\", p);\n"
-                  "}\n", typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
-        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(const %s && p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, const %s && p);\n"
+                "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+                "namespace expect {\n"
+                "MockExpectedCall& function1(const %s && p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.with%sParameter(\"p\", p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, const %s && p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.with%sParameter(\"p\", p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n",
+                typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str(),
+                typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4471,19 +4635,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
             "void function1(Class1&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(Class1 && p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4504,19 +4681,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
             "void function1(const Class1&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const Class1 && p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Class1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const Class1 && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const Class1 && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const Class1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const Class1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Class1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4537,19 +4727,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
             "void function1(Class1<short>&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(Class1<short> && p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Class1<short>\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(Class1<short> && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, Class1<short> && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4570,19 +4773,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
             "void function1(const Class1<short>&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const Class1<short> && p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const Class1<short> && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const Class1<short> && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const Class1<short> && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const Class1<short> && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Class1<short>\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4603,19 +4819,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
             "void function1(struct Struct1&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(struct Struct1 && p)\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Struct1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(struct Struct1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, struct Struct1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withOutputParameterOfTypeReturning(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4636,19 +4865,32 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
             "void function1(const struct Struct1&& p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    SimpleString expectedResult =
-            "void function1(const struct Struct1 && p)\n{\n"
-            "    mock().actualCall(\"function1\").withParameterOfType(\"Struct1\", \"p\", &p);\n"
-            "}\n";
-    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const struct Struct1 && p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const struct Struct1 && p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(const struct Struct1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, const struct Struct1 && p)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    __expectedCall__.withParameterOfType(\"Struct1\", \"p\", &p);\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4673,17 +4915,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
             "void function1(Type1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4703,17 +4964,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
             "void function1(Type1* const p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *const> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *const> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *const> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *const> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4736,19 +5016,39 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
-                      "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(Type1 * p, size_t __sizeof_p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, Type1 * p, size_t __sizeof_p);\n"
+                "}\n";
+        SimpleString expectedResultImpl =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(Type1 * p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, Type1 * p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n";
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4770,19 +5070,43 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
-                      "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p);\n"
+                "}\n";
+        SimpleString expectedResultImpl =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n";
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4804,19 +5128,43 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
-                      "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1 *> p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1 *> p);\n"
+                "}\n";
+        SimpleString expectedResultImpl =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1 *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1 *> p)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n";
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4838,19 +5186,39 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
-                      "    mock().actualCall(\"function1\").withOutputParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(Type1 *const p, size_t __sizeof_p);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, Type1 *const p, size_t __sizeof_p);\n"
+                "}\n";
+        SimpleString expectedResultImpl =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(Type1 *const p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, Type1 *const p, size_t __sizeof_p)\n{\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n";
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
+        mock().clear();
     }
 }
 
@@ -4872,17 +5240,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
             "void function1(Type1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Type1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    SimpleString expectedResultProto =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 * p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 * p);\n"
+            "}\n";
+    SimpleString expectedResultImpl =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 * p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+            "    __expectedCall__.withOutputParameterOfTypeReturning(\"Type1\", \"p\", p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 * p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    __expectedCall__.withOutputParameterOfTypeReturning(\"Type1\", \"p\", p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+    STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4904,17 +5291,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
             "void function1(Type1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4936,17 +5342,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
             "void function1(const Type1* p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const Type1 * p)\n{\n"
-                  "    mock().actualCall(\"function1\").withParameterOfType(\"Type1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1 *> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1 *> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1 *> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Type1\", \"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4968,17 +5393,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
             "void function1(Type1* const p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 *const p)\n{\n"
-                  "    mock().actualCall(\"function1\").withOutputParameterOfType(\"Type1\", \"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    SimpleString expectedResultProto =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 *const p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 *const p);\n"
+            "}\n";
+    SimpleString expectedResultImpl =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 *const p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+            "    __expectedCall__.withOutputParameterOfTypeReturning(\"Type1\", \"p\", p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 *const p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    __expectedCall__.withOutputParameterOfTypeReturning(\"Type1\", \"p\", p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+    STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5006,17 +5450,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                      "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5041,17 +5504,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                      "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5076,17 +5558,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                      "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5111,17 +5612,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
                 typeData.originalType.c_str() );
 
         // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
         // Verify
         mock().checkExpectations();
         CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
-                      "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                      "}\n", results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5143,17 +5663,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5173,17 +5712,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
             "void function1(const Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withStringParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5205,17 +5763,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5236,17 +5813,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5267,17 +5863,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
             "void function1(Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5298,17 +5913,36 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
             "void function1(const Type1 p);";
 
     // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(const Type1 p)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"p\", p);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p);\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p);\n"
+                  "}\n", resultsProto[0].c_str() );
+    STRCMP_EQUAL( "namespace expect {\n"
+                  "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p)\n{\n"
+                  "    bool __ignoreOtherParams__ = false;\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                  "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", p.getValue()); }\n"
+                  "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "}\n", resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5318,49 +5952,119 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 //*************************************************************************************************
 
 //*************************************************************************************************
-//                                 Typedef for Reference Parameters
+//                                 Typedef for Left-Value Reference Parameters
 //*************************************************************************************************
 
 /*
- * Check expectation generation of a function with a typedef for a reference to a non-const primitive type parameter and without return value.
+ * Check expectation generation of a function with a typedef for a lv-reference to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter )
+TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForLVReferenceToPrimitiveTypeParameter )
 {
-    const std::vector<std::string> referenceTypes = { "&", "&&" };
-
-    for( auto referenceType : referenceTypes )
+    for( auto typeData : primitivePointedTypesWithString )
     {
-        for( auto typeData : primitivePointedTypesWithString )
-        {
-            // Prepare
-            Config* config = GetMockConfig();
-            mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
-            mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+        // Prepare
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
 
-            SimpleString testHeader = StringFromFormat(
-                    "typedef %s%s Type1;\n"
-                    "void function1(Type1 p);",
-                    typeData.originalType.c_str(), referenceType.c_str() );
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s& Type1;\n"
+                "void function1(Type1 p);",
+                typeData.originalType.c_str());
 
-            // Exercise
-            std::vector<std::string> results;
-            unsigned int functionCount = ParseHeader( testHeader, *config, results );
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
 
-            // Verify
-            mock().checkExpectations();
-            CHECK_EQUAL( 1, functionCount );
-            CHECK_EQUAL( 1, results.size() );
-            STRCMP_EQUAL( "void function1(Type1 p)\n{\n"
-                          "    mock().actualCall(\"function1\").withPointerParameter(\"p\", &p);\n"
-                          "}\n", results[0].c_str() );
-            CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), results[0] ) );
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", &p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+                      "    bool __ignoreOtherParams__ = false;\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter(\"p\", &p.getValue()); }\n"
+                      "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
 
-            // Cleanup
-            mock().clear();
-        }
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
+//                                 Typedef for Right-Value Reference Parameters
+//*************************************************************************************************
+
+/*
+ * Check expectation generation of a function with a typedef for a rv-reference to a non-const primitive type parameter and without return value.
+ */
+TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForRVReferenceToPrimitiveTypeParameter )
+{
+    for( auto typeData : primitivePointedTypesWithString )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p").andReturnValue((const void*)0);
+        mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#Type1").andReturnValue((const void*)0);
+
+        SimpleString testHeader = StringFromFormat(
+                "typedef %s&& Type1;\n"
+                "void function1(Type1 p);",
+                typeData.originalType.c_str());
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(Type1 p);\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, Type1 p);\n"
+                      "}\n", resultsProto[0].c_str() );
+        STRCMP_EQUAL( "namespace expect {\n"
+                      "MockExpectedCall& function1(Type1 p)\n{\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+                      "    __expectedCall__.withPointerParameter(\"p\", &p);\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "MockExpectedCall& function1(unsigned int __numCalls__, Type1 p)\n{\n"
+                      "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                      "    __expectedCall__.withPointerParameter(\"p\", &p);\n"
+                      "    return __expectedCall__;\n"
+                      "}\n"
+                      "}\n", resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
     }
 }
 #endif
+
+#if 0
 
 //*************************************************************************************************
 //                                 Pointer to Pointer Parameters
