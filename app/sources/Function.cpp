@@ -80,7 +80,7 @@ public:
 class ReturnStandard : public Function::Return
 {
 public:
-    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false) {}
+    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false), m_isRVReference(false) {}
     virtual ~ReturnStandard() {};
 
     void BothRetExprPrepend( const std::string &expr )
@@ -127,7 +127,7 @@ public:
 
     virtual std::string GetExpectationSignature() const override
     {
-        return m_originalType + (m_expectationArgByRef ? " &" : " ") + RETURN_ARG_NAME;
+        return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + RETURN_ARG_NAME;
     }
 
     virtual std::string GetExpectationBody() const override
@@ -136,14 +136,19 @@ public:
                RETURN_ARG_NAME +  GetExpectationRetExprBack() + ");\n";
     }
 
-    void ExpectationArgByRef()
+    void SetExpectationArgByRef()
     {
         m_expectationArgByRef = true;
     }
 
-    void ExpectationNeedsCast()
+    void SetExpectationNeedsCast()
     {
         m_expectationNeedsCast = true;
+    }
+
+    void SetIsRVReference()
+    {
+        m_isRVReference = true;
     }
 
 protected:
@@ -162,12 +167,25 @@ private:
         return m_expectationRetExprBack +  ( m_expectationNeedsCast ? ")" : "" );
     }
 
+    std::string GetSignatureType() const
+    {
+        if( m_isRVReference )
+        {
+            return m_originalType.substr( 0, ( m_originalType.size() - 1 ) );
+        }
+        else
+        {
+            return m_originalType;
+        }
+    }
+
     std::string m_mockRetExprFront;
     std::string m_mockRetExprBack;
     std::string m_expectationRetExprFront;
     std::string m_expectationRetExprBack;
     bool m_expectationArgByRef;
     bool m_expectationNeedsCast;
+    bool m_isRVReference;
 };
 
 class ReturnBool : public ReturnStandard
@@ -431,7 +449,7 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
 
     ret->BothRetExprPrepend( override->GetExprModFront() );
     ret->BothRetExprAppend( override->GetExprModBack() );
-    ret->ExpectationNeedsCast();
+    ret->SetExpectationNeedsCast();
 
     return ret;
 }
@@ -458,7 +476,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_WChar:
         case CXType_Enum:
             ret = new ReturnInt;
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -471,7 +489,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_UShort:
         case CXType_Char16:
             ret = new ReturnUnsignedInt;
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -485,7 +503,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Char32:
             ret = new ReturnUnsignedLong;
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -495,7 +513,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Float:
             ret = new ReturnDouble;
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
             mockNeedsCast = true;
             break;
 
@@ -509,8 +527,8 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             // Dereference and cast mock return pointer to proper pointer type
             ret = new ReturnConstPointer;
-            ret->ExpectationNeedsCast();
-            ret->ExpectationArgByRef();
+            ret->SetExpectationNeedsCast();
+            ret->SetExpectationArgByRef();
             if( enableCast )
             {
                 ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
@@ -521,7 +539,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Typedef:
             ret = ProcessTypeTypedef( returnType, inheritConst );
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
             break;
 
         case CXType_Elaborated:
@@ -574,7 +592,7 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
 
         if( pointeeType.kind != CXType_Void )
         {
-            ret->ExpectationNeedsCast();
+            ret->SetExpectationNeedsCast();
 
             if( enableCast )
             {
@@ -597,6 +615,7 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
         ret->MockRetExprPrepend( "std::move(*" );
         ret->MockRetExprAppend( ")" );
         ret->ExpectationRetExprPrepend( "&" );
+        ret->SetIsRVReference();
     }
 
     return ret;
@@ -627,7 +646,7 @@ ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool
         // Dereference mock return pointer
         ret->MockRetExprPrepend( "*static_cast<const " + clang_getTypeSpelling( returnType ) + "*>(" );
         ret->MockRetExprAppend( ")" );
-        ret->ExpectationArgByRef();
+        ret->SetExpectationArgByRef();
         ret->ExpectationRetExprPrepend( "&" );
     }
     else
@@ -705,7 +724,7 @@ public:
 class ArgumentStandard : public Function::Argument
 {
 public:
-    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false) {}
+    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false) {}
     virtual ~ArgumentStandard() {}
 
     virtual std::string GetSignature( bool mock ) const override
@@ -720,7 +739,7 @@ public:
         }
         else
         {
-            return m_originalType + (m_expectationArgByRef ? " &" : " ") + m_name;
+            return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + m_name;
         }
     }
 
@@ -763,7 +782,7 @@ public:
         m_mockArgExprBack.append( expr );
     }
 
-    void ExpectationArgByRef()
+    void SetExpectationArgByRef()
     {
         m_expectationArgByRef = true;
     }
@@ -776,6 +795,11 @@ public:
     void ForceNotIgnored()
     {
         m_forceNotIgnored = true;
+    }
+
+    void SetIsRVReference()
+    {
+        m_isRVReference = true;
     }
 
 protected:
@@ -797,10 +821,23 @@ private:
         return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + GetCallBack(mock);
     }
 
+    std::string GetSignatureType() const
+    {
+        if( m_isRVReference )
+        {
+            return m_originalType.substr( 0, ( m_originalType.size() - 1 ) );
+        }
+        else
+        {
+            return m_originalType;
+        }
+    }
+
     std::string m_mockArgExprFront;
     std::string m_mockArgExprBack;
     bool m_expectationArgByRef;
     bool m_forceNotIgnored;
+    bool m_isRVReference;
 };
 
 class ArgumentBool : public ArgumentStandard
@@ -1200,7 +1237,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
         case CXType_Unexposed: // Template classes are processed as "Unexposed" kind
             ret = ProcessTypeRecord( argType, origArgType, inheritConst, false );
             ret->MockArgExprPrepend("&");
-            ret->ExpectationArgByRef();
+            ret->SetExpectationArgByRef();
             break;
 
         case CXType_Elaborated:
@@ -1314,6 +1351,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeRVReference( const CXType &argType,
     }
 
     ret->ForceNotIgnored();
+    ret->SetIsRVReference();
     return ret;
 }
 
