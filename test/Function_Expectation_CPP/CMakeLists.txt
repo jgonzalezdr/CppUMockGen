@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen.Test.Function_Expectation )
+project( CppUMockGen.Test.Function_Expectation_CPP )
 
 # Test configuration
 
