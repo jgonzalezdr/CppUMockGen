@@ -29,9 +29,9 @@
  *===========================================================================*/
 
 #ifdef INTERPRET_C
-#define TEST_GROUP_NAME Function_C
+#define TEST_GROUP_NAME Function_Mock_C
 #else
-#define TEST_GROUP_NAME Function_CPP
+#define TEST_GROUP_NAME Function_Mock_CPP
 #endif
 
 #define TEST_GROUP_EX(x) TEST_GROUP(x)
