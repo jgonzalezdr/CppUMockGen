@@ -37,7 +37,7 @@ Config* GetMockConfig()
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
-TEST_GROUP( Method )
+TEST_GROUP( Method_Mock )
 {
     unsigned int ParseHeader( const SimpleString &testHeader, const Config &config, std::vector<std::string> &results )
     {
@@ -65,7 +65,7 @@ TEST_GROUP( Method )
 /*
  * Check that a public method with definition inside the class declaration is not mocked.
  */
-TEST( Method, PublicNonVirtualWithDefinitionInsideClass )
+TEST( Method_Mock, PublicNonVirtualWithDefinitionInsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -90,7 +90,7 @@ TEST( Method, PublicNonVirtualWithDefinitionInsideClass )
 /*
  * Check that a non-virtual protected method with definition inside the class declaration is not mocked.
  */
-TEST( Method, ProtectedVirtualWithDefinitionInsideClass )
+TEST( Method_Mock, ProtectedVirtualWithDefinitionInsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -118,7 +118,7 @@ TEST( Method, ProtectedVirtualWithDefinitionInsideClass )
 /*
  * Check that a method with definition outside the class declaration is not mocked.
  */
-TEST( Method, WithDefinitionOutsideClass )
+TEST( Method_Mock, WithDefinitionOutsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -144,7 +144,7 @@ TEST( Method, WithDefinitionOutsideClass )
 /*
  * Check that a non-virtual private method is not mocked.
  */
-TEST( Method, NonVirtualPrivateMethod )
+TEST( Method_Mock, NonVirtualPrivateMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -169,7 +169,7 @@ TEST( Method, NonVirtualPrivateMethod )
 /*
  * Check that a non-virtual protected method is not mocked.
  */
-TEST( Method, NonVirtualProtectedMethod )
+TEST( Method_Mock, NonVirtualProtectedMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -194,7 +194,7 @@ TEST( Method, NonVirtualProtectedMethod )
 /*
  * Check that a pure virtual method is not mocked.
  */
-TEST( Method, PureVirtualMethod )
+TEST( Method_Mock, PureVirtualMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -219,7 +219,7 @@ TEST( Method, PureVirtualMethod )
 /*
  * Check that a non-virtual public method is mocked properly.
  */
-TEST( Method, NonVirtualPublicMethod )
+TEST( Method_Mock, NonVirtualPublicMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -247,7 +247,7 @@ TEST( Method, NonVirtualPublicMethod )
 /*
  * Check that a virtual public method is mocked properly.
  */
-TEST( Method, VirtualPublicMethod )
+TEST( Method_Mock, VirtualPublicMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -275,7 +275,7 @@ TEST( Method, VirtualPublicMethod )
 /*
  * Check that a virtual private method is mocked properly.
  */
-TEST( Method, VirtualPrivateMethod )
+TEST( Method_Mock, VirtualPrivateMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -303,7 +303,7 @@ TEST( Method, VirtualPrivateMethod )
 /*
  * Check that a virtual private method is mocked properly.
  */
-TEST( Method, VirtualProtectedMethod )
+TEST( Method_Mock, VirtualProtectedMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -331,7 +331,7 @@ TEST( Method, VirtualProtectedMethod )
 /*
  * Check that a public const method is mocked properly.
  */
-TEST( Method, PublicConstMethod )
+TEST( Method_Mock, PublicConstMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -359,7 +359,7 @@ TEST( Method, PublicConstMethod )
 /*
  * Check that a method inside a namespace is mocked properly.
  */
-TEST( Method, MethodWithinNamespace )
+TEST( Method_Mock, MethodWithinNamespace )
 {
     // Prepare
     Config* config = GetMockConfig();
