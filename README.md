@@ -46,16 +46,21 @@ CppUMockGen would generate the following expectation helper function:
 ###### MyFunction_expect.h
 ```cpp
 namespace expect {
-MockExpectedCall& myFunction(const char * p);
+MockExpectedCall& myFunction(CppUMockGen::Parameter<const char *> p, char * __return__);
 }
 ```
 
 ###### MyFunction_expect.cpp
 ```cpp
 namespace expect {
-MockExpectedCall& myFunction(const char * p)
+MockExpectedCall& myFunction(CppUMockGen::Parameter<const char *> p, char * __return__)
 {
-    return mock().expectOneCall("myFunction").withConstPointerParameter("p", p);
+    bool __ignoreOtherParams__ = false;
+    MockExpectedCall& __expectedCall__ = mock().expectOneCall("myFunction");
+    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter("p", p); }
+    __expectedCall__.andReturnValue(static_cast<void*>(__return__));
+    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
+    return __ignoreOtherParams__;
 }
 }
 ```
@@ -66,7 +71,7 @@ And we could use these in an unit test like this:
 ```cpp
 TEST( myTestSuite, myOtherFunction )
 {
-    expect::myFunction("ABC").andReturnValue("123");
+    expect::myFunction("ABC", "123");
     CHECK_EQUAL( true, myOtherFunction("ABC") );
     mock().checkExpectations();
 }
