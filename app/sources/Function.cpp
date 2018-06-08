@@ -519,8 +519,12 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
         case CXType_Pointer:
         case CXType_LValueReference:
+            ret = ProcessTypePointer( returnType, enableCast );
+            break;
+
         case CXType_RValueReference:
             ret = ProcessTypePointer( returnType, enableCast );
+            ret->SetIsRVReference();
             break;
 
         case CXType_Record:
@@ -615,7 +619,6 @@ ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool
         ret->MockRetExprPrepend( "std::move(*" );
         ret->MockRetExprAppend( ")" );
         ret->ExpectationRetExprPrepend( "&" );
-        ret->SetIsRVReference();
     }
 
     return ret;
