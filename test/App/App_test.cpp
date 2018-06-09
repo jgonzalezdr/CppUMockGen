@@ -68,6 +68,10 @@ static const std::string outDirPath = tempDirPath + PATH_SEPARATOR;
 static const std::string inputFilename = "foo.h";
 static const std::string mockOutputFilename = "foo_mock.cpp";
 static const std::string mockOutputFilePath = outDirPath + mockOutputFilename;
+static const std::string expectationHeaderOutputFilename = "foo_expect.hpp";
+static const std::string expectationHeaderOutputFilePath = outDirPath + expectationHeaderOutputFilename;
+static const std::string expectationImplOutputFilename = "foo_expect.cpp";
+static const std::string expectationImplOutputFilePath = outDirPath + expectationImplOutputFilename;
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -76,7 +80,9 @@ static const std::string mockOutputFilePath = outDirPath + mockOutputFilename;
 TEST_GROUP( App )
 {
     std::string initialDir;
-    std::string outputFilepath;
+    std::string outputFilepath1;
+    std::string outputFilepath2;
+    std::string outputFilepath3;
 
     TEST_SETUP()
     {
@@ -86,9 +92,17 @@ TEST_GROUP( App )
     TEST_TEARDOWN()
     {
         chdir( initialDir.c_str() );
-        if( !outputFilepath.empty() )
+        if( !outputFilepath1.empty() )
         {
-            std::remove( outputFilepath.c_str() );
+            std::remove( outputFilepath1.c_str() );
+        }
+        if( !outputFilepath2.empty() )
+        {
+            std::remove( outputFilepath2.c_str() );
+        }
+        if( !outputFilepath3.empty() )
+        {
+            std::remove( outputFilepath3.c_str() );
         }
     }
 
@@ -195,8 +209,8 @@ TEST( App, MockOutput_OutDir )
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
     mock().installCopier( "std::ostream", stdOstreamCopier );
 
-    outputFilepath = mockOutputFilePath;
-    std::remove( outputFilepath.c_str() );
+    outputFilepath1 = mockOutputFilePath;
+    std::remove( outputFilepath1.c_str() );
 
     std::ostringstream output;
     std::ostringstream error;
@@ -225,9 +239,9 @@ TEST( App, MockOutput_OutDir )
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
-    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath, outputText ) );
+    CHECK( CheckFileContains( outputFilepath1, outputText ) );
 
     // Cleanup
 }
@@ -243,8 +257,8 @@ TEST( App, MockOutput_CurrentDir )
 
     const char* inputFilename = "bar";
     const std::string outputFilename = "bar_mock.cpp";
-    outputFilepath = outDirPath + outputFilename;
-    std::remove( outputFilepath.c_str() );
+    outputFilepath1 = outDirPath + outputFilename;
+    std::remove( outputFilepath1.c_str() );
 
     std::ostringstream output;
     std::ostringstream error;
@@ -277,7 +291,7 @@ TEST( App, MockOutput_CurrentDir )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilename + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath, outputText ) );
+    CHECK( CheckFileContains( outputFilepath1, outputText ) );
 
     // Cleanup
 }
@@ -295,10 +309,10 @@ TEST( App, MockOutput_OutFile )
     std::ostringstream error;
     App app( output, error );
 
-    outputFilepath = outDirPath + "mymock.cpp";
-    std::remove( outputFilepath.c_str() );
+    outputFilepath1 = outDirPath + "mymock.cpp";
+    std::remove( outputFilepath1.c_str() );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath.c_str() };
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
 
     std::vector<std::string> paramOverrideOptions;
     std::vector<std::string> typeOverrideOptions;
@@ -321,9 +335,9 @@ TEST( App, MockOutput_OutFile )
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
-    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath, outputText ) );
+    CHECK( CheckFileContains( outputFilepath1, outputText ) );
 
     // Cleanup
 }
@@ -635,6 +649,408 @@ TEST( App, MockOutput_ParseError )
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Output could not be generated due to errors parsing the input file '" + inputFilename + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() )
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to an output directory (output filename deduced from input filename)
+ */
+TEST( App, ExpectationOutput_OutDir )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    outputFilepath1 = expectationHeaderOutputFilePath;
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = expectationImplOutputFilePath;
+    std::remove( outputFilepath2.c_str() );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outDirPath.c_str() };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT1#####";
+    std::string outputText2 = "#####TEXT2#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilepath1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to the current directory (output filename deduced from input filename)
+ */
+TEST( App, ExpectationOutput_CurrentDir )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    const char* inputFilename = "bar";
+    const std::string outputFilename1 = "bar_expect.hpp";
+    const std::string outputFilename2 = "bar_expect.cpp";
+
+    outputFilepath1 = outDirPath + outputFilename1;
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = outDirPath + outputFilename2;
+    std::remove( outputFilepath2.c_str() );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename, "-e" };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT22#####";
+    std::string outputText2 = "#####TEXT33#####";
+
+    chdir( tempDirPath.c_str() );
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilename1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilename1 + "' and '" + outputFilename2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, ExpectationMockOutput_OutFile_Header )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = outDirPath + "my_expect.hpp";
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = outDirPath + "my_expect.cpp";
+    std::remove( outputFilepath2.c_str() );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath1.c_str() };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT43#####";
+    std::string outputText2 = "#####TEXT83#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilepath1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, ExpectationMockOutput_OutFile_Impl )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = outDirPath + "my_expect.hpp";
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = outDirPath + "my_expect.cpp";
+    std::remove( outputFilepath2.c_str() );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath2.c_str() };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT43#####";
+    std::string outputText2 = "#####TEXT83#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilepath1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = outDirPath + "my_expect.blablabla";
+
+    outputFilepath1 = outDirPath + "my_expect.hpp";
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = outDirPath + "my_expect.cpp";
+    std::remove( outputFilepath2.c_str() );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT43#####";
+    std::string outputText2 = "#####TEXT83#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilepath1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = outDirPath + "my_expect";
+
+    outputFilepath1 = outDirPath + "my_expect.hpp";
+    std::remove( outputFilepath1.c_str() );
+
+    outputFilepath2 = outDirPath + "my_expect.cpp";
+    std::remove( outputFilepath2.c_str() );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT43#####";
+    std::string outputText2 = "#####TEXT83#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", outputFilepath1.c_str())
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
+    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and printed to console
+ */
+TEST( App, ExpectationOutput_ConsoleOutput )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "@" };
+
+    std::vector<std::string> paramOverrideOptions;
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT4455#####";
+    std::string outputText2 = "#####TEXT5642#####";
+
+    mock().expectOneCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", false)
+            .withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions)
+            .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().expectOneCall("Parser::Parse").withParameter("inputFilepath", inputFilename.c_str()).withParameter("interpretAsCpp", false)
+            .withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error)
+            .ignoreOtherParameters().andReturnValue(true);
+    mock().expectOneCall("Parser::GenerateExpectationHeader").withStringParameter("genOpts", "")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText1);
+    mock().expectOneCall("Parser::GenerateExpectationImpl").withStringParameter("genOpts", "").withStringParameter("headerFilepath", "@")
+            .withOutputParameterOfTypeReturning("std::ostream", "output", &outputText2);
+
+    // Exercise
+    int ret = app.Execute( args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( (outputText1 + outputText2).c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that if the output file cannot be opened, an error is displayed
+ */
+TEST( App, ExpectationOutput_CannotOpenFile )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputDir = outDirPath + "NonExistantDirectory123898876354874" + PATH_SEPARATOR;
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputDir.c_str() };
+
+    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+
+   // Exercise
+   int ret = app.Execute( args.size(), args.data() );
+
+   // Verify
+   CHECK_EQUAL( 1, ret );
+   STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
+   STRCMP_CONTAINS( ("Expectation header output file '" + outputDir + expectationHeaderOutputFilename + "' could not be opened").c_str(), error.str().c_str() );
+   CHECK_EQUAL( 0, output.tellp() )
 
     // Cleanup
 }

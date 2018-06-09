@@ -159,8 +159,10 @@ int App::Execute( int argc, const char* argv[] )
                 expectImplOutputFile.open( expectImplOutputFilepath );
                 if( !expectImplOutputFile.is_open() )
                 {
+                    // LCOV_EXCL_START
                     std::string errorMsg = "Expectation implementation output file '" + expectImplOutputFilepath + "' could not be opened.";
                     throw std::runtime_error( errorMsg );
+                    // LCOV_EXCL_STOP
                 }
             }
         }
