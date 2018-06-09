@@ -48,11 +48,11 @@ Config* GetMockConfig()
  *===========================================================================*/
 
 static const std::string tempDirPath = std::string(std::getenv("TEMP"));
-static const std::string tempFilename = "CppUMockGen_MockGenerator.h";
+static const std::string tempFilename = "CppUMockGen_Parser.h";
 static const std::string tempFilePath = tempDirPath + PATH_SEPARATOR + tempFilename;
-static const std::string nonexistingFilePath = tempDirPath + PATH_SEPARATOR + "CppUMockGen_MockGenerator_NotExisting.h";
+static const std::string nonexistingFilePath = tempDirPath + PATH_SEPARATOR + "CppUMockGen_Parser_NotExisting.h";
 
-TEST_GROUP( MockGenerator )
+TEST_GROUP( Parser )
 {
     std::ofstream tempFile;
     std::string initialDir;
@@ -83,7 +83,7 @@ TEST_GROUP( MockGenerator )
 /*
  * Check that mocking a function works as expected.
  */
-TEST( MockGenerator, MockedFunction )
+TEST( Parser, MockedFunction )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -100,30 +100,66 @@ TEST( MockGenerator, MockedFunction )
    bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
    // Verify
+   mock().checkExpectations();
    CHECK_EQUAL( true, result );
    CHECK_EQUAL( 0, error.tellp() )
-   mock().checkExpectations();
+
+   // Cleanup
+   mock().clear();
 
    // Prepare
-   std::ostringstream output;
-   const char* testMock = "###MOCK###";
+   std::ostringstream output1;
+   const char* testMock = "###MOCK6768###";
 
    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
-   parser.GenerateMock( "", output );
+   parser.GenerateMock( "", output1 );
 
    // Verify
-   STRCMP_CONTAINS( testMock, output.str().c_str() );
-   STRCMP_CONTAINS( "extern \"C\"", output.str().c_str() );
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testMock, output1.str().c_str() );
+   STRCMP_CONTAINS( "extern \"C\"", output1.str().c_str() );
 
    // Cleanup
+   mock().clear();
+
+   // Prepare
+   std::ostringstream output2;
+   const char* testExpect1 = "###EXPECT3178###";
+
+   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1);
+
+   // Exercise
+   parser.GenerateExpectationHeader( "", output2 );
+
+   // Verify
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+   STRCMP_CONTAINS( "extern \"C\"", output2.str().c_str() );
+
+   // Cleanup
+   mock().clear();
+
+   // Prepare
+   std::ostringstream output3;
+   const char* testExpect2 = "###EXPECT3682###";
+
+   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2);
+
+   // Exercise
+   parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+   // Verify
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+   STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
 }
 
 /*
  * Check that mocking a method works as expected.
  */
-TEST( MockGenerator, MockedMethod )
+TEST( Parser, MockedMethod )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -143,28 +179,61 @@ TEST( MockGenerator, MockedMethod )
     bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( true, result );
     CHECK_EQUAL( 0, error.tellp() )
-    mock().checkExpectations();
 
     // Prepare
-    std::ostringstream output;
+    std::ostringstream output1;
     const char* testMock = "###MOCK###";
 
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
     // Exercise
-    parser.GenerateMock( "", output );
+    parser.GenerateMock( "", output1 );
 
     // Verify
-    STRCMP_CONTAINS( testMock, output.str().c_str() );
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+
     // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpect1 = "###EXPECT87828763###";
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1);
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpect2 = "###EXPECT87362###";
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2);
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
 }
 
 /*
  * Check that mocking a method works as expected.
  */
-TEST( MockGenerator, MultipleMockableFunctionsAndMethods )
+TEST( Parser, MultipleMockableFunctionsAndMethods )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -188,12 +257,12 @@ TEST( MockGenerator, MultipleMockableFunctionsAndMethods )
     bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( true, result );
     CHECK_EQUAL( 0, error.tellp() )
-    mock().checkExpectations();
 
     // Prepare
-    std::ostringstream output;
+    std::ostringstream output1;
     const char* testMock[] = { "### MOCK 1 ###\n", "### MOCK 2 ###\n", "### MOCK 3 ###\n", "### MOCK 4 ###\n" };
 
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[0]);
@@ -202,21 +271,65 @@ TEST( MockGenerator, MultipleMockableFunctionsAndMethods )
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[3]);
 
     // Exercise
-    parser.GenerateMock( "", output );
+    parser.GenerateMock( "", output1 );
 
     // Verify
-    STRCMP_CONTAINS( testMock[0], output.str().c_str() );
-    STRCMP_CONTAINS( testMock[1], output.str().c_str() );
-    STRCMP_CONTAINS( testMock[2], output.str().c_str() );
-    STRCMP_CONTAINS( testMock[3], output.str().c_str() );
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock[0], output1.str().c_str() );
+    STRCMP_CONTAINS( testMock[1], output1.str().c_str() );
+    STRCMP_CONTAINS( testMock[2], output1.str().c_str() );
+    STRCMP_CONTAINS( testMock[3], output1.str().c_str() );
 
     // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpect1[] = { "### EXPECT H 1 ###\n", "### EXPECT H 2 ###\n", "### EXPECT H 3 ###\n", "### EXPECT H 4 ###\n" };
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[0]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[1]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[2]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[3]);
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1[0], output2.str().c_str() );
+    STRCMP_CONTAINS( testExpect1[1], output2.str().c_str() );
+    STRCMP_CONTAINS( testExpect1[2], output2.str().c_str() );
+    STRCMP_CONTAINS( testExpect1[3], output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpect2[] = { "### EXPECT I 1 ###\n", "### EXPECT I 2 ###\n", "### EXPECT I 3 ###\n", "### EXPECT I 4 ###\n" };
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[0]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[1]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[2]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[3]);
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2[0], output3.str().c_str() );
+    STRCMP_CONTAINS( testExpect2[1], output3.str().c_str() );
+    STRCMP_CONTAINS( testExpect2[2], output3.str().c_str() );
+    STRCMP_CONTAINS( testExpect2[3], output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
 }
 
 /*
  * Check that mocking a non-mockable function works as expected.
  */
-TEST( MockGenerator, FunctionNonMockable )
+TEST( Parser, FunctionNonMockable )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -244,7 +357,7 @@ TEST( MockGenerator, FunctionNonMockable )
 /*
  * Check that mocking a non-mockable method works as expected.
  */
-TEST( MockGenerator, MethodNonMockable )
+TEST( Parser, MethodNonMockable )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -275,7 +388,7 @@ TEST( MockGenerator, MethodNonMockable )
 /*
  * Check that mocking a method works as expected.
  */
-TEST( MockGenerator, MixedMockableNonMockableFunctionsAndMethods )
+TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -301,31 +414,67 @@ TEST( MockGenerator, MixedMockableNonMockableFunctionsAndMethods )
     bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
     // Verify
+    mock().checkExpectations();
     CHECK_EQUAL( true, result );
     CHECK_EQUAL( 0, error.tellp() )
-    mock().checkExpectations();
 
     // Prepare
-    std::ostringstream output;
+    std::ostringstream output1;
     const char* testMock[] = { "### MOCK 1 ###\n", "### MOCK 2 ###\n" };
 
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[0]);
     mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[1]);
 
     // Exercise
-    parser.GenerateMock( "", output );
+    parser.GenerateMock( "", output1 );
 
     // Verify
-    STRCMP_CONTAINS( testMock[0], output.str().c_str() );
-    STRCMP_CONTAINS( testMock[1], output.str().c_str() );
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock[0], output1.str().c_str() );
+    STRCMP_CONTAINS( testMock[1], output1.str().c_str() );
 
     // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpect1[] = { "### EXPECT H 1 ###\n", "### EXPECT H 2 ###\n" };
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[0]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[1]);
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1[0], output2.str().c_str() );
+    STRCMP_CONTAINS( testExpect1[1], output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpect2[] = { "### EXPECT I 1 ###\n", "### EXPECT I 2 ###\n" };
+
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[0]);
+    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[1]);
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2[0], output3.str().c_str() );
+    STRCMP_CONTAINS( testExpect2[1], output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
 }
 
 /*
  * Check that a syntax error aborts mock generation.
  */
-TEST( MockGenerator, SyntaxError )
+TEST( Parser, SyntaxError )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -344,7 +493,7 @@ TEST( MockGenerator, SyntaxError )
    // Verify
    CHECK_EQUAL( false, result );
    STRCMP_CONTAINS( "PARSE ERROR:", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_MockGenerator.h:1:1: error: unknown type name 'foo'", error.str().c_str() );
+   STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:1: error: unknown type name 'foo'", error.str().c_str() );
 
    // Cleanup
 }
@@ -352,13 +501,11 @@ TEST( MockGenerator, SyntaxError )
 /*
  * Check that a warning is handled without aborting mock generation.
  */
-TEST( MockGenerator, Warning )
+TEST( Parser, Warning )
 {
    // Prepare
    Config* config = GetMockConfig();
-   std::ostringstream output;
    std::ostringstream error;
-   const char* testMock = "###MOCK###";
 
    SimpleString testHeader =
            "#warning test\n"
@@ -367,28 +514,69 @@ TEST( MockGenerator, Warning )
 
    mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
-   mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
 
    // Exercise
    std::vector<std::string> results;
    Parser parser;
    bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
-   parser.GenerateMock( "", output );
 
    // Verify
-   CHECK_EQUAL( true, result );
-   STRCMP_CONTAINS( testMock, output.str().c_str() );
-   STRCMP_CONTAINS( "PARSE WARNING:", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_MockGenerator.h:1:2: warning: test [-W#warnings]", error.str().c_str() );
    mock().checkExpectations();
+   CHECK_EQUAL( true, result );
+   STRCMP_CONTAINS( "PARSE WARNING:", error.str().c_str() );
+   STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:2: warning: test [-W#warnings]", error.str().c_str() );
 
    // Cleanup
+   mock().clear();
+
+   // Prepare
+   std::ostringstream output1;
+   const char* testMock = "###MOCK775434578###";
+   mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
+
+   // Exercise
+   parser.GenerateMock( "", output1 );
+
+   // Verify
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testMock, output1.str().c_str() );
+
+   // Cleanup
+   mock().clear();
+
+   // Prepare
+   std::ostringstream output2;
+   const char* testExpectation1 = "###EXPECT38484578###";
+   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpectation1);
+
+   // Exercise
+   parser.GenerateExpectationHeader( "", output2 );
+
+   // Verify
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testExpectation1, output2.str().c_str() );
+
+   // Cleanup
+   mock().clear();
+
+   // Prepare
+   std::ostringstream output3;
+   const char* testExpectation2 = "###EXPECT993617###";
+   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpectation2);
+
+   // Exercise
+   parser.GenerateExpectationImpl( "", "blabla.h", output3 );
+
+   // Verify
+   mock().checkExpectations();
+   STRCMP_CONTAINS( testExpectation2, output3.str().c_str() );
+   STRCMP_CONTAINS( "include \"blabla.h\"", output3.str().c_str() );
 }
 
 /*
  * Check that an error is issued when the input file does not exist.
  */
-TEST( MockGenerator, NonExistingInputFile )
+TEST( Parser, NonExistingInputFile )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -405,7 +593,7 @@ TEST( MockGenerator, NonExistingInputFile )
    // Verify
    CHECK_EQUAL( false, result );
    STRCMP_CONTAINS( "INPUT ERROR: Input file '", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_MockGenerator_NotExisting.h' does not exist", error.str().c_str() );
+   STRCMP_CONTAINS( "CppUMockGen_Parser_NotExisting.h' does not exist", error.str().c_str() );
 
    // Cleanup
 }
@@ -413,7 +601,7 @@ TEST( MockGenerator, NonExistingInputFile )
 /*
  * Check that include paths are processed properly.
  */
-TEST( MockGenerator, IncludePaths )
+TEST( Parser, IncludePaths )
 {
    // Prepare
    Config* config = GetMockConfig();
@@ -444,7 +632,7 @@ TEST( MockGenerator, IncludePaths )
 /*
  * Check that regeneration options are printed properly.
  */
-TEST( MockGenerator, WithRegenOpts )
+TEST( Parser, WithRegenOpts )
 {
    // Prepare
    std::ostringstream output;
