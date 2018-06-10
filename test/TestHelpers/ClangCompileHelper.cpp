@@ -15,11 +15,11 @@ bool ClangCompileHelper::CheckMockCompilation( const std::string &testedHeader, 
             "#include <CppUTest/TestHarness.h>\n"
             "#include <CppUTestExt/MockSupport.h>\n";
 #ifdef INTERPRET_C
-    compiledCode += "extern \"C\" {";
+    compiledCode += "extern \"C\" {\n";
 #endif
     compiledCode += testedHeader + "\n";
 #ifdef INTERPRET_C
-    compiledCode += "}";
+    compiledCode += "}\n";
 #endif
     compiledCode += testedSource;
 
@@ -73,11 +73,11 @@ bool ClangCompileHelper::CheckExpectationCompilation( const std::string &testedH
             "#include <CppUTestExt/MockSupport.h>\n"
             "#include <CppUMockGen.h>\n";
 #ifdef INTERPRET_C
-    compiledCode += "extern \"C\" {";
+    compiledCode += "extern \"C\" {\n";
 #endif
     compiledCode += testedHeader + "\n";
 #ifdef INTERPRET_C
-    compiledCode += "}";
+    compiledCode += "}\n";
 #endif
     compiledCode += testedSource;
 

@@ -5416,17 +5416,21 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 
     const std::vector< struct ArgumentOverrideData > overrideOptions
     {
-        { MockedType::Bool, "Bool", "(*", "!=0)" },
-        { MockedType::Int, "Int", "*", "" },
-        { MockedType::UnsignedInt, "UnsignedInt", "(unsigned)*", "" },
-        { MockedType::Long, "LongInt", "*", "" },
-        { MockedType::UnsignedLong, "UnsignedLongInt", "(unsigned)*", "" },
-        { MockedType::Double, "Double", "*", "" },
-        { MockedType::String, "String", "StringFromFormat(\"%c\", *", ").asCharString()" },
+        { MockedType::Bool, "Bool", "(", "->a != 0)" },
+        { MockedType::Int, "Int", "(*", ").a" },
+        { MockedType::UnsignedInt, "UnsignedInt", "(unsigned)(", "->a)" },
+        { MockedType::Long, "LongInt", "", "->a" },
+        { MockedType::UnsignedLong, "UnsignedLongInt", "(unsigned)(", "->a)" },
+        { MockedType::Double, "Double", "(*", ").a" },
+        { MockedType::String, "String", "StringFromFormat(\"%d\", ", "->a).asCharString()" },
         { MockedType::Pointer, "Pointer", "", "" },
         { MockedType::ConstPointer, "ConstPointer", "", "" },
         { MockedType::Output, "Output", "", "" },
     };
+
+    SimpleString testHeader =
+            "struct Struct1 { int a; };\n"
+            "unsigned long function1(const signed int* p1, struct Struct1* p2, signed char* p3, short p4);\n";
 
     for( auto overrideOption : overrideOptions )
     {
@@ -5450,8 +5454,6 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprFront);
         mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprBack);
 
-        SimpleString testHeader = "unsigned long function1(const signed int* p1, char* p2, signed char* p3, short p4);\n";
-
         // Exercise
         std::vector<std::string> results;
         unsigned int functionCount = ParseHeader( testHeader, *config, results );
@@ -5461,7 +5463,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         CHECK_EQUAL( 1, functionCount );
         CHECK_EQUAL( 1, results.size() );
         SimpleString expectedResult = StringFromFormat(
-            "unsigned long function1(const int * p1, char * p2, signed char * p3, short p4)\n{\n"
+            "unsigned long function1(const int * p1, struct Struct1 * p2, signed char * p3, short p4)\n{\n"
             "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
                  ".with%sParameter(\"p2\", %sp2%s)"
                  ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
@@ -5500,13 +5502,13 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
         { MockedType::ConstPointer, "ConstPointer", "((unsigned long *) ", ")[0]" },
     };
 
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
+
     for( auto overrideOption : overrideOptions )
     {
         // Prepare
         Config* config = GetMockConfig();
         const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(199);
-        const std::string overrideArgExprFront = "(*(unsigned long*)";
-        const std::string overrideArgExprBack = ")+1";
         mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue(override);
         mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
         mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue((const void*)0);
@@ -5517,8 +5519,6 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
         mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)overrideOption.mockedType);
         mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprFront);
         mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&overrideOption.argExprBack);
-
-        SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
 
         // Exercise
         std::vector<std::string> results;

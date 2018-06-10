@@ -80,20 +80,8 @@ public:
 class ReturnStandard : public Function::Return
 {
 public:
-    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false), m_isRVReference(false) {}
+    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
     virtual ~ReturnStandard() {};
-
-    void BothRetExprPrepend( const std::string &expr )
-    {
-        m_mockRetExprFront.insert( 0, expr );
-        m_expectationRetExprFront.insert( 0, expr );
-    }
-
-    void BothRetExprAppend( const std::string &expr )
-    {
-        m_mockRetExprBack.append( expr );
-        m_expectationRetExprBack.append( expr );
-    }
 
     void MockRetExprPrepend( const std::string &expr )
     {
@@ -127,7 +115,14 @@ public:
 
     virtual std::string GetExpectationSignature() const override
     {
-        return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + RETURN_ARG_NAME;
+        if( m_expectationUseBaseType )
+        {
+            return GetExpectationBaseType() + " " RETURN_ARG_NAME;
+        }
+        else
+        {
+            return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + RETURN_ARG_NAME;
+        }
     }
 
     virtual std::string GetExpectationBody() const override
@@ -151,15 +146,20 @@ public:
         m_isRVReference = true;
     }
 
+    void SetExpectationUseBaseType()
+    {
+        m_expectationUseBaseType = true;
+    }
+
 protected:
     virtual std::string GetMockCall() const = 0;
 
-    virtual std::string GetBaseType() const = 0;
+    virtual std::string GetExpectationBaseType() const = 0;
 
 private:
     std::string GetExpectationRetExprFront() const
     {
-        return ( m_expectationNeedsCast ? "static_cast<" + GetBaseType() + ">(" : "" ) + m_expectationRetExprFront;
+        return ( m_expectationNeedsCast ? "static_cast<" + GetExpectationBaseType() + ">(" : "" ) + m_expectationRetExprFront;
     }
 
     std::string GetExpectationRetExprBack() const
@@ -186,6 +186,7 @@ private:
     bool m_expectationArgByRef;
     bool m_expectationNeedsCast;
     bool m_isRVReference;
+    bool m_expectationUseBaseType;
 };
 
 class ReturnBool : public ReturnStandard
@@ -194,7 +195,7 @@ public:
     virtual ~ReturnBool() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "bool";
     }
@@ -211,7 +212,7 @@ public:
     virtual ~ReturnInt() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "int";
     }
@@ -228,7 +229,7 @@ public:
     virtual ~ReturnUnsignedInt() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "unsigned int";
     }
@@ -245,7 +246,7 @@ public:
     virtual ~ReturnLong() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "long";
     }
@@ -262,7 +263,7 @@ public:
     virtual ~ReturnUnsignedLong() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "unsigned long";
     }
@@ -279,7 +280,7 @@ public:
     virtual ~ReturnDouble() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "double";
     }
@@ -296,7 +297,7 @@ public:
     virtual ~ReturnString() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "const char*";
     }
@@ -313,7 +314,7 @@ public:
     virtual ~ReturnConstPointer() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "const void*";
     }
@@ -330,7 +331,7 @@ public:
     virtual ~ReturnPointer() {};
 
 protected:
-    virtual std::string GetBaseType() const override
+    virtual std::string GetExpectationBaseType() const override
     {
         return "void*";
     }
@@ -447,9 +448,9 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
 // LCOV_EXCL_STOP
     }
 
-    ret->BothRetExprPrepend( override->GetExprModFront() );
-    ret->BothRetExprAppend( override->GetExprModBack() );
-    ret->SetExpectationNeedsCast();
+    ret->MockRetExprPrepend( override->GetExprModFront() );
+    ret->MockRetExprAppend( override->GetExprModBack() );
+    ret->SetExpectationUseBaseType();
 
     return ret;
 }
@@ -685,9 +686,13 @@ public:
         m_originalType = type;
     }
 
-    virtual std::string GetSignature( bool mock ) const = 0;
+    virtual std::string GetMockSignature() const = 0;
 
-    virtual std::string GetBody( bool mock, bool argumentsSkipped ) const = 0;
+    virtual std::string GetMockBody() const = 0;
+
+    virtual std::string GetExpectationSignature() const = 0;
+
+    virtual std::string GetExpectationBody( bool argumentsSkipped ) const = 0;
 
     virtual bool CanBeIgnored() const = 0;
 
@@ -703,12 +708,22 @@ class ArgumentSkip : public Function::Argument
 public:
     virtual ~ArgumentSkip() {}
 
-    virtual std::string GetSignature( bool mock ) const override
+    virtual std::string GetMockSignature() const override
     {
-        return mock ? m_originalType : "";
+        return m_originalType;
     }
 
-    virtual std::string GetBody( bool, bool ) const override
+    virtual std::string GetExpectationSignature() const override
+    {
+        return "";
+    }
+
+    virtual std::string GetMockBody() const override
+    {
+        return "";
+    }
+
+    virtual std::string GetExpectationBody( bool ) const override
     {
         return "";
     }
@@ -727,46 +742,62 @@ public:
 class ArgumentStandard : public Function::Argument
 {
 public:
-    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false) {}
+    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
     virtual ~ArgumentStandard() {}
 
-    virtual std::string GetSignature( bool mock ) const override
+    virtual std::string GetMockSignature() const override
     {
-        if( mock )
+        return m_originalType + " " + m_name;
+    }
+
+    virtual std::string GetExpectationSignature() const override
+    {
+        if( CanBeIgnored() )
         {
-            return m_originalType + " " + m_name;
-        }
-        else if( CanBeIgnored() )
-        {
-            return "CppUMockGen::Parameter<" + m_originalType + (m_expectationArgByRef ? "&> " : "> ") + m_name;
+            if( m_expectationUseBaseType )
+            {
+                return "CppUMockGen::Parameter<" + GetExpectationBaseType() + "> " + m_name;
+            }
+            else
+            {
+                return "CppUMockGen::Parameter<" + m_originalType + (m_expectationArgByRef ? "&> " : "> ") + m_name;
+            }
         }
         else
         {
-            return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + m_name;
+            if( m_expectationUseBaseType )
+            {
+                return GetExpectationBaseType() + " " + m_name;
+            }
+            else
+            {
+                return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + m_name;
+            }
         }
     }
 
-    virtual std::string GetBody( bool mock, bool argumentsSkipped ) const override
+    virtual std::string GetMockBody() const override
     {
-        if( mock )
-        {
-            return "." + GetBodyCall(mock, "");
-        }
-        else if( CanBeIgnored() )
+        return "." + GetMockBodyCall();
+    }
+
+    virtual std::string GetExpectationBody( bool argumentsSkipped ) const override
+    {
+        if( CanBeIgnored() )
         {
             if( argumentsSkipped )
             {
-                return INDENT "if(!" + m_name + ".isIgnored()) { " EXPECTED_CALL_VAR_NAME "." + GetBodyCall(mock, ".getValue()") + "; }\n";
+                return INDENT "if(!" + m_name + ".isIgnored()) { " EXPECTED_CALL_VAR_NAME "." + GetExpectationBodyCall( ".getValue()" ) + "; }\n";
             }
             else
             {
                 return INDENT "if(" + m_name + ".isIgnored()) { " IGNORE_OTHERS_VAR_NAME " = true; } else { " EXPECTED_CALL_VAR_NAME "." +
-                       GetBodyCall(mock, ".getValue()") + "; }\n";
+                        GetExpectationBodyCall( ".getValue()" ) + "; }\n";
             }
         }
         else
         {
-            return INDENT EXPECTED_CALL_VAR_NAME "." + GetBodyCall(mock, "") + ";\n";
+            return INDENT EXPECTED_CALL_VAR_NAME "." + GetExpectationBodyCall( "" ) + ";\n";
         }
     }
 
@@ -805,6 +836,11 @@ public:
         m_isRVReference = true;
     }
 
+    void SetExpectationUseBaseType()
+    {
+        m_expectationUseBaseType = true;
+    }
+
 protected:
     virtual bool isInput() const
     {
@@ -818,10 +854,18 @@ protected:
         return ")";
     }
 
+    virtual std::string GetExpectationBaseType() const = 0;
+
 private:
-    std::string GetBodyCall(bool mock, const std::string& getter) const
+    std::string GetMockBodyCall() const
     {
-        return GetCallFront(mock) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + GetCallBack(mock);
+        return GetCallFront(true) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetCallBack(true);
+    }
+
+    std::string GetExpectationBodyCall(const std::string& getter) const
+    {
+        return GetCallFront(false) + "\"" + m_name + "\", " + ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) +
+               m_name + getter + ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack(false);
     }
 
     std::string GetSignatureType() const
@@ -841,6 +885,7 @@ private:
     bool m_expectationArgByRef;
     bool m_forceNotIgnored;
     bool m_isRVReference;
+    bool m_expectationUseBaseType;
 };
 
 class ArgumentBool : public ArgumentStandard
@@ -852,6 +897,11 @@ protected:
     virtual std::string GetCallFront(bool) const override
     {
         return "withBoolParameter(";
+    }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "bool";
     }
 };
 
@@ -865,6 +915,11 @@ protected:
     {
         return "withIntParameter(";
     }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "int";
+    }
 };
 
 class ArgumentUnsignedInt : public ArgumentStandard
@@ -876,6 +931,11 @@ protected:
     virtual std::string GetCallFront(bool) const override
     {
         return "withUnsignedIntParameter(";
+    }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "unsigned int";
     }
 };
 
@@ -889,6 +949,11 @@ protected:
     {
         return "withLongIntParameter(";
     }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "long";
+    }
 };
 
 class ArgumentUnsignedLong : public ArgumentStandard
@@ -900,6 +965,11 @@ protected:
     virtual std::string GetCallFront(bool) const override
     {
         return "withUnsignedLongIntParameter(";
+    }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "unsigned long";
     }
 };
 
@@ -913,6 +983,11 @@ protected:
     {
         return "withDoubleParameter(";
     }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "double";
+    }
 };
 
 class ArgumentString : public ArgumentStandard
@@ -924,6 +999,11 @@ protected:
     virtual std::string GetCallFront(bool) const override
     {
         return "withStringParameter(";
+    }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "const char*";
     }
 };
 
@@ -937,6 +1017,11 @@ protected:
     {
         return "withPointerParameter(";
     }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "void*";
+    }
 };
 
 class ArgumentConstPointer : public ArgumentStandard
@@ -949,6 +1034,11 @@ protected:
     {
         return "withConstPointerParameter(";
     }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "const void*";
+    }
 };
 
 class ArgumentOutput : public ArgumentStandard
@@ -957,10 +1047,15 @@ public:
     ArgumentOutput() : m_calculateSizeFromType(false) {}
     virtual ~ArgumentOutput() {}
 
-    virtual std::string GetSignature(bool mock) const override
+    virtual std::string GetMockSignature() const override
     {
-        std::string ret = m_originalType + " " + m_name;
-        if( !mock && !m_calculateSizeFromType )
+        return m_originalType + " " + m_name;
+    }
+
+    virtual std::string GetExpectationSignature() const override
+    {
+        std::string ret = ArgumentStandard::GetExpectationSignature();
+        if( !m_calculateSizeFromType )
         {
             ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
         }
@@ -1006,6 +1101,11 @@ protected:
         }
     }
 
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "const void*";
+    }
+
     bool m_calculateSizeFromType;
 };
 
@@ -1026,6 +1126,11 @@ protected:
     }
 
     std::string m_exposedType;
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "const void*";
+    }
 };
 
 class ArgumentOutputOfType : public ArgumentOfType
@@ -1049,6 +1154,11 @@ protected:
         {
             return "withOutputParameterOfTypeReturning(\"" + m_exposedType + "\", ";
         }
+    }
+
+    virtual std::string GetExpectationBaseType() const override
+    {
+        return "void*";
     }
 };
 
@@ -1173,6 +1283,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
 
     ret->MockArgExprPrepend( override->GetExprModFront() );
     ret->MockArgExprAppend( override->GetExprModBack() );
+    ret->SetExpectationUseBaseType();
 
     return ret;
 }
@@ -1511,9 +1622,9 @@ std::string Function::GenerateMock() const
             signature += ", ";
         }
 
-        signature += m_arguments[i]->GetSignature( true );
+        signature += m_arguments[i]->GetMockSignature();
 
-        body += m_arguments[i]->GetBody( true, false );
+        body += m_arguments[i]->GetMockBody();
     }
 
     signature += ")";
@@ -1637,7 +1748,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
-        std::string argumentSignature = m_arguments[i]->GetSignature(false);
+        std::string argumentSignature = m_arguments[i]->GetExpectationSignature();
 
         if( !argumentSignature.empty() )
         {
@@ -1652,7 +1763,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
         if( !proto )
         {
-            body += m_arguments[i]->GetBody( false, argumentsSkipped );
+            body += m_arguments[i]->GetExpectationBody( argumentsSkipped );
         }
     }
 
