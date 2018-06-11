@@ -728,15 +728,17 @@ public:
         return "";
     }
 
-    virtual bool IsSkipped() const
+    virtual bool IsSkipped() const override
     {
         return true;
     }
 
+    // LCOV_EXCL_START
     virtual bool CanBeIgnored() const override
     {
         return false;
     }
+    // LCOV_EXCL_STOP
 };
 
 class ArgumentStandard : public Function::Argument
@@ -801,7 +803,7 @@ public:
         }
     }
 
-    virtual bool IsSkipped() const
+    virtual bool IsSkipped() const override
     {
         return false;
     }
@@ -1127,10 +1129,12 @@ protected:
 
     std::string m_exposedType;
 
+    // LCOV_EXCL_START
     virtual std::string GetExpectationBaseType() const override
     {
         return "const void*";
     }
+    // LCOV_EXCL_STOP
 };
 
 class ArgumentOutputOfType : public ArgumentOfType
@@ -1156,10 +1160,12 @@ protected:
         }
     }
 
+    // LCOV_EXCL_START
     virtual std::string GetExpectationBaseType() const override
     {
         return "void*";
     }
+    // LCOV_EXCL_STOP
 };
 
 class ArgumentParser
@@ -1408,13 +1414,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
             {
                 case CXType_Void:
                 case CXType_Pointer:
-                case CXType_LValueReference:
                     ret = new ArgumentPointer;
-                    break;
-
-                case CXType_RValueReference:
-                    ret = new ArgumentPointer;
-                    ret->ForceNotIgnored();
                     break;
 
                 case CXType_Record:
