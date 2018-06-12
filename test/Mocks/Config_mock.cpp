@@ -26,6 +26,11 @@ MockedType Config::OverrideSpec::GetType() const
     return static_cast<MockedType>( mock().actualCall("Config::OverrideSpec::GetType").onObject(this).returnIntValue() );
 }
 
+const std::string & Config::OverrideSpec::GetTypeName() const
+{
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetTypeName").onObject(this).returnConstPointerValue() );
+}
+
 const std::string & Config::OverrideSpec::GetExprModFront() const
 {
     return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetExprModFront").onObject(this).returnConstPointerValue() );

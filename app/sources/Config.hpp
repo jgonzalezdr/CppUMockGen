@@ -18,7 +18,8 @@ enum class MockedType
     Pointer,
     ConstPointer,
     Output,
-    Skip,
+    InputOfType,
+    Skip
 };
 
 /**
@@ -34,7 +35,8 @@ public:
     {
     public:
         static const char EXPR_MOD_SEPARATOR = '/';
-        static const char EXPR_MOD_PLACEHOLDER = '$';
+        static const char TYPE_SEPARATOR = ':';
+        static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
 
         /**
          * Constructs a OverrideSpec object.
@@ -53,6 +55,11 @@ public:
         MockedType GetType() const;
 
         /**
+         * Returns the type name.
+         */
+        const std::string&  GetTypeName() const;
+
+        /**
          * Returns the expression modifier part before the character '$'.
          * @return String with the front expression modifier part
          */
@@ -66,6 +73,7 @@ public:
 
     private:
         MockedType m_type;
+        std::string m_typeName;
         std::string m_exprModFront;
         std::string m_exprModBack;
     };

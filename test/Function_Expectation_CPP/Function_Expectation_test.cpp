@@ -8251,6 +8251,88 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Output )
 }
 
 /*
+ * Check expectation generation of a function with parameter override of type InputOfType.
+ */
+TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
+{
+    // Prepare
+    const std::string typeName = "Struct1";
+    const std::string argExprFront = "##%%";
+    const std::string argExprBack = "&&//";
+
+    mock().installCopier( "std::string", stdStringCopier );
+
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue(override);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)MockedType::InputOfType);
+    mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&argExprFront);
+    mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&argExprBack);
+    mock().expectOneCall("Config::OverrideSpec::GetTypeName").onObject((void*)override).andReturnValue((const void*)&typeName);
+
+    SimpleString testHeader =
+            "struct Struct1 { int a; };\n"
+            "struct Struct2 { struct Struct1 s; };\n"
+            "unsigned long function1(const signed int* p1, struct Struct2* p2, signed char* p3, short p4);\n";
+
+    // Exercise
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    SimpleString expectedResultProto =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "}\n";
+    SimpleString expectedResultImpl =
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
+            "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
+            "    if(p2.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p2\", p2.getValue()); }\n"
+            "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
+            "    if(p4.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
+            "    __expectedCall__.andReturnValue(__return__);\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
+            "    if(p2.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType(\"Struct1\", \"p2\", p2.getValue()); }\n"
+            "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
+            "    if(p4.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
+            "    __expectedCall__.andReturnValue(__return__);\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n";
+    STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+    STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+
+    // Cleanup
+}
+
+/*
  * Check expectation generation of a function with parameter override.
  */
 TEST_EX( TEST_GROUP_NAME,ReturnOverride )

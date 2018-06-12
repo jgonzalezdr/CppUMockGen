@@ -1111,10 +1111,10 @@ protected:
     bool m_calculateSizeFromType;
 };
 
-class ArgumentOfType : public ArgumentStandard
+class ArgumentInputOfType : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentOfType() {}
+    virtual ~ArgumentInputOfType() {}
 
     void SetExposedType( const std::string &type )
     {
@@ -1129,15 +1129,13 @@ protected:
 
     std::string m_exposedType;
 
-    // LCOV_EXCL_START
     virtual std::string GetExpectationBaseType() const override
     {
-        return "const void*";
+        return "const " + m_exposedType + "*";
     }
-    // LCOV_EXCL_STOP
 };
 
-class ArgumentOutputOfType : public ArgumentOfType
+class ArgumentOutputOfType : public ArgumentInputOfType
 {
 public:
     virtual ~ArgumentOutputOfType() {}
@@ -1236,7 +1234,12 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
     ArgumentStandard *ret;
     MockedType overrideType = override->GetType();
 
-    switch( overrideType )
+    if( overrideType == MockedType::InputOfType )
+    {
+        ret = new ArgumentInputOfType;
+        static_cast<ArgumentInputOfType*>(ret)->SetExposedType( override->GetTypeName() );
+    }
+    else switch( overrideType )
     {
         case MockedType::Bool:
             ret = new ArgumentBool;
@@ -1518,12 +1521,12 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
 
 ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee )
 {
-    ArgumentOfType *ret;
+    ArgumentInputOfType *ret;
 
     bool isConst = clang_isConstQualifiedType( argType ) || inheritConst;
     if( !isPointee || isConst )
     {
-        ret = new ArgumentOfType;
+        ret = new ArgumentInputOfType;
     }
     else
     {

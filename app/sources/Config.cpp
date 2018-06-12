@@ -42,6 +42,8 @@ static const std::vector<std::pair<std::string, MockedType>> validOverrideTypes 
 static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
 static const std::map<std::string, MockedType> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
+static const std::string inputOfTypeOverride = std::string("InputOfType") + Config::OverrideSpec::TYPE_SEPARATOR;
+
 Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )
 {
     if( value.empty() )
@@ -68,7 +70,7 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
             throw std::runtime_error( errorMsg );
         }
 
-        size_t placeholderPos = argExprMod.find( EXPR_MOD_PLACEHOLDER );
+        size_t placeholderPos = argExprMod.find( EXPR_MOD_ARG_PLACEHOLDER );
         if( placeholderPos == std::string::npos )
         {
             std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) <" + option + ">";
@@ -102,6 +104,16 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         if( it != validParameterOverrideTypes.end() )
         {
             m_type = it->second;
+        }
+        else if( type.find( inputOfTypeOverride ) == 0 )
+        {
+            m_type = MockedType::InputOfType;
+            m_typeName = type.substr( inputOfTypeOverride.size() );
+            if( m_typeName.empty() )
+            {
+                std::string errorMsg = "Type name cannot be empty for override option <" + option + ">.";
+                throw std::runtime_error( errorMsg );
+            }
         }
         else
         {
@@ -152,6 +164,11 @@ const Config::OverrideSpec* Config::OverrideMap::GetOverride( const std::string&
 MockedType Config::OverrideSpec::GetType() const
 {
     return m_type;
+}
+
+const std::string& Config::OverrideSpec::GetTypeName() const
+{
+    return m_typeName;
 }
 
 const std::string& Config::OverrideSpec::GetExprModFront() const
