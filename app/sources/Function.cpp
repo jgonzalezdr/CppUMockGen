@@ -1157,13 +1157,6 @@ protected:
             return "withOutputParameterOfTypeReturning(\"" + m_exposedType + "\", ";
         }
     }
-
-    // LCOV_EXCL_START
-    virtual std::string GetExpectationBaseType() const override
-    {
-        return "void*";
-    }
-    // LCOV_EXCL_STOP
 };
 
 class ArgumentParser
@@ -1238,6 +1231,11 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
     {
         ret = new ArgumentInputOfType;
         static_cast<ArgumentInputOfType*>(ret)->SetExposedType( override->GetTypeName() );
+    }
+    else if( overrideType == MockedType::OutputOfType )
+    {
+        ret = new ArgumentOutputOfType;
+        static_cast<ArgumentOutputOfType*>(ret)->SetExposedType( override->GetTypeName() );
     }
     else switch( overrideType )
     {

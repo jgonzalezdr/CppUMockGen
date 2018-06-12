@@ -19,6 +19,7 @@ enum class MockedType
     ConstPointer,
     Output,
     InputOfType,
+    OutputOfType,
     Skip
 };
 
@@ -35,7 +36,6 @@ public:
     {
     public:
         static const char EXPR_MOD_SEPARATOR = '/';
-        static const char TYPE_SEPARATOR = ':';
         static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
 
         /**

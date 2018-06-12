@@ -5532,6 +5532,61 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 }
 
 /*
+ * Check mock generation of a function with parameter override of type OutputOfType.
+ */
+TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
+{
+    // Prepare
+    const std::string typeName = "Struct1";
+    const std::string argExprFront = "&(";
+    const std::string argExprBack = "->s)";
+
+    SimpleString testHeader =
+            "struct Struct1 { int a; };\n"
+            "struct Struct2 { struct Struct1 s; };\n"
+            "unsigned long function1(const signed int* p1, struct Struct2* p2, signed char* p3, short p4);\n";
+
+    mock().installCopier( "std::string", stdStringCopier );
+
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1@").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p1").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p2").andReturnValue(override);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p3").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetParameterOverride").onObject(config).withStringParameter("key", "function1#p4").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "@unsigned long").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#const int *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#signed char *").andReturnValue((const void*)0);
+    mock().expectOneCall("Config::GetTypeOverride").onObject(config).withStringParameter("key", "#short").andReturnValue((const void*)0);
+
+    mock().expectOneCall("Config::OverrideSpec::GetType").onObject((void*)override).andReturnValue((int)MockedType::OutputOfType);
+    mock().expectOneCall("Config::OverrideSpec::GetExprModFront").onObject((void*)override).andReturnValue((const void*)&argExprFront);
+    mock().expectOneCall("Config::OverrideSpec::GetExprModBack").onObject((void*)override).andReturnValue((const void*)&argExprBack);
+    mock().expectOneCall("Config::OverrideSpec::GetTypeName").onObject((void*)override).andReturnValue((const void*)&typeName);
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    SimpleString expectedResult =
+        "unsigned long function1(const int * p1, struct Struct2 * p2, signed char * p3, short p4)\n{\n"
+        "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
+             ".withOutputParameterOfType(\"Struct1\", \"p2\", &(p2->s))"
+             ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+        "}\n";
+    STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
  * Check mock generation of a function with parameter override.
  */
 TEST_EX( TEST_GROUP_NAME,ReturnOverride )

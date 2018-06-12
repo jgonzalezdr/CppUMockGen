@@ -42,7 +42,11 @@ static const std::vector<std::pair<std::string, MockedType>> validOverrideTypes 
 static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
 static const std::map<std::string, MockedType> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
-static const std::string inputOfTypeOverride = std::string("InputOfType") + Config::OverrideSpec::TYPE_SEPARATOR;
+static const std::vector<std::pair<std::string, MockedType>> validTypeOfOverrideTypes =
+{
+    { "InputOfType:", MockedType::InputOfType },
+    { "OutputOfType:", MockedType::OutputOfType },
+};
 
 Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )
 {
@@ -105,20 +109,30 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         {
             m_type = it->second;
         }
-        else if( type.find( inputOfTypeOverride ) == 0 )
-        {
-            m_type = MockedType::InputOfType;
-            m_typeName = type.substr( inputOfTypeOverride.size() );
-            if( m_typeName.empty() )
-            {
-                std::string errorMsg = "Type name cannot be empty for override option <" + option + ">.";
-                throw std::runtime_error( errorMsg );
-            }
-        }
         else
         {
-            std::string errorMsg = "Invalid parameter override option type <" + option + ">.";
-            throw std::runtime_error( errorMsg );
+            bool overrideTypeFound = false;
+
+            for( auto overrideType : validTypeOfOverrideTypes )
+            {
+                if( type.find( overrideType.first ) == 0 )
+                {
+                    m_type = overrideType.second;
+                    m_typeName = type.substr( overrideType.first.size() );
+                    if( m_typeName.empty() )
+                    {
+                        std::string errorMsg = "Type name cannot be empty for override option <" + option + ">.";
+                        throw std::runtime_error( errorMsg );
+                    }
+                    overrideTypeFound = true;
+                }
+            }
+
+            if( !overrideTypeFound )
+            {
+                std::string errorMsg = "Invalid parameter override option type <" + option + ">.";
+                throw std::runtime_error( errorMsg );
+            }
         }
     }
 }
