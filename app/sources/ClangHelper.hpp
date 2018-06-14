@@ -73,4 +73,12 @@ std::string getBareTypeSpelling( const CXType &type );
  */
 std::string getMethodClassName( const CXCursor &cursor );
 
+/**
+ * Checks if a method and its containing classes have public scope.
+ *
+ * @param cursor [in] A cursor to a method
+ * @return @c true if the method and its containing classes are public, or @c false otherwise
+ */
+bool isMethodPublic( const CXCursor &cursor );
+
 #endif // header guard

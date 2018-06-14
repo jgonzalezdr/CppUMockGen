@@ -105,3 +105,32 @@ std::string getMethodClassName( const CXCursor &cursor )
 
     return ret;
 }
+
+bool isMethodPublic( const CXCursor &cursor )
+{
+    CXCursorKind cursorKind = clang_getCursorKind( cursor );
+    CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
+
+    // LCOV_EXCL_START
+    if( cursorKind == CXCursor_TranslationUnit )
+    {
+        return true;
+    }
+    else if( clang_Cursor_isNull( cursor ) )
+    {
+        return false;
+    }
+    // LCOV_EXCL_STOP
+    else if( accessSpecifier == CX_CXXInvalidAccessSpecifier )
+    {
+        return true;
+    }
+    else if( accessSpecifier != CX_CXXPublic )
+    {
+        return false;
+    }
+    else
+    {
+        return isMethodPublic( clang_getCursorSemanticParent( cursor ) );
+    }
+}

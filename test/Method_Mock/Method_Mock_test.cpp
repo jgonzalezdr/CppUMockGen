@@ -217,6 +217,62 @@ TEST( Method_Mock, PureVirtualMethod )
 }
 
 /*
+ * Check that a public method in a private class is not mocked.
+ */
+TEST( Method_Mock, PublicMethodInPrivateClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "private:\n"
+            "    class class2 {\n"
+            "        public:\n"
+            "        void method1();\n"
+            "    };\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 0, results.size() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a public method in a protected class is not mocked.
+ */
+TEST( Method_Mock, PublicMethodInProtectedClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "protected:\n"
+            "    class class2 {\n"
+            "        public:\n"
+            "        void method1();\n"
+            "    };\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 0, results.size() );
+
+    // Cleanup
+}
+
+/*
  * Check that a non-virtual public method is mocked properly.
  */
 TEST( Method_Mock, NonVirtualPublicMethod )

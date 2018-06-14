@@ -65,7 +65,7 @@ TEST_GROUP( Method_Expectation )
  *===========================================================================*/
 
 /*
- * Check that a public method with definition inside the class declaration is not mocked.
+ * Check that a public method with definition inside the class declaration does not generate expectation helper function.
  */
 TEST( Method_Expectation, PublicNonVirtualWithDefinitionInsideClass )
 {
@@ -91,7 +91,7 @@ TEST( Method_Expectation, PublicNonVirtualWithDefinitionInsideClass )
 }
 
 /*
- * Check that a non-virtual protected method with definition inside the class declaration is not mocked.
+ * Check that a non-virtual protected method with definition inside the class declaration does not generate expectation helper function.
  */
 TEST( Method_Expectation, ProtectedVirtualWithDefinitionInsideClass )
 {
@@ -120,7 +120,7 @@ TEST( Method_Expectation, ProtectedVirtualWithDefinitionInsideClass )
 }
 
 /*
- * Check that a method with definition outside the class declaration is not mocked.
+ * Check that a method with definition outside the class declaration does not generate expectation helper function.
  */
 TEST( Method_Expectation, WithDefinitionOutsideClass )
 {
@@ -147,7 +147,7 @@ TEST( Method_Expectation, WithDefinitionOutsideClass )
 }
 
 /*
- * Check that a non-virtual private method is not mocked.
+ * Check that a non-virtual private method does not generate expectation helper function.
  */
 TEST( Method_Expectation, NonVirtualPrivateMethod )
 {
@@ -173,7 +173,7 @@ TEST( Method_Expectation, NonVirtualPrivateMethod )
 }
 
 /*
- * Check that a non-virtual protected method is not mocked.
+ * Check that a non-virtual protected method does not generate expectation helper function.
  */
 TEST( Method_Expectation, NonVirtualProtectedMethod )
 {
@@ -199,7 +199,7 @@ TEST( Method_Expectation, NonVirtualProtectedMethod )
 }
 
 /*
- * Check that a pure virtual method is not mocked.
+ * Check that a pure virtual method does not generate expectation helper function.
  */
 TEST( Method_Expectation, PureVirtualMethod )
 {
@@ -225,7 +225,65 @@ TEST( Method_Expectation, PureVirtualMethod )
 }
 
 /*
- * Check that a non-virtual public method is mocked properly.
+ * Check that a public method in a private class does not generate expectation helper function.
+ */
+TEST( Method_Expectation, PublicMethodInPrivateClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "private:\n"
+            "    class class2 {\n"
+            "        public:\n"
+            "        void method1();\n"
+            "    };\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int methodCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 0, resultsProto.size() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a public method in a protected class does not generate expectation helper function.
+ */
+TEST( Method_Expectation, PublicMethodInProtectedClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "protected:\n"
+            "    class class2 {\n"
+            "        public:\n"
+            "        void method1();\n"
+            "    };\n"
+            "};";
+
+    // Exercise
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int methodCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 0, resultsProto.size() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a non-virtual public method generates a expectation helper function.
  */
 TEST( Method_Expectation, NonVirtualPublicMethod )
 {
@@ -267,7 +325,7 @@ TEST( Method_Expectation, NonVirtualPublicMethod )
 }
 
 /*
- * Check that a virtual public method is mocked properly.
+ * Check that a virtual public method generates a expectation helper function.
  */
 TEST( Method_Expectation, VirtualPublicMethod )
 {
@@ -309,7 +367,7 @@ TEST( Method_Expectation, VirtualPublicMethod )
 }
 
 /*
- * Check that a virtual private method is mocked properly.
+ * Check that a virtual private method generates a expectation helper function.
  */
 TEST( Method_Expectation, VirtualPrivateMethod )
 {
@@ -351,7 +409,7 @@ TEST( Method_Expectation, VirtualPrivateMethod )
 }
 
 /*
- * Check that a virtual private method is mocked properly.
+ * Check that a virtual private method generates a expectation helper function.
  */
 TEST( Method_Expectation, VirtualProtectedMethod )
 {
@@ -393,7 +451,7 @@ TEST( Method_Expectation, VirtualProtectedMethod )
 }
 
 /*
- * Check that a public const method is mocked properly.
+ * Check that a public const method generates a expectation helper function.
  */
 TEST( Method_Expectation, PublicConstMethod )
 {
@@ -435,7 +493,7 @@ TEST( Method_Expectation, PublicConstMethod )
 }
 
 /*
- * Check that a method inside a namespace is mocked properly.
+ * Check that a method inside a namespace generates a expectation helper function.
  */
 TEST( Method_Expectation, MethodWithinNamespace )
 {
