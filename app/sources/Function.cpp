@@ -1756,7 +1756,8 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
         if( IsMethod() )
         {
-            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<void*>(" OBJECT_ARG_NAME ".getValue())); }\n";
+            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<" +
+                    m_className + "*>(" OBJECT_ARG_NAME ".getValue())); }\n";
         }
     }
 
