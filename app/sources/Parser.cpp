@@ -194,6 +194,7 @@ void Parser::GenerateMock( const std::string &genOpts, std::ostream &output ) co
         output << "}" << std::endl;
     }
     output << std::endl;
+
     output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
     output << std::endl;
 
@@ -221,6 +222,9 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
     }
     output << std::endl;
 
+    output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
+    output << std::endl;
+
     for( const std::unique_ptr<const Function> &function : m_functions )
     {
         output << function->GenerateExpectation(true) << std::endl;
@@ -231,8 +235,6 @@ void Parser::GenerateExpectationImpl( const std::string &genOpts, const std::str
 {
     GenerateFileHeading( genOpts, output );
 
-    output << "#include <CppUTestExt/MockSupport.h>" << std::endl;
-    output << std::endl;
     output << "#include \"" <<  GetFilenameFromPath( headerFilepath ) << "\"" << std::endl;
     output << std::endl;
 
