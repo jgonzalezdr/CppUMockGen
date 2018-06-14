@@ -247,18 +247,18 @@ TEST( Method_Expectation, NonVirtualPublicMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__);\n"
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
@@ -289,18 +289,18 @@ TEST( Method_Expectation, VirtualPublicMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__);\n"
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
@@ -331,18 +331,18 @@ TEST( Method_Expectation, VirtualPrivateMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__);\n"
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
@@ -373,18 +373,18 @@ TEST( Method_Expectation, VirtualProtectedMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__);\n"
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
@@ -415,18 +415,18 @@ TEST( Method_Expectation, PublicConstMethod )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__);\n"
                   "} }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} }\n", resultsImpl[0].c_str() );
@@ -459,18 +459,18 @@ TEST( Method_Expectation, MethodWithinNamespace )
     CHECK_EQUAL( 1, methodCount );
     CHECK_EQUAL( 1, resultsProto.size() );
     STRCMP_EQUAL( "namespace expect { namespace ns1$ { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__);\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__);\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<ns1::class1*> __object__);\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<ns1::class1*> __object__);\n"
                   "} } }\n", resultsProto[0].c_str() );
     STRCMP_EQUAL( "namespace expect { namespace ns1$ { namespace class1$ {\n"
-                  "MockExpectedCall& method1(CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(CppUMockGen::Parameter<ns1::class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"ns1::class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
-                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<void*> __object__)\n{\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__, CppUMockGen::Parameter<ns1::class1*> __object__)\n{\n"
                   "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"ns1::class1::method1\");\n"
-                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(__object__.getValue()); }\n"
+                  "    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<void*>(__object__.getValue())); }\n"
                   "    return __expectedCall__;\n"
                   "}\n"
                   "} } }\n", resultsImpl[0].c_str() );

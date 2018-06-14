@@ -1575,8 +1575,21 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
         // Get function name
         m_functionName = getQualifiedName( cursor );
 
-        // Get method constantness
-        m_isConst = ( IsMethod() && clang_CXXMethod_isConst(cursor) );
+        if( IsMethod() )
+        {
+            // Get method constantness
+            m_isConst = clang_CXXMethod_isConst(cursor);
+
+            // Get method class
+            m_className = getMethodClassName(cursor);
+
+            // LCOV_EXCL_START
+            if( m_className.empty() )
+            {
+                throw std::runtime_error( "<UNEXPECTED ERROR> Could not determine class name for method '" + clang_getCursorSpelling(cursor) + "'" );
+            }
+            // LCOV_EXCL_STOP
+        }
 
         // Get & process function return type
         const CXType returnType = clang_getCursorResultType( cursor );
@@ -1702,8 +1715,8 @@ std::string Function::GenerateExpectation( bool proto ) const
 std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
 {
     bool addSignatureSeparator = false;
-    bool argumentsSkipped = hasSkippedArguments();
-    bool checkIgnoredArguments = !argumentsSkipped && hasIgnorableArguments();
+    bool argumentsSkipped = HasSkippedArguments();
+    bool checkIgnoredArguments = !argumentsSkipped && HasIgnorableArguments();
 
     std::string ret = "MockExpectedCall& " + functionName + "(";
 
@@ -1720,7 +1733,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
             ret += ", ";
         }
 
-        ret += "CppUMockGen::Parameter<void*> " OBJECT_ARG_NAME;
+        ret += "CppUMockGen::Parameter<const " + m_className + "*> " OBJECT_ARG_NAME;
         addSignatureSeparator = true;
     }
 
@@ -1743,7 +1756,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
         if( IsMethod() )
         {
-            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(" OBJECT_ARG_NAME ".getValue()); }\n";
+            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<void*>(" OBJECT_ARG_NAME ".getValue())); }\n";
         }
     }
 
@@ -1804,7 +1817,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     return ret;
 }
 
-bool Function::hasIgnorableArguments() const
+bool Function::HasIgnorableArguments() const
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
@@ -1817,7 +1830,7 @@ bool Function::hasIgnorableArguments() const
     return false;
 }
 
-bool Function::hasSkippedArguments() const
+bool Function::HasSkippedArguments() const
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {

@@ -53,7 +53,7 @@ std::string operator+( const char *string, const CXString& cxstr );
  * Returns the qualified name of a function or variable (i.e., prefixed with namespaces and class names).
  *
  * @param cursor [in] A cursor
- * @return A string with the fill qualified name of the cursor
+ * @return A string with the full qualified name of the cursor
  */
 std::string getQualifiedName( const CXCursor &cursor );
 
@@ -64,5 +64,13 @@ std::string getQualifiedName( const CXCursor &cursor );
  * @return A string with the spelling of the bare type
  */
 std::string getBareTypeSpelling( const CXType &type );
+
+/**
+ * Returns the name of the class to which a method belongs.
+ *
+ * @param cursor [in] A cursor to a method
+ * @return A string with name of the class to which belongs the method of the cursor
+ */
+std::string getMethodClassName( const CXCursor &cursor );
 
 #endif // header guard

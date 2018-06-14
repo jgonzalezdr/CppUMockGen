@@ -91,3 +91,17 @@ std::string getBareTypeSpelling( const CXType &type )
 
     return className;
 }
+
+std::string getMethodClassName( const CXCursor &cursor )
+{
+    std::string ret;
+
+    CXCursor parent = clang_getCursorSemanticParent( cursor );
+
+    if( !clang_Cursor_isNull( parent ) )
+    {
+        ret = getQualifiedName( parent );
+    }
+
+    return ret;
+}
