@@ -12,6 +12,10 @@
 
 #include <CppUTestExt/MockSupport.h>
 
+namespace expect { namespace Config$ {
+MockExpectedCall& Config$(bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions, const std::vector<std::string> &typeOverrideOptions);
+} }
+
 namespace expect { namespace Config$ { namespace OverrideSpec$ {
 MockExpectedCall& GetType(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, MockedType __return__);
 MockExpectedCall& GetType(unsigned int __numCalls__, CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, MockedType __return__);

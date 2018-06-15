@@ -8,6 +8,17 @@
 
 #include "Config_expect.hpp"
 
+namespace expect { namespace Config$ {
+MockExpectedCall& Config$(bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions, const std::vector<std::string> &typeOverrideOptions)
+{
+    MockExpectedCall& __expectedCall__ = mock().expectOneCall("Config::Config");
+    __expectedCall__.withBoolParameter("useUnderlyingTypedefType", useUnderlyingTypedefType);
+    __expectedCall__.withParameterOfType("std::vector<std::string>", "paramOverrideOptions", &paramOverrideOptions);
+    __expectedCall__.withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    return __expectedCall__;
+}
+} }
+
 namespace expect { namespace Config$ { namespace OverrideSpec$ {
 MockExpectedCall& GetType(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, MockedType __return__)
 {

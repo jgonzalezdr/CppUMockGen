@@ -254,8 +254,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
             "};";
     SetupTempFile( testHeader );
 
-    expect::Function$::Parse( 2, IgnoreParameter::YES, IgnoreParameter::YES, config, true );
-    expect::Function$::Parse( 2, IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+    expect::Function$::Parse( 4, IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
     // Exercise
     Parser parser;
@@ -521,7 +520,6 @@ TEST( Parser, Warning )
    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
    // Exercise
-   std::vector<std::string> results;
    Parser parser;
    bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
