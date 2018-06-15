@@ -6,20 +6,9 @@
 namespace CppUMockGen {
 
 /**
- * Class used to identify parameters that shall be ignored.
+ * Enum used to identify parameters that shall be ignored.
  */
-class IgnoreParameter
-{
-};
-
-/**
- * Utility class to store useful static values for the Parameter class.
- */
-class PARAMETER
-{
-public:
-    static const IgnoreParameter IGNORE;
-};
+enum IgnoreParameter { YES };
 
 /**
  * Class used to handle parameters that can be ignored of expectation helper functions.
