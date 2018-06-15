@@ -9,6 +9,8 @@ set( PROD_DIR ${CMAKE_SOURCE_DIR}/app )
 include_directories(
     ${PROD_DIR}/sources
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/app/include/
+    ${CMAKE_SOURCE_DIR}/test/Expectations/
 )
 
 set( PROD_SRC_FILES
@@ -23,6 +25,8 @@ set( TEST_SRC_FILES
      ${CMAKE_SOURCE_DIR}/test/Mocks/Function_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Method_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/ConsoleColorizer_mock.cpp
+     ${CMAKE_SOURCE_DIR}/test/Expectations/Function_expect.cpp
+     ${CMAKE_SOURCE_DIR}/test/Expectations/ConsoleColorizer_expect.cpp
 )
 
 if( MSVC )

@@ -1,6 +1,8 @@
 #ifndef CPPUMOCKGEN_H_
 #define CPPUMOCKGEN_H_
 
+#include <type_traits>
+
 namespace CppUMockGen {
 
 /**
@@ -29,22 +31,22 @@ public:
      * Constructor for non-ignored parameters.
      * @param value [in] Value of the parameter
      */
-    Parameter(BaseType value) : m_value(value), m_isIgnored(false) {}
+    Parameter(const BaseType &value) : m_value(&value), m_isIgnored(false) {}
 
     /**
      * Constructor for ignored parameters.
      *
      * The actual value of the passed parameter is ignored.
      */
-    Parameter(IgnoreParameter) : m_isIgnored(true) {}
+    Parameter(IgnoreParameter) : m_value(nullptr),  m_isIgnored(true) {}
 
     /**
      * Returns the parameter value.
      * @return Parameter value
      */
-    BaseType getValue()
+    const BaseType& getValue()
     {
-        return m_value;
+        return *m_value;
     }
 
     /**
@@ -57,7 +59,7 @@ public:
     }
 
 private:
-    BaseType m_value;
+    const typename std::remove_reference<BaseType>::type *m_value;
     bool m_isIgnored;
 };
 

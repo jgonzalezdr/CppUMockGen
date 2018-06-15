@@ -30,6 +30,13 @@
 #include "Parser.hpp"
 #include "FileHelper.hpp"
 
+#include "Function_expect.hpp"
+#include "ConsoleColorizer_expect.hpp"
+
+#undef IGNORE
+
+using CppUMockGen::PARAMETER;
+
 #ifdef _MSC_VER
 #pragma warning( disable : 4996 )
 #endif
@@ -93,7 +100,7 @@ TEST( Parser, MockedFunction )
            "void function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+   expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
 
    // Exercise
    Parser parser;
@@ -111,7 +118,7 @@ TEST( Parser, MockedFunction )
    std::ostringstream output1;
    const char* testMock = "###MOCK6768###";
 
-   mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
+   expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock );
 
    // Exercise
    parser.GenerateMock( "", output1 );
@@ -128,7 +135,7 @@ TEST( Parser, MockedFunction )
    std::ostringstream output2;
    const char* testExpect1 = "###EXPECT3178###";
 
-   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1);
+   expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1 );
 
    // Exercise
    parser.GenerateExpectationHeader( "", output2 );
@@ -145,7 +152,7 @@ TEST( Parser, MockedFunction )
    std::ostringstream output3;
    const char* testExpect2 = "###EXPECT3682###";
 
-   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2);
+   expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2 );
 
    // Exercise
    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
@@ -172,7 +179,7 @@ TEST( Parser, MockedMethod )
             "};";
     SetupTempFile( testHeader );
 
-    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+    expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
 
     // Exercise
     Parser parser;
@@ -187,7 +194,7 @@ TEST( Parser, MockedMethod )
     std::ostringstream output1;
     const char* testMock = "###MOCK###";
 
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock );
 
     // Exercise
     parser.GenerateMock( "", output1 );
@@ -203,7 +210,7 @@ TEST( Parser, MockedMethod )
     std::ostringstream output2;
     const char* testExpect1 = "###EXPECT87828763###";
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1 );
 
     // Exercise
     parser.GenerateExpectationHeader( "", output2 );
@@ -219,7 +226,7 @@ TEST( Parser, MockedMethod )
     std::ostringstream output3;
     const char* testExpect2 = "###EXPECT87362###";
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2 );
 
     // Exercise
     parser.GenerateExpectationImpl( "", "my_header.h", output3 );
@@ -249,8 +256,8 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
             "};";
     SetupTempFile( testHeader );
 
-    mock().expectNCalls(2, "Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
-    mock().expectNCalls(2, "Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+    expect::Function$::Parse( 2, PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
+    expect::Function$::Parse( 2, PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
 
     // Exercise
     Parser parser;
@@ -265,10 +272,10 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     std::ostringstream output1;
     const char* testMock[] = { "### MOCK 1 ###\n", "### MOCK 2 ###\n", "### MOCK 3 ###\n", "### MOCK 4 ###\n" };
 
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[0]);
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[1]);
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[2]);
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[3]);
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[0] );
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[1] );
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[2] );
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[3] );
 
     // Exercise
     parser.GenerateMock( "", output1 );
@@ -287,10 +294,10 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     std::ostringstream output2;
     const char* testExpect1[] = { "### EXPECT H 1 ###\n", "### EXPECT H 2 ###\n", "### EXPECT H 3 ###\n", "### EXPECT H 4 ###\n" };
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[0]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[1]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[2]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[3]);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[0] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[1] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[2] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[3] );
 
     // Exercise
     parser.GenerateExpectationHeader( "", output2 );
@@ -309,10 +316,10 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     std::ostringstream output3;
     const char* testExpect2[] = { "### EXPECT I 1 ###\n", "### EXPECT I 2 ###\n", "### EXPECT I 3 ###\n", "### EXPECT I 4 ###\n" };
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[0]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[1]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[2]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[3]);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[0] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[1] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[2] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[3] );
 
     // Exercise
     parser.GenerateExpectationImpl( "", "my_header.h", output3 );
@@ -339,8 +346,8 @@ TEST( Parser, FunctionNonMockable )
            "void function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
-   mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+   expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, false );
+   expect::ConsoleColorizer$::SetColor( 2, PARAMETER::IGNORE, PARAMETER::IGNORE );
 
    // Exercise
    Parser parser;
@@ -370,8 +377,8 @@ TEST( Parser, MethodNonMockable )
            "};";
    SetupTempFile( testHeader );
 
-   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
-   mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+   expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, false );
+   expect::ConsoleColorizer$::SetColor( 2, PARAMETER::IGNORE, PARAMETER::IGNORE );
 
    // Exercise
    Parser parser;
@@ -404,10 +411,10 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
             "};";
     SetupTempFile( testHeader );
 
-    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
-    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
-    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
-    mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(false);
+    expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
+    expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, false );
+    expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
+    expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, false );
 
     // Exercise
     Parser parser;
@@ -422,8 +429,8 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     std::ostringstream output1;
     const char* testMock[] = { "### MOCK 1 ###\n", "### MOCK 2 ###\n" };
 
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[0]);
-    mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock[1]);
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[0] );
+    expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock[1] );
 
     // Exercise
     parser.GenerateMock( "", output1 );
@@ -440,8 +447,8 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     std::ostringstream output2;
     const char* testExpect1[] = { "### EXPECT H 1 ###\n", "### EXPECT H 2 ###\n" };
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[0]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpect1[1]);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[0] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpect1[1] );
 
     // Exercise
     parser.GenerateExpectationHeader( "", output2 );
@@ -458,8 +465,8 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     std::ostringstream output3;
     const char* testExpect2[] = { "### EXPECT I 1 ###\n", "### EXPECT I 2 ###\n" };
 
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[0]);
-    mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpect2[1]);
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[0] );
+    expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpect2[1] );
 
     // Exercise
     parser.GenerateExpectationImpl( "", "my_header.h", output3 );
@@ -484,7 +491,7 @@ TEST( Parser, SyntaxError )
            "foo function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+   expect::ConsoleColorizer$::SetColor( 2, PARAMETER::IGNORE, PARAMETER::IGNORE );
 
    // Exercise
    Parser parser;
@@ -512,8 +519,8 @@ TEST( Parser, Warning )
            "void function1(int a);";
    SetupTempFile( testHeader );
 
-   mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
-   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+   expect::ConsoleColorizer$::SetColor( 2, PARAMETER::IGNORE, PARAMETER::IGNORE );
+   expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
 
    // Exercise
    std::vector<std::string> results;
@@ -532,7 +539,7 @@ TEST( Parser, Warning )
    // Prepare
    std::ostringstream output1;
    const char* testMock = "###MOCK775434578###";
-   mock().expectOneCall("Function::GenerateMock").andReturnValue(testMock);
+   expect::Function$::GenerateMock( PARAMETER::IGNORE, testMock );
 
    // Exercise
    parser.GenerateMock( "", output1 );
@@ -547,7 +554,7 @@ TEST( Parser, Warning )
    // Prepare
    std::ostringstream output2;
    const char* testExpectation1 = "###EXPECT38484578###";
-   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", true).andReturnValue(testExpectation1);
+   expect::Function$::GenerateExpectation( PARAMETER::IGNORE, true, testExpectation1 );
 
    // Exercise
    parser.GenerateExpectationHeader( "", output2 );
@@ -562,7 +569,7 @@ TEST( Parser, Warning )
    // Prepare
    std::ostringstream output3;
    const char* testExpectation2 = "###EXPECT993617###";
-   mock().expectOneCall("Function::GenerateExpectation").withBoolParameter("proto", false).andReturnValue(testExpectation2);
+   expect::Function$::GenerateExpectation( PARAMETER::IGNORE, false, testExpectation2 );
 
    // Exercise
    parser.GenerateExpectationImpl( "", "blabla.h", output3 );
@@ -584,7 +591,7 @@ TEST( Parser, NonExistingInputFile )
 
    std::remove( nonexistingFilePath.c_str() );
 
-   mock().expectNCalls(2, "ConsoleColorizer::SetColor").ignoreOtherParameters();
+   expect::ConsoleColorizer$::SetColor( 2, PARAMETER::IGNORE, PARAMETER::IGNORE );
 
    // Exercise
    Parser parser;
@@ -616,7 +623,7 @@ TEST( Parser, IncludePaths )
 
    chdir( tempDirPath.c_str() );
 
-   mock().expectOneCall("Function::Parse").withConstPointerParameter("config", config).ignoreOtherParameters().andReturnValue(true);
+   expect::Function$::Parse( PARAMETER::IGNORE, PARAMETER::IGNORE, config, true );
 
    // Exercise
    Parser parser;
