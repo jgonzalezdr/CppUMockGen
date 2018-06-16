@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    const typename std::remove_reference<BaseType>::type *m_value;
+    typename std::remove_reference<const BaseType>::type *m_value;
     bool m_isIgnored;
 };
 
