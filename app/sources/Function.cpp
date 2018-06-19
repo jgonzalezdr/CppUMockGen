@@ -1121,18 +1121,24 @@ public:
         m_exposedType = type;
     }
 
+    void SetExpectationArgType( const std::string &type )
+    {
+        m_expectationArgType = type;
+    }
+
 protected:
     virtual std::string GetCallFront(bool) const override
     {
         return "withParameterOfType(\"" + m_exposedType + "\", ";
     }
 
-    std::string m_exposedType;
-
     virtual std::string GetExpectationBaseType() const override
     {
-        return "const " + m_exposedType + "*";
+        return "const " + m_expectationArgType + "*";
     }
+
+    std::string m_exposedType;
+    std::string m_expectationArgType;
 };
 
 class ArgumentOutputOfType : public ArgumentInputOfType
@@ -1230,12 +1236,14 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
     if( overrideType == MockedType::InputOfType )
     {
         ret = new ArgumentInputOfType;
-        static_cast<ArgumentInputOfType*>(ret)->SetExposedType( override->GetTypeName() );
+        static_cast<ArgumentInputOfType*>(ret)->SetExposedType( override->GetExposedTypeName() );
+        static_cast<ArgumentInputOfType*>(ret)->SetExpectationArgType( override->GetExpectationArgTypeName() );
     }
     else if( overrideType == MockedType::OutputOfType )
     {
         ret = new ArgumentOutputOfType;
-        static_cast<ArgumentOutputOfType*>(ret)->SetExposedType( override->GetTypeName() );
+        static_cast<ArgumentOutputOfType*>(ret)->SetExposedType( override->GetExposedTypeName() );
+        static_cast<ArgumentOutputOfType*>(ret)->SetExpectationArgType( override->GetExpectationArgTypeName() );
     }
     else switch( overrideType )
     {

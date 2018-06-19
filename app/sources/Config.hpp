@@ -35,9 +35,6 @@ public:
     class OverrideSpec
     {
     public:
-        static const char EXPR_MOD_SEPARATOR = '/';
-        static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
-
         /**
          * Constructs a OverrideSpec object.
          *
@@ -55,9 +52,10 @@ public:
         MockedType GetType() const;
 
         /**
-         * Returns the type name.
+         * Returns the exposed type name.
+         * @return String with the exposed type name
          */
-        const std::string&  GetTypeName() const;
+        const std::string& GetExposedTypeName() const;
 
         /**
          * Returns the expression modifier part before the character '$'.
@@ -71,11 +69,18 @@ public:
          */
         const std::string& GetExprModBack() const;
 
+        /**
+         * Returns the expectation argument type name.
+         * @return String with the expectation argument type name
+         */
+        const std::string& GetExpectationArgTypeName() const;
+
     private:
         MockedType m_type;
-        std::string m_typeName;
+        std::string m_exposedTypeName;
         std::string m_exprModFront;
         std::string m_exprModBack;
+        std::string m_expectationArgTypeName;
     };
 
     /**

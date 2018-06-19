@@ -26,9 +26,9 @@ MockedType Config::OverrideSpec::GetType() const
     return static_cast<MockedType>( mock().actualCall("Config::OverrideSpec::GetType").onObject(this).returnIntValue() );
 }
 
-const std::string & Config::OverrideSpec::GetTypeName() const
+const std::string & Config::OverrideSpec::GetExposedTypeName() const
 {
-    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetTypeName").onObject(this).returnConstPointerValue() );
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetExposedTypeName").onObject(this).returnConstPointerValue() );
 }
 
 const std::string & Config::OverrideSpec::GetExprModFront() const
@@ -39,6 +39,11 @@ const std::string & Config::OverrideSpec::GetExprModFront() const
 const std::string & Config::OverrideSpec::GetExprModBack() const
 {
     return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetExprModBack").onObject(this).returnConstPointerValue() );
+}
+
+const std::string & Config::OverrideSpec::GetExpectationArgTypeName() const
+{
+    return * static_cast<const std::string *>( mock().actualCall("Config::OverrideSpec::GetExpectationArgTypeName").onObject(this).returnConstPointerValue() );
 }
 
 bool Config::UseUnderlyingTypedefType() const

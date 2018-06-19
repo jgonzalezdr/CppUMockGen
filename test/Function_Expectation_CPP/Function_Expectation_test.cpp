@@ -8258,9 +8258,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Output )
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 {
     // Prepare
-    const std::string typeName = "Struct1";
+    const std::string exposedTypeName = "Struct1";
     const std::string argExprFront = "##%%";
     const std::string argExprBack = "&&//";
+    const std::string expectationArgTypeName = "OtherStruct33";
 
     mock().installCopier( "std::string", stdStringCopier );
 
@@ -8280,7 +8281,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
     expect::Config$::OverrideSpec$::GetType( override, MockedType::InputOfType );
     expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
     expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetTypeName( override, typeName );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
 
     SimpleString testHeader =
             "struct Struct1 { int a; };\n"
@@ -8298,12 +8300,12 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
     CHECK_EQUAL( 1, resultsProto.size() );
     SimpleString expectedResultProto =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const OtherStruct33*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const OtherStruct33*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
             "}\n";
     SimpleString expectedResultImpl =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const OtherStruct33*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    bool __ignoreOtherParams__ = false;\n"
             "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
             "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
@@ -8314,7 +8316,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
             "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
             "    return __expectedCall__;\n"
             "}\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const Struct1*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<const OtherStruct33*> p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    bool __ignoreOtherParams__ = false;\n"
             "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
             "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
@@ -8340,9 +8342,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 {
     // Prepare
-    const std::string typeName = "Struct1";
+    const std::string exposedTypeName = "Struct1";
     const std::string argExprFront = "##%%";
     const std::string argExprBack = "&&//";
+    const std::string expectationArgTypeName = "OtherStruct12";
 
     mock().installCopier( "std::string", stdStringCopier );
 
@@ -8362,7 +8365,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
     expect::Config$::OverrideSpec$::GetType( override, MockedType::OutputOfType );
     expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
     expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetTypeName( override, typeName );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
 
     SimpleString testHeader =
             "struct Struct1 { int a; };\n"
@@ -8380,12 +8384,12 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
     CHECK_EQUAL( 1, resultsProto.size() );
     SimpleString expectedResultProto =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const Struct1* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const Struct1* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const OtherStruct12* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const OtherStruct12* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
             "}\n";
     SimpleString expectedResultImpl =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const Struct1* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const OtherStruct12* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    bool __ignoreOtherParams__ = false;\n"
             "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"function1\");\n"
             "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
@@ -8396,7 +8400,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
             "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
             "    return __expectedCall__;\n"
             "}\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const Struct1* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const OtherStruct12* p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    bool __ignoreOtherParams__ = false;\n"
             "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
             "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
@@ -8419,7 +8423,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 /*
  * Check expectation generation of a function with parameter override.
  */
-TEST_EX( TEST_GROUP_NAME,ReturnOverride )
+TEST_EX( TEST_GROUP_NAME, ReturnOverride )
 {
     const std::string argExprFront = "##%%";
     const std::string argExprBack = "&&//";

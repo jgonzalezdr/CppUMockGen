@@ -5484,9 +5484,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 {
     // Prepare
-    const std::string typeName = "Struct1";
+    const std::string exposedTypeName = "Struct1";
     const std::string argExprFront = "&(";
     const std::string argExprBack = "->s)";
+    const std::string expectationArgTypeName = "98432~#";
 
     SimpleString testHeader =
             "struct Struct1 { int a; };\n"
@@ -5511,7 +5512,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
     expect::Config$::OverrideSpec$::GetType( override, MockedType::InputOfType );
     expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
     expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetTypeName( override, typeName );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
 
     // Exercise
     std::vector<std::string> results;
@@ -5539,9 +5541,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 {
     // Prepare
-    const std::string typeName = "Struct1";
+    const std::string exposedTypeName = "Struct1";
     const std::string argExprFront = "&(";
     const std::string argExprBack = "->s)";
+    const std::string expectationArgTypeName = "98432~#";
 
     SimpleString testHeader =
             "struct Struct1 { int a; };\n"
@@ -5566,7 +5569,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
     expect::Config$::OverrideSpec$::GetType( override, MockedType::OutputOfType );
     expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
     expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetTypeName( override, typeName );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
 
     // Exercise
     std::vector<std::string> results;

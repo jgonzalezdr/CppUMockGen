@@ -3,6 +3,10 @@
 #include <set>
 #include <vector>
 
+static const char EXPR_MOD_SEPARATOR = '/';
+static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
+static const char EXPECTATION_ARG_TYPE_SEPARATOR = '<';
+
 Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
                 const std::vector<std::string> &typeOverrideOptions )
 : m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_paramOverrideMap( paramOverrideOptions, false ),
@@ -52,32 +56,32 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
 {
     if( value.empty() )
     {
-        std::string errorMsg = "Override option specification cannot be empty <" + option + ">";
+        std::string errorMsg = "Override option specification cannot be empty ['" + option + "']";
         throw std::runtime_error( errorMsg );
     }
 
     std::string type;
-    size_t sepPos = value.find( EXPR_MOD_SEPARATOR );
-    if( sepPos != std::string::npos )
+    size_t exprModSepPos = value.find( EXPR_MOD_SEPARATOR );
+    if( exprModSepPos != std::string::npos )
     {
-        type = value.substr(0, sepPos);
+        type = value.substr(0, exprModSepPos);
         if( type.empty() )
         {
-            std::string errorMsg = "Override option type cannot be empty <" + option + ">";
+            std::string errorMsg = "Override option type cannot be empty ['" + option + "']";
             throw std::runtime_error( errorMsg );
         }
 
-        std::string argExprMod = value.substr(sepPos+1);
+        std::string argExprMod = value.substr(exprModSepPos+1);
         if( argExprMod.empty() )
         {
-            std::string errorMsg = "Override option argument expression cannot be empty if specified <" + option + ">";
+            std::string errorMsg = "Override option argument expression cannot be empty if specified ['" + option + "']";
             throw std::runtime_error( errorMsg );
         }
 
         size_t placeholderPos = argExprMod.find( EXPR_MOD_ARG_PLACEHOLDER );
         if( placeholderPos == std::string::npos )
         {
-            std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) <" + option + ">";
+            std::string errorMsg = "Override option argument expression does not contain parameter name placeholder ($) ['" + option + "']";
             throw std::runtime_error( errorMsg );
         }
 
@@ -98,7 +102,7 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
         }
         else
         {
-            std::string errorMsg = "Invalid return override option type <" + option + ">.";
+            std::string errorMsg = "Invalid return override option type ['" + option + "'].";
             throw std::runtime_error( errorMsg );
         }
     }
@@ -118,19 +122,38 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
                 if( type.find( overrideType.first ) == 0 )
                 {
                     m_type = overrideType.second;
-                    m_typeName = type.substr( overrideType.first.size() );
-                    if( m_typeName.empty() )
+                    m_exposedTypeName = type.substr( overrideType.first.size() );
+
+                    size_t expectArgTypeSepPos = m_exposedTypeName.find( EXPECTATION_ARG_TYPE_SEPARATOR );
+                    if( expectArgTypeSepPos != std::string::npos )
                     {
-                        std::string errorMsg = "Type name cannot be empty for override option <" + option + ">.";
+                        m_expectationArgTypeName = m_exposedTypeName.substr( expectArgTypeSepPos + 1 );
+                        m_exposedTypeName = m_exposedTypeName.substr( 0, expectArgTypeSepPos );
+
+                        if( m_expectationArgTypeName.empty() )
+                        {
+                            std::string errorMsg = "Override option expectation argument type cannot be empty ['" + option + "'].";
+                            throw std::runtime_error( errorMsg );
+                        }
+                    }
+                    else
+                    {
+                        m_expectationArgTypeName = m_exposedTypeName;
+                    }
+
+                    if( m_exposedTypeName.empty() )
+                    {
+                        std::string errorMsg = "Override option type name cannot be empty ['" + option + "'].";
                         throw std::runtime_error( errorMsg );
                     }
+
                     overrideTypeFound = true;
                 }
             }
 
             if( !overrideTypeFound )
             {
-                std::string errorMsg = "Invalid parameter override option type <" + option + ">.";
+                std::string errorMsg = "Invalid parameter override option type ['" + option + "'].";
                 throw std::runtime_error( errorMsg );
             }
         }
@@ -147,7 +170,7 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool 
             std::string key = option.substr(0, sepPos);
             if( key.empty() )
             {
-                std::string errorMsg = "Override option key cannot be empty <" + option + ">.";
+                std::string errorMsg = "Override option key cannot be empty ['" + option + "'].";
                 throw std::runtime_error( errorMsg );
             }
 
@@ -157,13 +180,13 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool 
 
             if( !m_map.emplace( key, spec ).second )
             {
-                std::string errorMsg = "Override option key <" + key + "> can only be passed once.";
+                std::string errorMsg = "Override option key '" + key + "' can only be passed once.";
                 throw std::runtime_error( errorMsg );
             }
         }
         else
         {
-            std::string errorMsg = "Invalid override option <" + option + ">.";
+            std::string errorMsg = "Invalid override option '[" + option + "'].";
             throw std::runtime_error( errorMsg );
         }
     }
@@ -180,9 +203,9 @@ MockedType Config::OverrideSpec::GetType() const
     return m_type;
 }
 
-const std::string& Config::OverrideSpec::GetTypeName() const
+const std::string& Config::OverrideSpec::GetExposedTypeName() const
 {
-    return m_typeName;
+    return m_exposedTypeName;
 }
 
 const std::string& Config::OverrideSpec::GetExprModFront() const
@@ -193,4 +216,9 @@ const std::string& Config::OverrideSpec::GetExprModFront() const
 const std::string& Config::OverrideSpec::GetExprModBack() const
 {
     return m_exprModBack;
+}
+
+const std::string& Config::OverrideSpec::GetExpectationArgTypeName() const
+{
+    return m_expectationArgTypeName;
 }

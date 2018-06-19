@@ -163,6 +163,8 @@ TEST( Config, ParameterOverrideOptions_AllowedTypes )
         "function1#p11=Skip",
         "function1#p12=InputOfType:MyType",
         "function1#p13=OutputOfType:MyType",
+        "function1#p14=InputOfType:MyType<OtherType",
+        "function1#p15=OutputOfType:MyType<OtherType",
     }, std::vector<std::string>() );
 
     // Verify
@@ -179,6 +181,8 @@ TEST( Config, ParameterOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetParameterOverride("function1#p11") != NULL );
     CHECK( testConfig.GetParameterOverride("function1#p12") != NULL );
     CHECK( testConfig.GetParameterOverride("function1#p13") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p14") != NULL );
+    CHECK( testConfig.GetParameterOverride("function1#p15") != NULL );
 
     // Cleanup
 }
@@ -206,6 +210,8 @@ TEST( Config, TypeOverrideOptions_AllowedTypes )
         "#type11=Skip",
         "#type12=InputOfType:MyType",
         "#type13=OutputOfType:MyType",
+        "#type14=InputOfType:MyType<OtherType",
+        "#type15=OutputOfType:MyType<OtherType",
     } );
 
     // Verify
@@ -222,6 +228,8 @@ TEST( Config, TypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("#type11") != NULL );
     CHECK( testConfig.GetTypeOverride("#type12") != NULL );
     CHECK( testConfig.GetTypeOverride("#type13") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type14") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type15") != NULL );
 
     // Cleanup
 }
@@ -236,7 +244,9 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
                        std::vector<std::string> { "function1#p=Int/($)",
                                                   "ns1::function1@=ConstPointer/&$",
                                                   "func2#p=InputOfType:TypeZ/$->getZ()",
-                                                  "func3#p=OutputOfType:TypeW/(*$).getW()" },
+                                                  "func3#p=OutputOfType:TypeW/(*$).getW()",
+                                                  "func4#p=InputOfType:TypeM<OtherTypeA/$->getM()",
+                                                  "func5#p=OutputOfType:TypeN<OtherTypeB/(*$).getN()" },
                        std::vector<std::string>() );
 
     // Exercise
@@ -244,32 +254,52 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
     const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function1@");
     const Config::OverrideSpec* override3 = testConfig.GetParameterOverride("func2#p");
     const Config::OverrideSpec* override4 = testConfig.GetParameterOverride("func3#p");
+    const Config::OverrideSpec* override5 = testConfig.GetParameterOverride("func4#p");
+    const Config::OverrideSpec* override6 = testConfig.GetParameterOverride("func5#p");
 
     // Verify
     CHECK( override1 != NULL );
     CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
     STRCMP_EQUAL( "(", override1->GetExprModFront().c_str() );
     STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override1->GetTypeName().c_str() );
+    STRCMP_EQUAL( "", override1->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", override1->GetExpectationArgTypeName().c_str() );
 
     CHECK( override2 != NULL );
     CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
     STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override2->GetTypeName().c_str() );
-    STRCMP_EQUAL( "", override2->GetTypeName().c_str() );
+    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", override2->GetExpectationArgTypeName().c_str() );
 
     CHECK( override3 != NULL );
     CHECK_EQUAL( (int)MockedType::InputOfType, (int)override3->GetType() );
     STRCMP_EQUAL( "", override3->GetExprModFront().c_str() );
     STRCMP_EQUAL( "->getZ()", override3->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeZ", override3->GetTypeName().c_str() );
+    STRCMP_EQUAL( "TypeZ", override3->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeZ", override3->GetExpectationArgTypeName().c_str() );
 
     CHECK( override4 != NULL );
     CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override4->GetType() );
     STRCMP_EQUAL( "(*", override4->GetExprModFront().c_str() );
     STRCMP_EQUAL( ").getW()", override4->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeW", override4->GetTypeName().c_str() );
+    STRCMP_EQUAL( "TypeW", override4->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeW", override4->GetExpectationArgTypeName().c_str() );
+
+    CHECK( override5 != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override5->GetType() );
+    STRCMP_EQUAL( "", override5->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getM()", override5->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeM", override5->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeA", override5->GetExpectationArgTypeName().c_str() );
+
+    CHECK( override6 != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override6->GetType() );
+    STRCMP_EQUAL( "(*", override6->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ").getN()", override6->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeN", override6->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeB", override6->GetExpectationArgTypeName().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
@@ -292,38 +322,60 @@ TEST( Config, TypeOverrideOptions_ArgumentExpression )
                        std::vector<std::string> { "#const int *=Int/(*$)",
                                                   "@const int *=LongInt/&$",
                                                   "#typeX=InputOfType:TypeY/&($.getY())",
-                                                  "#typeQ=OutputOfType:TypeQ/&$->getQ()" } );
+                                                  "#typeQ=OutputOfType:TypeQ/&$->getQ()",
+                                                  "#typeI=InputOfType:TypeK<OtherTypeC/&($.getK())",
+                                                  "#typeJ=OutputOfType:TypeL<OtherTypeD/&$->getL()" } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#const int *");
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@const int *");
     const Config::OverrideSpec* override3 = testConfig.GetTypeOverride("#typeX");
     const Config::OverrideSpec* override4 = testConfig.GetTypeOverride("#typeQ");
+    const Config::OverrideSpec* override5 = testConfig.GetTypeOverride("#typeI");
+    const Config::OverrideSpec* override6 = testConfig.GetTypeOverride("#typeJ");
 
     // Verify
     CHECK( override1 != NULL );
     CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
     STRCMP_EQUAL( "(*", override1->GetExprModFront().c_str() );
     STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override1->GetTypeName().c_str() );
+    STRCMP_EQUAL( "", override1->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", override1->GetExpectationArgTypeName().c_str() );
 
     CHECK( override2 != NULL );
     CHECK_EQUAL( (int)MockedType::Long, (int)override2->GetType() );
     STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override2->GetTypeName().c_str() );
+    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", override2->GetExpectationArgTypeName().c_str() );
 
     CHECK( override3 != NULL );
     CHECK_EQUAL( (int)MockedType::InputOfType, (int)override3->GetType() );
     STRCMP_EQUAL( "&(", override3->GetExprModFront().c_str() );
     STRCMP_EQUAL( ".getY())", override3->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeY", override3->GetTypeName().c_str() );
+    STRCMP_EQUAL( "TypeY", override3->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeY", override3->GetExpectationArgTypeName().c_str() );
 
     CHECK( override4 != NULL );
     CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override4->GetType() );
     STRCMP_EQUAL( "&", override4->GetExprModFront().c_str() );
     STRCMP_EQUAL( "->getQ()", override4->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeQ", override4->GetTypeName().c_str() );
+    STRCMP_EQUAL( "TypeQ", override4->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeQ", override4->GetExpectationArgTypeName().c_str() );
+
+    CHECK( override5 != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override5->GetType() );
+    STRCMP_EQUAL( "&(", override5->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ".getK())", override5->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeK", override5->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeC", override5->GetExpectationArgTypeName().c_str() );
+
+    CHECK( override6 != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override6->GetType() );
+    STRCMP_EQUAL( "&", override6->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getL()", override6->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeL", override6->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeD", override6->GetExpectationArgTypeName().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("const int *") );
@@ -372,7 +424,25 @@ TEST( Config, Exception_ParameterOverrideBadFormat )
                   Config( false, std::vector<std::string> { "function1#p=InputOfType:" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:a<" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<a" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "function2#p=OutputOfType:" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:a<" }, std::vector<std::string>() ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<a" }, std::vector<std::string>() ) );
 
     // Cleanup
 }
@@ -416,7 +486,25 @@ TEST( Config, Exception_TypeOverrideBadFormat )
                   Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:a<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:<a" } ) );
+
+    CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:a<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
 
     // Cleanup
 }
