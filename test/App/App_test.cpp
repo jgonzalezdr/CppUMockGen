@@ -260,7 +260,7 @@ TEST( App, MockOutput_OutDir )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -305,7 +305,7 @@ TEST( App, MockOutput_CurrentDir )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -346,7 +346,7 @@ TEST( App, MockOutput_OutFile )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -384,7 +384,7 @@ TEST( App, MockOutput_ConsoleOutput )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -450,7 +450,7 @@ TEST( App, MockOutput_InterpretAsCpp )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, true, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x ", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -485,7 +485,7 @@ TEST( App, MockOutput_UseUnderlyingTypedefType )
 
     expect::Config$::Config$( true, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u ", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -520,7 +520,7 @@ TEST( App, MockOutput_IncludePaths )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -555,7 +555,7 @@ TEST( App, MockOutput_paramOverrideOptions )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -590,7 +590,7 @@ TEST( App, MockOutput_typeOverrideOptions )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -667,8 +667,8 @@ TEST( App, ExpectationOutput_OutDir )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -720,8 +720,8 @@ TEST( App, ExpectationOutput_CurrentDir )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilename1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilename1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -767,8 +767,8 @@ TEST( App, ExpectationMockOutput_OutFile_Header )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -814,8 +814,8 @@ TEST( App, ExpectationMockOutput_OutFile_Impl )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -863,8 +863,8 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -912,8 +912,8 @@ TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -953,8 +953,8 @@ TEST( App, ExpectationOutput_ConsoleOutput )
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", outputText1 );
-    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", outputText2 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText2 );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
