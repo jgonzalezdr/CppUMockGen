@@ -11,6 +11,8 @@
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
 
+#include "VersionInfo.h"
+
 const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
 App::App( std::ostream &cout, std::ostream &cerr )
@@ -69,7 +71,7 @@ int App::Execute( int argc, const char* argv[] )
 {
     int returnCode = 0;
 
-    cxxopts::Options options("CppUMockGen", "Mock generator for CppUTest");
+    cxxopts::Options options(PRODUCT_NAME, PRODUCT_COMMENTS);
 
     options.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
@@ -80,6 +82,7 @@ int App::Execute( int argc, const char* argv[] )
         ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
         ( "p,param-override", "Override parameter type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
         ( "t,type-override", "Override generic type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
+        ( "v,version", "Print version" )
         ( "h,help", "Print help" );
 
     options.positional_help( "<input>" );
@@ -91,7 +94,13 @@ int App::Execute( int argc, const char* argv[] )
 
         if( options.count("help") )
         {
-            m_cerr << options.help();
+            m_cout << options.help();
+            return 0;
+        }
+
+        if( options.count("version") )
+        {
+            m_cout << PRODUCT_NAME " v" PRODUCT_VERSION_COMPACT_STR;
             return 0;
         }
 

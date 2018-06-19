@@ -153,8 +153,31 @@ TEST( App, Help )
 
     // Verify
     CHECK_EQUAL( 0, ret );
-    STRCMP_CONTAINS( "Usage:", error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() )
+    STRCMP_CONTAINS( "FooBar\nUsage:\n  CppUMockGenFoo", output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() )
+
+    // Cleanup
+}
+
+/*
+ * Check that version option displays the version
+ */
+TEST( App, Version )
+{
+    // Prepare
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-v" };
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "CppUMockGenFoo vF.O.O", output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() )
 
     // Cleanup
 }

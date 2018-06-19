@@ -96,13 +96,21 @@ function(generate_product_version outfiles)
     if (NOT PRODUCT_VERSION_REVISION OR "${PRODUCT_VERSION_REVISION}" STREQUAL "")
         set(PRODUCT_VERSION_REVISION 0)
     endif()
+    
+    if (PRODUCT_VERSION_REVISION GREATER 0)
+        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}.${PRODUCT_VERSION_REVISION}")
+    elseif(PRODUCT_VERSION_PATCH GREATER 0)
+        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}")
+    else()
+        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}")
+    endif()
 
     if (NOT PRODUCT_COMPANY_COPYRIGHT OR "${PRODUCT_COMPANY_COPYRIGHT}" STREQUAL "")
         string(TIMESTAMP PRODUCT_CURRENT_YEAR "%Y")
         set(PRODUCT_COMPANY_COPYRIGHT "${PRODUCT_COMPANY_NAME} (C) Copyright ${PRODUCT_CURRENT_YEAR}")
     endif()
     if (NOT PRODUCT_COMMENTS OR "${PRODUCT_COMMENTS}" STREQUAL "")
-        set(PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}")
+        set(PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION_COMPACT}")
     endif()
     if (NOT PRODUCT_ORIGINAL_FILENAME OR "${PRODUCT_ORIGINAL_FILENAME}" STREQUAL "")
         set(PRODUCT_ORIGINAL_FILENAME "${PRODUCT_NAME}")
@@ -114,16 +122,21 @@ function(generate_product_version outfiles)
         set(PRODUCT_FILE_DESCRIPTION "${PRODUCT_NAME}")
     endif()
 
-    set (_VersionInfoFile ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h)
+    set (_VersionInfoHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h)
+    set (_VersionResourceHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.h)
     set (_VersionResourceFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.rc)
     configure_file(
         ${GenerateProductVersionCurrentDir}/VersionInfo.h.in
-        ${_VersionInfoFile}
+        ${_VersionInfoHeaderFile}
+        @ONLY)
+    configure_file(
+        ${GenerateProductVersionCurrentDir}/VersionResource.h.in
+        ${_VersionResourceHeaderFile}
         @ONLY)
     configure_file(
         ${GenerateProductVersionCurrentDir}/VersionResource.rc
         ${_VersionResourceFile}
         COPYONLY)
-    list(APPEND ${outfiles} ${_VersionInfoFile} ${_VersionResourceFile})
+    list(APPEND ${outfiles} ${_VersionInfoHeaderFile} ${_VersionResourceHeaderFile} ${_VersionResourceFile})
     set (${outfiles} ${${outfiles}} PARENT_SCOPE)
 endfunction()

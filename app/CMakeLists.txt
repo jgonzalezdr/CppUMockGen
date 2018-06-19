@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen )
 set( PROJECT_VERSION_MAJOR 0 )
-set( PROJECT_VERSION_MINOR 2 )
+set( PROJECT_VERSION_MINOR 3 )
 set( PROJECT_VERSION_PATCH 0 )
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
@@ -51,6 +51,7 @@ generate_product_version(
     VERSION_PATCH ${PROJECT_VERSION_PATCH}
     COMPANY_NAME "www.gdr-sistemas.com"
     COMPANY_COPYRIGHT "(C) Copyright 2017-2018 Jesus Gonzalez"
+    COMMENTS "Mock generator for CppUTest"
 )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )

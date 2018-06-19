@@ -8,6 +8,7 @@ set( PROD_DIR ${CMAKE_SOURCE_DIR}/app )
 
 include_directories(
     ${PROD_DIR}/sources
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${PROD_DIR}/libs/cxxopts/include
     ${CMAKE_SOURCE_DIR}/app/include/
     ${CMAKE_SOURCE_DIR}/test/Expectations/
