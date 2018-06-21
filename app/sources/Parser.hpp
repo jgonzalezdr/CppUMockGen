@@ -32,7 +32,7 @@ public:
      * @param genOpts [in] String containing the generation options
      * @param output [out] Stream where the generated mocks will be written
      */
-    void GenerateMock( const std::string &genOpts, std::ostream &output ) const;
+    void GenerateMock( const std::string &genOpts, std::ostream &output ) const noexcept;
 
     /**
      * Generates expectation functions header for the C/C++ header parsed previously.
@@ -40,7 +40,7 @@ public:
      * @param genOpts [in] String containing the generation options
      * @param output [out] Stream where the generated expectations header will be written
      */
-    void GenerateExpectationHeader( const std::string &genOpts, std::ostream &output ) const;
+    void GenerateExpectationHeader( const std::string &genOpts, std::ostream &output ) const noexcept;
 
     /**
      * Generates expectation functions implementation for the C/C++ header parsed previously.
@@ -49,10 +49,10 @@ public:
      * @param headerFilepath [in] Filename for the expectation functions header file
      * @param output [out] Stream where the generated expectations implementation will be written
      */
-    void GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const;
+    void GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const noexcept;
 
 private:
-    void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const;
+    void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const noexcept;
 
     std::vector<std::unique_ptr<const Function>> m_functions;
     std::string m_inputFilepath;

@@ -6,12 +6,12 @@
 class App
 {
 public:
-    App( std::ostream &cout, std::ostream &cerr );
+    App( std::ostream &cout, std::ostream &cerr ) noexcept;
 
-    int Execute( int argc, const char* argv[] );
+    int Execute( int argc, const char* argv[] ) noexcept;
 
 private:
-    void PrintError( const char *msg );
+    void PrintError( const char *msg ) noexcept;
 
     std::ostream &m_cout;
     std::ostream &m_cerr;

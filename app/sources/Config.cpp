@@ -13,17 +13,17 @@ Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &p
   m_typeOverrideMap( typeOverrideOptions, true )
 {}
 
-bool Config::UseUnderlyingTypedefType() const
+bool Config::UseUnderlyingTypedefType() const noexcept
 {
     return m_useUnderlyingTypedefType;
 }
 
-const Config::OverrideSpec* Config::GetParameterOverride( const std::string& key ) const
+const Config::OverrideSpec* Config::GetParameterOverride( const std::string& key ) const noexcept
 {
     return m_paramOverrideMap.GetOverride(key);
 }
 
-const Config::OverrideSpec* Config::GetTypeOverride( const std::string& key ) const
+const Config::OverrideSpec* Config::GetTypeOverride( const std::string& key ) const noexcept
 {
     return m_typeOverrideMap.GetOverride(key);
 }
@@ -192,33 +192,33 @@ Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool 
     }
 }
 
-const Config::OverrideSpec* Config::OverrideMap::GetOverride( const std::string& key ) const
+const Config::OverrideSpec* Config::OverrideMap::GetOverride( const std::string& key ) const noexcept
 {
     OverrideMapType::const_iterator it = m_map.find( key );
     return ( it != m_map.end() ) ? &(it->second) : NULL;
 }
 
-MockedType Config::OverrideSpec::GetType() const
+MockedType Config::OverrideSpec::GetType() const noexcept
 {
     return m_type;
 }
 
-const std::string& Config::OverrideSpec::GetExposedTypeName() const
+const std::string& Config::OverrideSpec::GetExposedTypeName() const noexcept
 {
     return m_exposedTypeName;
 }
 
-const std::string& Config::OverrideSpec::GetExprModFront() const
+const std::string& Config::OverrideSpec::GetExprModFront() const noexcept
 {
     return m_exprModFront;
 }
 
-const std::string& Config::OverrideSpec::GetExprModBack() const
+const std::string& Config::OverrideSpec::GetExprModBack() const noexcept
 {
     return m_exprModBack;
 }
 
-const std::string& Config::OverrideSpec::GetExpectationArgTypeName() const
+const std::string& Config::OverrideSpec::GetExpectationArgTypeName() const noexcept
 {
     return m_expectationArgTypeName;
 }

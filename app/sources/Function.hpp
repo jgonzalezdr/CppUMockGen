@@ -16,12 +16,12 @@ public:
     /**
      * Default constructor.
      */
-    Function();
+    Function() noexcept;
 
     /**
      * Default destructor.
      */
-    virtual ~Function();
+    virtual ~Function() noexcept;
 
     /**
      * Parses a function.
@@ -36,7 +36,7 @@ public:
      *
      * @return String containing the generated mock
      */
-    std::string GenerateMock() const;
+    std::string GenerateMock() const noexcept;
 
     /**
      * Generates an expectation function prototype or implementation for the function.
@@ -44,7 +44,7 @@ public:
      * @param proto [in] Generate function prototype if @c true, or function implementation otherwise.
      * @return String containing the generated expectation function prototype
      */
-    std::string GenerateExpectation( bool proto ) const;
+    std::string GenerateExpectation( bool proto ) const noexcept;
 
     class Argument;
     class Return;
@@ -62,20 +62,20 @@ protected:
     /**
      * Returns whether the function can be mocked.
      */
-    virtual bool IsMockable( const CXCursor &cursor ) const;
+    virtual bool IsMockable( const CXCursor &cursor ) const noexcept;
 
     /**
      * Returns whether the object is a method (a.k.a member function).
      */
-    virtual bool IsMethod() const
+    virtual bool IsMethod() const noexcept
     {
         return false;
     }
 
-    std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const;
+    std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const noexcept;
 
-    bool HasIgnorableArguments() const;
-    bool HasSkippedArguments() const;
+    bool HasIgnorableArguments() const noexcept;
+    bool HasSkippedArguments() const noexcept;
 
     std::string m_functionName;
     std::unique_ptr<Return> m_return;

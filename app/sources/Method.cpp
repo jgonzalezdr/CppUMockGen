@@ -4,10 +4,10 @@
 #include <sstream>
 #include "ClangHelper.hpp"
 
-Method::Method()
+Method::Method() noexcept
 {}
 
-bool Method::IsMockable( const CXCursor &cursor ) const
+bool Method::IsMockable( const CXCursor &cursor ) const noexcept
 {
     // Only public methods should be mocked
     bool isPublic = isMethodPublic( cursor );

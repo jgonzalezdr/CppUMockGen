@@ -1,13 +1,13 @@
 #include "ClangHelper.hpp"
 
-std::ostream& operator<<( std::ostream& stream, const CXString& cxstr )
+std::ostream& operator<<( std::ostream& stream, const CXString& cxstr ) noexcept
 {
     stream << clang_getCString(cxstr);
     clang_disposeString(cxstr);
     return stream;
 }
 
-std::string toString( const CXString & cxstr )
+std::string toString( const CXString & cxstr ) noexcept
 {
     std::string ret;
     ret += clang_getCString(cxstr);
@@ -15,14 +15,14 @@ std::string toString( const CXString & cxstr )
     return ret;
 }
 
-std::string& operator+=( std::string &string, const CXString &cxstr )
+std::string& operator+=( std::string &string, const CXString &cxstr ) noexcept
 {
     string += toString( cxstr );
     return string;
 }
 
 // LCOV_EXCL_START
-std::string operator+( const std::string &string, const CXString &cxstr )
+std::string operator+( const std::string &string, const CXString &cxstr ) noexcept
 {
     std::string ret = string;
     ret += toString( cxstr );
@@ -30,14 +30,14 @@ std::string operator+( const std::string &string, const CXString &cxstr )
 }
 // LCOV_EXCL_STOP
 
-std::string operator+( const char *string, const CXString &cxstr )
+std::string operator+( const char *string, const CXString &cxstr ) noexcept
 {
     std::string ret = string;
     ret += toString( cxstr );
     return ret;
 }
 
-std::string getQualifiedName( const CXCursor &cursor )
+std::string getQualifiedName( const CXCursor &cursor ) noexcept
 {
     std::string ret;
 
@@ -62,7 +62,7 @@ std::string getQualifiedName( const CXCursor &cursor )
     return ret;
 }
 
-std::string getBareTypeSpelling( const CXType &type )
+std::string getBareTypeSpelling( const CXType &type ) noexcept
 {
     std::string fullName = toString( clang_getTypeSpelling( (CXType &)type ) );
 
@@ -92,7 +92,7 @@ std::string getBareTypeSpelling( const CXType &type )
     return className;
 }
 
-std::string getMethodClassName( const CXCursor &cursor )
+std::string getMethodClassName( const CXCursor &cursor ) noexcept
 {
     std::string ret;
 
@@ -106,7 +106,7 @@ std::string getMethodClassName( const CXCursor &cursor )
     return ret;
 }
 
-bool isMethodPublic( const CXCursor &cursor )
+bool isMethodPublic( const CXCursor &cursor ) noexcept
 {
     CXCursorKind cursorKind = clang_getCursorKind( cursor );
     CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );

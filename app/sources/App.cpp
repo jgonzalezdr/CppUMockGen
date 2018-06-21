@@ -15,12 +15,12 @@
 
 const std::set<std::string> cppExtensions = { "hpp", "hxx", "hh" };
 
-App::App( std::ostream &cout, std::ostream &cerr )
+App::App( std::ostream &cout, std::ostream &cerr ) noexcept
 : m_cout(cout), m_cerr(cerr)
 {
 }
 
-void App::PrintError( const char *msg )
+void App::PrintError( const char *msg ) noexcept
 {
     cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_RED );
     m_cerr << "ERROR: ";
@@ -28,7 +28,7 @@ void App::PrintError( const char *msg )
     m_cerr << msg << std::endl;
 }
 
-std::string QuotifyOption( const std::string &option )
+std::string QuotifyOption( const std::string &option ) noexcept
 {
     if( option.find(' ') != std::string::npos )
     {
@@ -40,7 +40,7 @@ std::string QuotifyOption( const std::string &option )
     }
 }
 
-std::string GetGenerationOptions( cxxopts::Options &options )
+std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
 {
     std::string ret;
 
@@ -67,7 +67,7 @@ std::string GetGenerationOptions( cxxopts::Options &options )
     return ret;
 }
 
-int App::Execute( int argc, const char* argv[] )
+int App::Execute( int argc, const char* argv[] ) noexcept
 {
     int returnCode = 0;
 

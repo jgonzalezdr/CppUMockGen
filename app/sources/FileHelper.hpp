@@ -9,10 +9,10 @@
 #define PATH_SEPARATOR '/'
 #endif
 
-std::string GetFilenameFromPath( const std::string& filepath );
+std::string GetFilenameFromPath( const std::string& filepath ) noexcept;
 
-std::string RemoveFilenameExtension( const std::string &filepath );
+std::string RemoveFilenameExtension( const std::string &filepath ) noexcept;
 
-bool IsDirPath( const std::string &path );
+bool IsDirPath( const std::string &path ) noexcept;
 
 #endif // header guard

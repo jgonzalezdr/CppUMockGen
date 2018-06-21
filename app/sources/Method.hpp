@@ -12,12 +12,12 @@ public:
     /**
      * Default constructor.
      */
-    Method();
+    Method() noexcept;
 
 protected:
-    virtual bool IsMockable( const CXCursor &cursor ) const override;
+    virtual bool IsMockable( const CXCursor &cursor ) const noexcept override;
 
-    virtual bool IsMethod() const override
+    virtual bool IsMethod() const noexcept override
     {
         return true;
     }

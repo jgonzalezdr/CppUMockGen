@@ -12,7 +12,7 @@
  * @param cxstr [in] A CXString
  * @return @p stream
  */
-std::ostream& operator<<( std::ostream& stream, const CXString& cxstr );
+std::ostream& operator<<( std::ostream& stream, const CXString& cxstr ) noexcept;
 
 /**
  * Converts the CXString @p cxstr to a string.
@@ -20,7 +20,7 @@ std::ostream& operator<<( std::ostream& stream, const CXString& cxstr );
  * @param cxstr [in] A CXString
  * @return Result of conversion
  */
-std::string toString( const CXString& cxstr );
+std::string toString( const CXString& cxstr ) noexcept;
 
 /**
  * Operator that concatenates the CXString @p cxstr to @p string.
@@ -29,7 +29,7 @@ std::string toString( const CXString& cxstr );
  * @param cxstr [in] A CXString
  * @return @p string
  */
-std::string& operator+=( std::string &string, const CXString& cxstr );
+std::string& operator+=( std::string &string, const CXString& cxstr ) noexcept;
 
 /**
  * Operator that returns the concatenation of @p string and CXString @p cxstr.
@@ -38,7 +38,7 @@ std::string& operator+=( std::string &string, const CXString& cxstr );
  * @param cxstr [in] A CXString
  * @return Result of the concatenation
  */
-std::string operator+( const std::string &string, const CXString& cxstr );
+std::string operator+( const std::string &string, const CXString& cxstr ) noexcept;
 
 /**
  * Operator that returns the concatenation of @p string and CXString @p cxstr.
@@ -47,7 +47,7 @@ std::string operator+( const std::string &string, const CXString& cxstr );
  * @param cxstr [in] A CXString
  * @return Result of the concatenation
  */
-std::string operator+( const char *string, const CXString& cxstr );
+std::string operator+( const char *string, const CXString& cxstr ) noexcept;
 
 /**
  * Returns the qualified name of a function or variable (i.e., prefixed with namespaces and class names).
@@ -55,7 +55,7 @@ std::string operator+( const char *string, const CXString& cxstr );
  * @param cursor [in] A cursor
  * @return A string with the full qualified name of the cursor
  */
-std::string getQualifiedName( const CXCursor &cursor );
+std::string getQualifiedName( const CXCursor &cursor ) noexcept;
 
 /**
  * Returns the spelling of a type removing modifiers (const, volatile, pointer, etc.).
@@ -63,7 +63,7 @@ std::string getQualifiedName( const CXCursor &cursor );
  * @param type [in] A type
  * @return A string with the spelling of the bare type
  */
-std::string getBareTypeSpelling( const CXType &type );
+std::string getBareTypeSpelling( const CXType &type ) noexcept;
 
 /**
  * Returns the name of the class to which a method belongs.
@@ -71,7 +71,7 @@ std::string getBareTypeSpelling( const CXType &type );
  * @param cursor [in] A cursor to a method
  * @return A string with name of the class to which belongs the method of the cursor
  */
-std::string getMethodClassName( const CXCursor &cursor );
+std::string getMethodClassName( const CXCursor &cursor ) noexcept;
 
 /**
  * Checks if a method and its containing classes have public scope.
@@ -79,6 +79,6 @@ std::string getMethodClassName( const CXCursor &cursor );
  * @param cursor [in] A cursor to a method
  * @return @c true if the method and its containing classes are public, or @c false otherwise
  */
-bool isMethodPublic( const CXCursor &cursor );
+bool isMethodPublic( const CXCursor &cursor ) noexcept;
 
 #endif // header guard

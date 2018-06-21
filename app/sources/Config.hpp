@@ -49,31 +49,31 @@ public:
         /**
          * Returns the type identifier.
          */
-        MockedType GetType() const;
+        MockedType GetType() const noexcept;
 
         /**
          * Returns the exposed type name.
          * @return String with the exposed type name
          */
-        const std::string& GetExposedTypeName() const;
+        const std::string& GetExposedTypeName() const noexcept;
 
         /**
          * Returns the expression modifier part before the character '$'.
          * @return String with the front expression modifier part
          */
-        const std::string& GetExprModFront() const;
+        const std::string& GetExprModFront() const noexcept;
 
         /**
          * Returns the expression modifier part after the character '$'.
          * @return String with the back expression modifier part
          */
-        const std::string& GetExprModBack() const;
+        const std::string& GetExprModBack() const noexcept;
 
         /**
          * Returns the expectation argument type name.
          * @return String with the expectation argument type name
          */
-        const std::string& GetExpectationArgTypeName() const;
+        const std::string& GetExpectationArgTypeName() const noexcept;
 
     private:
         MockedType m_type;
@@ -98,7 +98,7 @@ public:
      * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function
      * parameters types
      */
-    bool UseUnderlyingTypedefType() const;
+    bool UseUnderlyingTypedefType() const noexcept;
 
     /**
      * Returns the override spec related to the specific function parameter or return
@@ -107,7 +107,7 @@ public:
      * @param key [in] Identifier for a specific function parameter or return type
      * @return A pointer to an override spec, or NULL if it does not exist
      */
-    const OverrideSpec* GetParameterOverride( const std::string& key ) const;
+    const OverrideSpec* GetParameterOverride( const std::string& key ) const noexcept;
 
     /**
      * Returns the override spec related to the generic parameter or return type represented
@@ -116,7 +116,7 @@ public:
      * @param key [in] Identifier for a parameter or return type
      * @return A pointer to an override spec, or NULL if it does not exist
      */
-    const OverrideSpec* GetTypeOverride( const std::string& key ) const;
+    const OverrideSpec* GetTypeOverride( const std::string& key ) const noexcept;
 
 private:
     /**
@@ -141,7 +141,7 @@ private:
          * @param key [in] Identifier for an element
          * @return A pointer to an override specification, or NULL if it does not exist
          */
-        const OverrideSpec* GetOverride( const std::string& key ) const;
+        const OverrideSpec* GetOverride( const std::string& key ) const noexcept;
 
     private:
         typedef std::map<std::string, OverrideSpec> OverrideMapType;

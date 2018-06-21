@@ -27,25 +27,25 @@
 class Function::Return
 {
 public:
-    virtual ~Return() {}
+    virtual ~Return() noexcept {}
 
-    void SetOriginalType( const std::string &type )
+    void SetOriginalType( const std::string &type ) noexcept
     {
         m_originalType = type;
     }
 
-    std::string GetMockSignature() const
+    std::string GetMockSignature() const noexcept
     {
         return m_originalType;
     }
 
-    virtual std::string GetMockBodyFront() const = 0;
+    virtual std::string GetMockBodyFront() const noexcept = 0;
 
-    virtual std::string GetMockBodyBack() const = 0;
+    virtual std::string GetMockBodyBack() const noexcept = 0;
 
-    virtual std::string GetExpectationSignature() const = 0;
+    virtual std::string GetExpectationSignature() const noexcept = 0;
 
-    virtual std::string GetExpectationBody() const = 0;
+    virtual std::string GetExpectationBody() const noexcept = 0;
 
 protected:
     std::string m_originalType;
@@ -54,24 +54,24 @@ protected:
 class ReturnVoid : public Function::Return
 {
 public:
-    virtual ~ReturnVoid() {};
+    virtual ~ReturnVoid() noexcept {};
 
-    virtual std::string GetMockBodyFront() const override
+    virtual std::string GetMockBodyFront() const noexcept override
     {
         return "";
     }
 
-    virtual std::string GetMockBodyBack() const override
+    virtual std::string GetMockBodyBack() const noexcept override
     {
         return "";
     }
 
-    virtual std::string GetExpectationSignature() const override
+    virtual std::string GetExpectationSignature() const noexcept override
     {
         return "";
     }
 
-    virtual std::string GetExpectationBody() const override
+    virtual std::string GetExpectationBody() const noexcept override
     {
         return "";
     }
@@ -80,40 +80,40 @@ public:
 class ReturnStandard : public Function::Return
 {
 public:
-    ReturnStandard() : m_expectationArgByRef(false), m_expectationNeedsCast(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
-    virtual ~ReturnStandard() {};
+    ReturnStandard() noexcept : m_expectationArgByRef(false), m_expectationNeedsCast(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
+    virtual ~ReturnStandard() noexcept {};
 
-    void MockRetExprPrepend( const std::string &expr )
+    void MockRetExprPrepend( const std::string &expr ) noexcept
     {
         m_mockRetExprFront.insert( 0, expr );
     }
 
-    void MockRetExprAppend( const std::string &expr )
+    void MockRetExprAppend( const std::string &expr ) noexcept
     {
         m_mockRetExprBack.append( expr );
     }
 
-    void ExpectationRetExprPrepend( const std::string &expr )
+    void ExpectationRetExprPrepend( const std::string &expr ) noexcept
     {
         m_expectationRetExprFront.insert( 0, expr );
     }
 
-    void ExpectationRetExprAppend( const std::string &expr )
+    void ExpectationRetExprAppend( const std::string &expr ) noexcept
     {
         m_expectationRetExprBack.append( expr );
     }
 
-    virtual std::string GetMockBodyFront() const override
+    virtual std::string GetMockBodyFront() const noexcept override
     {
         return "return " + m_mockRetExprFront;
     }
 
-    virtual std::string GetMockBodyBack() const override
+    virtual std::string GetMockBodyBack() const noexcept override
     {
         return "." + GetMockCall() + "()" + m_mockRetExprBack;
     }
 
-    virtual std::string GetExpectationSignature() const override
+    virtual std::string GetExpectationSignature() const noexcept override
     {
         if( m_expectationUseBaseType )
         {
@@ -125,49 +125,49 @@ public:
         }
     }
 
-    virtual std::string GetExpectationBody() const override
+    virtual std::string GetExpectationBody() const noexcept override
     {
         return INDENT EXPECTED_CALL_VAR_NAME ".andReturnValue(" + GetExpectationRetExprFront() +
                RETURN_ARG_NAME +  GetExpectationRetExprBack() + ");\n";
     }
 
-    void SetExpectationArgByRef()
+    void SetExpectationArgByRef() noexcept
     {
         m_expectationArgByRef = true;
     }
 
-    void SetExpectationNeedsCast()
+    void SetExpectationNeedsCast() noexcept
     {
         m_expectationNeedsCast = true;
     }
 
-    void SetIsRVReference()
+    void SetIsRVReference() noexcept
     {
         m_isRVReference = true;
     }
 
-    void SetExpectationUseBaseType()
+    void SetExpectationUseBaseType() noexcept
     {
         m_expectationUseBaseType = true;
     }
 
 protected:
-    virtual std::string GetMockCall() const = 0;
+    virtual std::string GetMockCall() const noexcept = 0;
 
-    virtual std::string GetExpectationBaseType() const = 0;
+    virtual std::string GetExpectationBaseType() const noexcept = 0;
 
 private:
-    std::string GetExpectationRetExprFront() const
+    std::string GetExpectationRetExprFront() const noexcept
     {
         return ( m_expectationNeedsCast ? "static_cast<" + GetExpectationBaseType() + ">(" : "" ) + m_expectationRetExprFront;
     }
 
-    std::string GetExpectationRetExprBack() const
+    std::string GetExpectationRetExprBack() const noexcept
     {
         return m_expectationRetExprBack +  ( m_expectationNeedsCast ? ")" : "" );
     }
 
-    std::string GetSignatureType() const
+    std::string GetSignatureType() const noexcept
     {
         if( m_isRVReference )
         {
@@ -192,15 +192,15 @@ private:
 class ReturnBool : public ReturnStandard
 {
 public:
-    virtual ~ReturnBool() {};
+    virtual ~ReturnBool() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "bool";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnBoolValue";
     }
@@ -209,15 +209,15 @@ protected:
 class ReturnInt : public ReturnStandard
 {
 public:
-    virtual ~ReturnInt() {};
+    virtual ~ReturnInt() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "int";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnIntValue";
     }
@@ -226,15 +226,15 @@ protected:
 class ReturnUnsignedInt : public ReturnStandard
 {
 public:
-    virtual ~ReturnUnsignedInt() {};
+    virtual ~ReturnUnsignedInt() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "unsigned int";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnUnsignedIntValue";
     }
@@ -243,15 +243,15 @@ protected:
 class ReturnLong : public ReturnStandard
 {
 public:
-    virtual ~ReturnLong() {};
+    virtual ~ReturnLong() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "long";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnLongIntValue";
     }
@@ -260,15 +260,15 @@ protected:
 class ReturnUnsignedLong : public ReturnStandard
 {
 public:
-    virtual ~ReturnUnsignedLong() {};
+    virtual ~ReturnUnsignedLong() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "unsigned long";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnUnsignedLongIntValue";
     }
@@ -277,15 +277,15 @@ protected:
 class ReturnDouble : public ReturnStandard
 {
 public:
-    virtual ~ReturnDouble() {};
+    virtual ~ReturnDouble() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "double";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnDoubleValue";
     }
@@ -294,15 +294,15 @@ protected:
 class ReturnString : public ReturnStandard
 {
 public:
-    virtual ~ReturnString() {};
+    virtual ~ReturnString() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const char*";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnStringValue";
     }
@@ -311,15 +311,15 @@ protected:
 class ReturnConstPointer : public ReturnStandard
 {
 public:
-    virtual ~ReturnConstPointer() {};
+    virtual ~ReturnConstPointer() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const void*";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnConstPointerValue";
     }
@@ -328,15 +328,15 @@ protected:
 class ReturnPointer : public ReturnStandard
 {
 public:
-    virtual ~ReturnPointer() {};
+    virtual ~ReturnPointer() noexcept {};
 
 protected:
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "void*";
     }
 
-    virtual std::string GetMockCall() const override
+    virtual std::string GetMockCall() const noexcept override
     {
         return "returnPointerValue";
     }
@@ -345,7 +345,7 @@ protected:
 class ReturnParser
 {
 public:
-    ReturnParser( const Config &config )
+    ReturnParser( const Config &config ) noexcept
     : m_config( config )
     {}
 
@@ -354,8 +354,7 @@ public:
 private:
     Function::Return* ProcessOverride( const Config::OverrideSpec *override );
     ReturnStandard* ProcessType( const CXType &returnType, bool inheritConst, bool enableCast );
-    ReturnStandard* ProcessTypePointer( const CXType & returnType, bool enableCast );
-    ReturnStandard* ProcessTypeRVReference( const CXType & returnType );
+    ReturnStandard* ProcessTypePointer( const CXType & returnType, bool enableCast ) noexcept;
     ReturnStandard* ProcessTypeTypedef( const CXType & returnType, bool inheritConst );
 
     const Config &m_config;
@@ -567,7 +566,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
     return ret;
 }
 
-ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool enableCast )
+ReturnStandard* ReturnParser::ProcessTypePointer( const CXType &returnType, bool enableCast ) noexcept
 {
     ReturnStandard *ret;
 
@@ -674,29 +673,29 @@ ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool
 class Function::Argument
 {
 public:
-    virtual ~Argument() {}
+    virtual ~Argument() noexcept {}
 
-    void SetName( const std::string &name )
+    void SetName( const std::string &name ) noexcept
     {
         m_name = name;
     }
 
-    void SetOriginalType( const std::string &type )
+    void SetOriginalType( const std::string &type ) noexcept
     {
         m_originalType = type;
     }
 
-    virtual std::string GetMockSignature() const = 0;
+    virtual std::string GetMockSignature() const noexcept = 0;
 
-    virtual std::string GetMockBody() const = 0;
+    virtual std::string GetMockBody() const noexcept = 0;
 
-    virtual std::string GetExpectationSignature() const = 0;
+    virtual std::string GetExpectationSignature() const noexcept = 0;
 
-    virtual std::string GetExpectationBody( bool argumentsSkipped ) const = 0;
+    virtual std::string GetExpectationBody( bool argumentsSkipped ) const noexcept = 0;
 
-    virtual bool CanBeIgnored() const = 0;
+    virtual bool CanBeIgnored() const noexcept = 0;
 
-    virtual bool IsSkipped() const = 0;
+    virtual bool IsSkipped() const noexcept = 0;
 
 protected:
     std::string m_name;
@@ -706,35 +705,35 @@ protected:
 class ArgumentSkip : public Function::Argument
 {
 public:
-    virtual ~ArgumentSkip() {}
+    virtual ~ArgumentSkip() noexcept {}
 
-    virtual std::string GetMockSignature() const override
+    virtual std::string GetMockSignature() const noexcept override
     {
         return m_originalType;
     }
 
-    virtual std::string GetExpectationSignature() const override
+    virtual std::string GetExpectationSignature() const noexcept override
     {
         return "";
     }
 
-    virtual std::string GetMockBody() const override
+    virtual std::string GetMockBody() const noexcept override
     {
         return "";
     }
 
-    virtual std::string GetExpectationBody( bool ) const override
+    virtual std::string GetExpectationBody( bool ) const noexcept override
     {
         return "";
     }
 
-    virtual bool IsSkipped() const override
+    virtual bool IsSkipped() const noexcept override
     {
         return true;
     }
 
     // LCOV_EXCL_START
-    virtual bool CanBeIgnored() const override
+    virtual bool CanBeIgnored() const noexcept override
     {
         return false;
     }
@@ -744,15 +743,15 @@ public:
 class ArgumentStandard : public Function::Argument
 {
 public:
-    ArgumentStandard() : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
-    virtual ~ArgumentStandard() {}
+    ArgumentStandard() noexcept : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
+    virtual ~ArgumentStandard() noexcept {}
 
-    virtual std::string GetMockSignature() const override
+    virtual std::string GetMockSignature() const noexcept override
     {
         return m_originalType + " " + m_name;
     }
 
-    virtual std::string GetExpectationSignature() const override
+    virtual std::string GetExpectationSignature() const noexcept override
     {
         if( CanBeIgnored() )
         {
@@ -778,12 +777,12 @@ public:
         }
     }
 
-    virtual std::string GetMockBody() const override
+    virtual std::string GetMockBody() const noexcept override
     {
         return "." + GetMockBodyCall();
     }
 
-    virtual std::string GetExpectationBody( bool argumentsSkipped ) const override
+    virtual std::string GetExpectationBody( bool argumentsSkipped ) const noexcept override
     {
         if( CanBeIgnored() )
         {
@@ -803,74 +802,74 @@ public:
         }
     }
 
-    virtual bool IsSkipped() const override
+    virtual bool IsSkipped() const noexcept override
     {
         return false;
     }
 
-    void MockArgExprPrepend( const std::string &expr )
+    void MockArgExprPrepend( const std::string &expr ) noexcept
     {
         m_mockArgExprFront.insert( 0, expr );
     }
 
-    void MockArgExprAppend( const std::string &expr )
+    void MockArgExprAppend( const std::string &expr ) noexcept
     {
         m_mockArgExprBack.append( expr );
     }
 
-    void SetExpectationArgByRef()
+    void SetExpectationArgByRef() noexcept
     {
         m_expectationArgByRef = true;
     }
 
-    virtual bool CanBeIgnored() const override
+    virtual bool CanBeIgnored() const noexcept override
     {
         return !m_forceNotIgnored && isInput();
     }
 
-    void ForceNotIgnored()
+    void ForceNotIgnored() noexcept
     {
         m_forceNotIgnored = true;
     }
 
-    void SetIsRVReference()
+    void SetIsRVReference() noexcept
     {
         m_isRVReference = true;
     }
 
-    void SetExpectationUseBaseType()
+    void SetExpectationUseBaseType() noexcept
     {
         m_expectationUseBaseType = true;
     }
 
 protected:
-    virtual bool isInput() const
+    virtual bool isInput() const noexcept
     {
         return true;
     }
 
-    virtual std::string GetCallFront(bool mock) const = 0;
+    virtual std::string GetCallFront(bool mock) const noexcept = 0;
 
-    virtual std::string GetCallBack(bool) const
+    virtual std::string GetCallBack(bool) const noexcept
     {
         return ")";
     }
 
-    virtual std::string GetExpectationBaseType() const = 0;
+    virtual std::string GetExpectationBaseType() const noexcept = 0;
 
 private:
-    std::string GetMockBodyCall() const
+    std::string GetMockBodyCall() const noexcept
     {
         return GetCallFront(true) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetCallBack(true);
     }
 
-    std::string GetExpectationBodyCall(const std::string& getter) const
+    std::string GetExpectationBodyCall(const std::string& getter) const noexcept
     {
         return GetCallFront(false) + "\"" + m_name + "\", " + ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) +
                m_name + getter + ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack(false);
     }
 
-    std::string GetSignatureType() const
+    std::string GetSignatureType() const noexcept
     {
         if( m_isRVReference )
         {
@@ -893,15 +892,15 @@ private:
 class ArgumentBool : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentBool() {}
+    virtual ~ArgumentBool() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withBoolParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "bool";
     }
@@ -910,15 +909,15 @@ protected:
 class ArgumentInt : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentInt() {}
+    virtual ~ArgumentInt() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withIntParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "int";
     }
@@ -927,15 +926,15 @@ protected:
 class ArgumentUnsignedInt : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentUnsignedInt() {}
+    virtual ~ArgumentUnsignedInt() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withUnsignedIntParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "unsigned int";
     }
@@ -944,15 +943,15 @@ protected:
 class ArgumentLong : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentLong() {}
+    virtual ~ArgumentLong() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withLongIntParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "long";
     }
@@ -961,15 +960,15 @@ protected:
 class ArgumentUnsignedLong : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentUnsignedLong() {}
+    virtual ~ArgumentUnsignedLong() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withUnsignedLongIntParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "unsigned long";
     }
@@ -978,15 +977,15 @@ protected:
 class ArgumentDouble : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentDouble() {}
+    virtual ~ArgumentDouble() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withDoubleParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "double";
     }
@@ -995,15 +994,15 @@ protected:
 class ArgumentString : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentString() {}
+    virtual ~ArgumentString() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withStringParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const char*";
     }
@@ -1012,15 +1011,15 @@ protected:
 class ArgumentPointer : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentPointer() {}
+    virtual ~ArgumentPointer() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withPointerParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "void*";
     }
@@ -1029,15 +1028,15 @@ protected:
 class ArgumentConstPointer : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentConstPointer() {}
+    virtual ~ArgumentConstPointer() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withConstPointerParameter(";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const void*";
     }
@@ -1046,15 +1045,15 @@ protected:
 class ArgumentOutput : public ArgumentStandard
 {
 public:
-    ArgumentOutput() : m_calculateSizeFromType(false) {}
-    virtual ~ArgumentOutput() {}
+    ArgumentOutput() noexcept : m_calculateSizeFromType(false) {}
+    virtual ~ArgumentOutput() noexcept {}
 
-    virtual std::string GetMockSignature() const override
+    virtual std::string GetMockSignature() const noexcept override
     {
         return m_originalType + " " + m_name;
     }
 
-    virtual std::string GetExpectationSignature() const override
+    virtual std::string GetExpectationSignature() const noexcept override
     {
         std::string ret = ArgumentStandard::GetExpectationSignature();
         if( !m_calculateSizeFromType )
@@ -1064,18 +1063,18 @@ public:
         return ret;
     }
 
-    void CalculateSizeFromType()
+    void CalculateSizeFromType() noexcept
     {
         m_calculateSizeFromType = true;
     }
 
 protected:
-    virtual bool isInput() const override
+    virtual bool isInput() const noexcept override
     {
         return false;
     }
 
-    virtual std::string GetCallFront(bool mock) const override
+    virtual std::string GetCallFront(bool mock) const noexcept override
     {
         if( mock )
         {
@@ -1087,7 +1086,7 @@ protected:
         }
     }
 
-    virtual std::string GetCallBack(bool mock) const
+    virtual std::string GetCallBack(bool mock) const noexcept
     {
         if( mock )
         {
@@ -1103,7 +1102,7 @@ protected:
         }
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const void*";
     }
@@ -1114,25 +1113,25 @@ protected:
 class ArgumentInputOfType : public ArgumentStandard
 {
 public:
-    virtual ~ArgumentInputOfType() {}
+    virtual ~ArgumentInputOfType() noexcept {}
 
-    void SetExposedType( const std::string &type )
+    void SetExposedType( const std::string &type ) noexcept
     {
         m_exposedType = type;
     }
 
-    void SetExpectationArgType( const std::string &type )
+    void SetExpectationArgType( const std::string &type ) noexcept
     {
         m_expectationArgType = type;
     }
 
 protected:
-    virtual std::string GetCallFront(bool) const override
+    virtual std::string GetCallFront(bool) const noexcept override
     {
         return "withParameterOfType(\"" + m_exposedType + "\", ";
     }
 
-    virtual std::string GetExpectationBaseType() const override
+    virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const " + m_expectationArgType + "*";
     }
@@ -1144,15 +1143,15 @@ protected:
 class ArgumentOutputOfType : public ArgumentInputOfType
 {
 public:
-    virtual ~ArgumentOutputOfType() {}
+    virtual ~ArgumentOutputOfType() noexcept {}
 
 protected:
-    virtual bool isInput() const override
+    virtual bool isInput() const noexcept override
     {
         return false;
     }
 
-    virtual std::string GetCallFront(bool mock) const override
+    virtual std::string GetCallFront(bool mock) const noexcept override
     {
         if( mock )
         {
@@ -1168,7 +1167,7 @@ protected:
 class ArgumentParser
 {
 public:
-    ArgumentParser( const Config &config )
+    ArgumentParser( const Config &config ) noexcept
     : m_config( config )
     {}
 
@@ -1177,10 +1176,10 @@ public:
 private:
     Function::Argument* ProcessOverride( const Config::OverrideSpec *override );
     ArgumentStandard* ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    ArgumentStandard* ProcessTypePointer( const CXType &argType, const CXType &origArgType );
+    ArgumentStandard* ProcessTypePointer( const CXType &argType, const CXType &origArgType ) noexcept;
     ArgumentStandard* ProcessTypeRVReference( const CXType &argType, const CXType &origArgType );
     ArgumentStandard* ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    ArgumentStandard* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee );
+    ArgumentStandard* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee ) noexcept;
 
     const Config &m_config;
 };
@@ -1384,7 +1383,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
     return ret;
 }
 
-ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType )
+ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType ) noexcept
 {
     ArgumentStandard *ret;
 
@@ -1525,7 +1524,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
     return ret;
 }
 
-ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee )
+ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee ) noexcept
 {
     ArgumentInputOfType *ret;
 
@@ -1550,18 +1549,18 @@ ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, cons
 //
 //*************************************************************************************************
 
-Function::Function()
+Function::Function() noexcept
 : m_isConst( false ), m_exceptionSpec( EExceptionSpec::Any )
 {
 }
 
 // LCOV_EXCL_START
-Function::~Function()
+Function::~Function() noexcept
 {
 }
 // LCOV_EXCL_STOP
 
-bool Function::IsMockable( const CXCursor &cursor ) const
+bool Function::IsMockable( const CXCursor &cursor ) const noexcept
 {
     // If the function has a definition, it means that it's defined inline, and therefore it's not mockable
     bool hasNoDefinition = clang_Cursor_isNull( clang_getCursorDefinition( cursor ) );
@@ -1650,7 +1649,7 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
     }
 }
 
-static std::string ExceptionSpecToString( Function::EExceptionSpec exceptionSpec )
+static std::string ExceptionSpecToString( Function::EExceptionSpec exceptionSpec ) noexcept
 {
     switch(exceptionSpec)
     {
@@ -1671,7 +1670,7 @@ static std::string ExceptionSpecToString( Function::EExceptionSpec exceptionSpec
     }
 }
 
-std::string Function::GenerateMock() const
+std::string Function::GenerateMock() const noexcept
 {
 // LCOV_EXCL_START
     if( m_functionName.empty() )
@@ -1717,7 +1716,7 @@ std::string Function::GenerateMock() const
 
 static std::string namespaceSeparator = "::";
 
-static std::vector<std::string> GetNamespaceDecomposition( const std::string &qualifiedName )
+static std::vector<std::string> GetNamespaceDecomposition( const std::string &qualifiedName ) noexcept
 {
     std::vector<std::string> ret;
 
@@ -1741,7 +1740,7 @@ static std::vector<std::string> GetNamespaceDecomposition( const std::string &qu
     return ret;
 }
 
-std::string Function::GenerateExpectation( bool proto ) const
+std::string Function::GenerateExpectation( bool proto ) const noexcept
 {
 // LCOV_EXCL_START
     if( m_functionName.empty() )
@@ -1774,7 +1773,7 @@ std::string Function::GenerateExpectation( bool proto ) const
     return ret;
 }
 
-std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const
+std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const noexcept
 {
     bool addSignatureSeparator = false;
     bool argumentsSkipped = HasSkippedArguments();
@@ -1880,7 +1879,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     return ret;
 }
 
-bool Function::HasIgnorableArguments() const
+bool Function::HasIgnorableArguments() const noexcept
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
@@ -1893,7 +1892,7 @@ bool Function::HasIgnorableArguments() const
     return false;
 }
 
-bool Function::HasSkippedArguments() const
+bool Function::HasSkippedArguments() const noexcept
 {
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {

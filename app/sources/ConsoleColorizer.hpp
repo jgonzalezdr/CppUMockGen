@@ -30,10 +30,10 @@ public:
         RESET
     };
 
-    ConsoleColorizer( ConsoleType consoleType );
-    ~ConsoleColorizer();
+    ConsoleColorizer( ConsoleType consoleType ) noexcept;
+    ~ConsoleColorizer() noexcept;
 
-    void SetColor( Color color );
+    void SetColor( Color color ) noexcept;
 
 private:
 #ifdef WIN32

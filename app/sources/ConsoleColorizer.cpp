@@ -2,7 +2,7 @@
 
 ConsoleColorizer cerrColorizer( ConsoleColorizer::ConsoleType::STD_ERROR );
 
-ConsoleColorizer::ConsoleColorizer( ConsoleType consoleType )
+ConsoleColorizer::ConsoleColorizer( ConsoleType consoleType ) noexcept
 {
 #ifdef WIN32
     m_handle = GetStdHandle( ( consoleType == ConsoleType::STD_ERROR ) ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE );
@@ -14,14 +14,14 @@ ConsoleColorizer::ConsoleColorizer( ConsoleType consoleType )
 #endif
 }
 
-ConsoleColorizer::~ConsoleColorizer()
+ConsoleColorizer::~ConsoleColorizer() noexcept
 {
 #ifdef WIN32
     SetConsoleTextAttribute( m_handle, m_origConsoleAttrs );
 #endif
 }
 
-void ConsoleColorizer::SetColor( Color color )
+void ConsoleColorizer::SetColor( Color color ) noexcept
 {
 #ifdef WIN32
     if( color >= Color::RESET )
