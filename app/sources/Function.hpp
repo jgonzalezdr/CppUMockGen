@@ -49,6 +49,15 @@ public:
     class Argument;
     class Return;
 
+    enum class EExceptionSpec
+    {
+        Any,
+        None,
+        DynamicNone,
+        Dynamic,
+        MSAny
+    };
+
 protected:
     /**
      * Returns whether the function can be mocked.
@@ -72,6 +81,7 @@ protected:
     std::unique_ptr<Return> m_return;
     std::vector<std::unique_ptr<Argument>> m_arguments;
     bool m_isConst;
+    EExceptionSpec m_exceptionSpec;
     std::string m_className;
 };
 

@@ -413,6 +413,90 @@ TEST( Method_Mock, PublicConstMethod )
 }
 
 /*
+ * Check that a public method with exception specifiers is mocked properly.
+ */
+TEST( Method_Mock, PublicExceptionSpecifiersMethod )
+{
+    const std::vector< std::pair< std::string, std::string > > exceptionSpecifiers =
+    {
+        { "noexcept", "noexcept" },
+        { "throw()", "throw()" },
+        { "throw(...)", "throw(...)" },
+        { "throw(int)", "throw(__put_exception_types_manually_here__)" },
+    };
+
+    for( auto exceptionSpecifier : exceptionSpecifiers )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+
+        SimpleString testHeader = StringFromFormat(
+                "class class1 {\n"
+                "public:\n"
+                "    void method1() %s;\n"
+                "};", exceptionSpecifier.first.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        CHECK_EQUAL( 1, methodCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectation = StringFromFormat(
+                "void class1::method1() %s\n{\n"
+                "    mock().actualCall(\"class1::method1\").onObject(this);\n"
+                "}\n", exceptionSpecifier.second.c_str() );
+        STRCMP_EQUAL( expectation.asCharString(), results[0].c_str() );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check that a public constmethod with exception specifiers is mocked properly.
+ */
+TEST( Method_Mock, PublicExceptionSpecifiersConstMethod )
+{
+    const std::vector< std::pair< std::string, std::string > > exceptionSpecifiers =
+    {
+        { "noexcept", "noexcept" },
+        { "throw()", "throw()" },
+        { "throw(...)", "throw(...)" },
+        { "throw(int)", "throw(__put_exception_types_manually_here__)" },
+    };
+
+    for( auto exceptionSpecifier : exceptionSpecifiers )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+
+        SimpleString testHeader = StringFromFormat(
+                "class class1 {\n"
+                "public:\n"
+                "    void method1() const %s;\n"
+                "};", exceptionSpecifier.first.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        CHECK_EQUAL( 1, methodCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectation = StringFromFormat(
+                "void class1::method1() const %s\n{\n"
+                "    mock().actualCall(\"class1::method1\").onObject(this);\n"
+                "}\n", exceptionSpecifier.second.c_str() );
+        STRCMP_EQUAL( expectation.asCharString(), results[0].c_str() );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
  * Check that a method inside a namespace is mocked properly.
  */
 TEST( Method_Mock, MethodWithinNamespace )

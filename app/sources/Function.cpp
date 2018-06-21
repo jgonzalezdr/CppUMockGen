@@ -1551,7 +1551,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, cons
 //*************************************************************************************************
 
 Function::Function()
-: m_isConst( false )
+: m_isConst( false ), m_exceptionSpec( EExceptionSpec::Any )
 {
 }
 
@@ -1573,6 +1573,35 @@ bool Function::IsMockable( const CXCursor &cursor ) const
     return isCanonical && hasNoDefinition;
 }
 
+static Function::EExceptionSpec ParseClangExceptionSpec( const CXCursor &cursor )
+{
+    int exceptionSpec = clang_getCursorExceptionSpecificationType( cursor );
+
+    switch( exceptionSpec )
+    {
+        case CXCursor_ExceptionSpecificationKind_None:
+            return Function::EExceptionSpec::Any; // No spec means any exception can be thrown
+
+        case CXCursor_ExceptionSpecificationKind_DynamicNone:
+            return Function::EExceptionSpec::DynamicNone;
+
+        case CXCursor_ExceptionSpecificationKind_Dynamic:
+            return Function::EExceptionSpec::Dynamic;
+
+        case CXCursor_ExceptionSpecificationKind_MSAny:
+            return Function::EExceptionSpec::MSAny;
+
+        case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
+            return Function::EExceptionSpec::None;
+
+        // LCOV_EXCL_START
+        default:
+            throw std::runtime_error( "<UNEXPECTED ERROR> Unexpected exception kind '" + std::to_string(exceptionSpec)  +
+                                      "' for method '" + clang_getCursorSpelling(cursor) + "'" );
+        // LCOV_EXCL_STOP
+    }
+}
+
 bool Function::Parse( const CXCursor &cursor, const Config &config )
 {
     if( IsMockable(cursor) )
@@ -1590,6 +1619,8 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
 
             // Get method class
             m_className = getMethodClassName(cursor);
+
+            m_exceptionSpec = ParseClangExceptionSpec(cursor);
 
             // LCOV_EXCL_START
             if( m_className.empty() )
@@ -1616,6 +1647,27 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
     else
     {
         return false;
+    }
+}
+
+static std::string ExceptionSpecToString( Function::EExceptionSpec exceptionSpec )
+{
+    switch(exceptionSpec)
+    {
+        case Function::EExceptionSpec::DynamicNone:
+            return " throw()";
+
+        case Function::EExceptionSpec::MSAny:
+            return " throw(...)";
+
+        case Function::EExceptionSpec::None:
+            return " noexcept";
+
+        case Function::EExceptionSpec::Dynamic:
+            return " throw(__put_exception_types_manually_here__)";
+
+        default:
+            return "";
     }
 }
 
@@ -1655,6 +1707,8 @@ std::string Function::GenerateMock() const
     {
         signature += " const";
     }
+
+    signature += ExceptionSpecToString( m_exceptionSpec );
 
     body += m_return->GetMockBodyBack();
 
