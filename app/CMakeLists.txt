@@ -52,6 +52,7 @@ generate_product_version(
     COMPANY_NAME "www.gdr-sistemas.com"
     COMPANY_COPYRIGHT "(C) Copyright 2017-2018 Jesus Gonzalez"
     COMMENTS "Mock generator for CppUTest"
+    EXPORT_TO_PARENT_SCOPE
 )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -72,3 +73,39 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION} )
 target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARIES} )
 
 add_dependencies( build ${PROJECT_NAME} )
+
+#
+# Install
+#
+
+function( string_escape out_var in_string )
+    string( REPLACE "\\" "\\\\" tmp_string "${in_string}" )
+    string( REPLACE "\$" "\\\$" tmp_string "${tmp_string}" )
+    string( REPLACE "\"" "\\\"" tmp_string "${tmp_string}" )
+    set( ${out_var} "${tmp_string}" PARENT_SCOPE )
+endfunction()
+
+set( CPACK_PACKAGE_NAME ${PRODUCT_NAME} )
+set( CPACK_PACKAGE_INSTALL_DIRECTORY ${PRODUCT_NAME} )
+set( CPACK_PACKAGE_VENDOR ${PRODUCT_COMPANY_NAME} )
+set( CPACK_PACKAGE_VERSION_MAJOR ${PRODUCT_VERSION_MAJOR} )
+set( CPACK_PACKAGE_VERSION_MINOR ${PRODUCT_VERSION_MINOR} )
+set( CPACK_PACKAGE_VERSION_PATCH ${PRODUCT_VERSION_PATCH} )
+set( CPACK_PACKAGE_VERSION ${PRODUCT_VERSION_COMPACT} )
+set( CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PRODUCT_COMMENTS} )
+set( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt )
+
+set( CPACK_NSIS_MODIFY_PATH OFF )
+set( CPACK_NSIS_MUI_ICON "\\\${NSISDIR}\\\\Contrib\\\\Graphics\\\\Icons\\\\orange-install.ico" )
+set( CPACK_NSIS_MUI_UNIICON "\\\${NSISDIR}\\\\Contrib\\\\Graphics\\\\Icons\\\\orange-uninstall.ico" )
+string_escape( CPACK_NSIS_EXTRA_INSTALL_COMMANDS "WriteRegStr SHCTX \"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\${PRODUCT_NAME}.exe\" \"\" \"\$INSTDIR\\${PRODUCT_NAME}.exe\"" )
+string_escape( CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "DeleteRegKey SHCTX \"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\${PRODUCT_NAME}.exe\"" )
+
+if( WIN32 )
+    set( CPACK_PACKAGE_FILE_NAME "Install ${CPACK_PACKAGE_NAME} v${CPACK_PACKAGE_VERSION}" )
+endif()
+
+include( CPack )
+
+install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin )
+install( DIRECTORY include/ DESTINATION include ) 
