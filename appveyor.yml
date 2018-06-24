@@ -17,6 +17,7 @@ environment:
     Configuration: Release
     Test: False
     PublishArtifacts: True
+    GenerateInstaller: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 cache:
