@@ -80,7 +80,7 @@ TEST( myTestSuite, myOtherFunction )
 ## Download Binaries
 
 * [GitHub Releases](https://github.com/jgonzalezdr/CppUMockGen/releases)
-* [Last successful Windows build of the master branch](https://ci.appveyor.com/api/projects/jgonzalezdr/CppUMockGen/artifacts/CppUMockGen.exe?branch=master&job=Environment:%20Platform=MinGW64,%20PlatformToolset=6.3.0,%20Configuration=Release,%20Test=False,%20PublishArtifacts=True,%20APPVEYOR_BUILD_WORKER_IMAGE=Visual%20Studio%202015)
+* [Last successful Windows build of the master branch](https://ci.appveyor.com/api/projects/jgonzalezdr/CppUMockGen/artifacts/Install%20CppUMockGen%20Experimental.exe?branch=master&job=Environment:%20Platform=MinGW64,%20PlatformToolset=6.3.0,%20Configuration=Release,%20Test=False,%20PublishArtifacts=True,%20GenerateInstaller=True,%20APPVEYOR_BUILD_WORKER_IMAGE=Visual%20Studio%202015)
 
 ## Getting Started
 

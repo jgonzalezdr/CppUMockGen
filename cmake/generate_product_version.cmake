@@ -26,8 +26,9 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 
 # generate_product_version() function
 #
-# This function uses VersionInfo.in template file and VersionResource.rc file
-# to generate WIN32 resource with version information and general resource strings.
+# This function uses VersionInfo.in.h and VersionResource.in.h template files, and 
+# VersionResource.rc file to generate WIN32 resource with version information and 
+# general resource strings.
 #
 # Usage:
 #   generate_product_version(
@@ -36,10 +37,9 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 #     ICON ${PATH_TO_APP_ICON}
 #     VERSION_MAJOR 2
 #     VERSION_MINOR 3
-#     VERSION_PATH ${BUILD_COUNTER}
-#     VERSION_REVISION ${BUILD_REVISION}
+#     VERSION_BUILD ${BUILD_COUNTER}
 #   )
-# where BUILD_COUNTER and BUILD_REVISION could be values from your CI server.
+# where BUILD_COUNTER could a value from your CI server.
 #
 # You can use generated resource for your executable targets:
 #   add_executable(target-name ${target-files} ${SomeOutputResourceVariable})
@@ -51,7 +51,7 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 #   VERSION_MAJOR      - 1 is default
 #   VERSION_MINOR      - 0 is default
 #   VERSION_PATCH      - 0 is default
-#   VERSION_REVISION   - 0 is default
+#   VERSION_BUILD      - 0 is default
 #   COMPANY_NAME       - your company name (no defaults)
 #   COMPANY_COPYRIGHT  - ${COMPANY_NAME} (C) Copyright ${CURRENT_YEAR} is default
 #   COMMENTS           - ${NAME} v${VERSION_MAJOR}.${VERSION_MINOR} is default
@@ -68,7 +68,8 @@ function(generate_product_version outfiles)
         VERSION_MAJOR
         VERSION_MINOR
         VERSION_PATCH
-        VERSION_REVISION
+        VERSION_BUILD
+        VERSION_SUFFIX
         COMPANY_NAME
         COMPANY_COPYRIGHT
         COMMENTS
@@ -94,16 +95,14 @@ function(generate_product_version outfiles)
     if (NOT PRODUCT_VERSION_PATCH OR "${PRODUCT_VERSION_PATCH}" STREQUAL "")
         set(PRODUCT_VERSION_PATCH 0)
     endif()
-    if (NOT PRODUCT_VERSION_REVISION OR "${PRODUCT_VERSION_REVISION}" STREQUAL "")
-        set(PRODUCT_VERSION_REVISION 0)
+    if (NOT PRODUCT_VERSION_BUILD OR "${PRODUCT_VERSION_BUILD}" STREQUAL "")
+        set(PRODUCT_VERSION_BUILD 0)
     endif()
     
-    if (PRODUCT_VERSION_REVISION GREATER 0)
-        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}.${PRODUCT_VERSION_REVISION}")
-    elseif(PRODUCT_VERSION_PATCH GREATER 0)
-        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}")
+    if(PRODUCT_VERSION_PATCH GREATER 0)
+        set(PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}${PRODUCT_VERSION_SUFFIX}")
     else()
-        set(PRODUCT_VERSION_COMPACT "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}")
+        set(PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}${PRODUCT_VERSION_SUFFIX}")
     endif()
 
     if (NOT PRODUCT_COMPANY_COPYRIGHT OR "${PRODUCT_COMPANY_COPYRIGHT}" STREQUAL "")
@@ -111,7 +110,7 @@ function(generate_product_version outfiles)
         set(PRODUCT_COMPANY_COPYRIGHT "${PRODUCT_COMPANY_NAME} (C) Copyright ${PRODUCT_CURRENT_YEAR}")
     endif()
     if (NOT PRODUCT_COMMENTS OR "${PRODUCT_COMMENTS}" STREQUAL "")
-        set(PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION_COMPACT}")
+        set(PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION}")
     endif()
     if (NOT PRODUCT_ORIGINAL_FILENAME OR "${PRODUCT_ORIGINAL_FILENAME}" STREQUAL "")
         set(PRODUCT_ORIGINAL_FILENAME "${PRODUCT_NAME}")
@@ -127,11 +126,11 @@ function(generate_product_version outfiles)
     set (_VersionResourceHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.h)
     set (_VersionResourceFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.rc)
     configure_file(
-        ${GenerateProductVersionCurrentDir}/VersionInfo.h.in
+        ${GenerateProductVersionCurrentDir}/VersionInfo.in.h
         ${_VersionInfoHeaderFile}
         @ONLY)
     configure_file(
-        ${GenerateProductVersionCurrentDir}/VersionResource.h.in
+        ${GenerateProductVersionCurrentDir}/VersionResource.in.h
         ${_VersionResourceHeaderFile}
         @ONLY)
     configure_file(
@@ -148,8 +147,9 @@ function(generate_product_version outfiles)
         set(PRODUCT_VERSION_MAJOR ${PRODUCT_VERSION_MAJOR} PARENT_SCOPE)
         set(PRODUCT_VERSION_MINOR ${PRODUCT_VERSION_MINOR} PARENT_SCOPE)
         set(PRODUCT_VERSION_PATCH ${PRODUCT_VERSION_PATCH} PARENT_SCOPE)
-        set(PRODUCT_VERSION_REVISION ${PRODUCT_VERSION_REVISION} PARENT_SCOPE)
-        set(PRODUCT_VERSION_COMPACT ${PRODUCT_VERSION_COMPACT} PARENT_SCOPE)
+        set(PRODUCT_VERSION_BUILD ${PRODUCT_VERSION_BUILD} PARENT_SCOPE)
+        set(PRODUCT_VERSION_SUFFIX ${PRODUCT_VERSION_SUFFIX} PARENT_SCOPE)
+        set(PRODUCT_VERSION ${PRODUCT_VERSION} PARENT_SCOPE)
         set(PRODUCT_COMPANY_NAME ${PRODUCT_COMPANY_NAME} PARENT_SCOPE)
         set(PRODUCT_COMPANY_COPYRIGHT ${PRODUCT_COMPANY_COPYRIGHT} PARENT_SCOPE)
         set(PRODUCT_COMMENTS ${PRODUCT_COMMENTS} PARENT_SCOPE)
