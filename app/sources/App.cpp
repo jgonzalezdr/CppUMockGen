@@ -71,7 +71,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 {
     int returnCode = 0;
 
-    cxxopts::Options options(PRODUCT_NAME, PRODUCT_COMMENTS);
+    cxxopts::Options options( PRODUCT_NAME, PRODUCT_FILE_DESCRIPTION );
 
     options.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
