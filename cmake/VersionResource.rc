@@ -2,6 +2,7 @@
 The MIT License (MIT)
 
 Copyright (c) 2015, by [halex2005](mailto:akharlov@gmail.com)
+Copyright (c) 2018, by Jesús Gonzalez <jgonzalez@gdr-sistemas.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,14 +28,18 @@ SOFTWARE.
 
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
+#ifdef PRODUCT_ICON
+APP_ICON ICON PRODUCT_ICON
+#endif
+
 VS_VERSION_INFO VERSIONINFO
     FILEVERSION FILE_VERSION_RESOURCE
     PRODUCTVERSION PRODUCT_VERSION_RESOURCE
     FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
-    FILEFLAGS VS_FF_DEBUG
+    FILEFLAGS (VS_FF_DEBUG|VFF_PRIVATE_BUILD|VFF_SPECIAL_BUILD|VFF_PRERELEASE|VFF_PATCHED)
 #else
-    FILEFLAGS 0x0L
+    FILEFLAGS (VFF_PRIVATE_BUILD|VFF_SPECIAL_BUILD|VFF_PRERELEASE|VFF_PATCHED)
 #endif
     FILEOS VOS__WINDOWS32
     FILETYPE VFT_DLL
@@ -53,6 +58,12 @@ BEGIN
             VALUE "OriginalFilename", PRODUCT_ORIGINAL_FILENAME
             VALUE "ProductName", PRODUCT_BUNDLE
             VALUE "ProductVersion", PRODUCT_VERSION_RESOURCE_STR
+#ifdef PRODUCT_PRIVATE_BUILD
+            VALUE "PrivateBuild", PRODUCT_PRIVATE_BUILD
+#endif
+#ifdef PRODUCT_SPECIAL_BUILD
+            VALUE "SpecialBuild", PRODUCT_SPECIAL_BUILD
+#endif
         END
     END
     BLOCK "VarFileInfo"

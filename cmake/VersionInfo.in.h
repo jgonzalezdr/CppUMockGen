@@ -2,6 +2,7 @@
 The MIT License (MIT)
 
 Copyright (c) 2015, by [halex2005](mailto:akharlov@gmail.com)
+Copyright (c) 2018, by Jesús Gonzalez <jgonzalez@gdr-sistemas.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,21 +25,10 @@ SOFTWARE.
 
 #pragma once
 
-#ifndef PRODUCT_VERSION_MAJOR
 #define PRODUCT_VERSION_MAJOR @PRODUCT_VERSION_MAJOR@
-#endif
-
-#ifndef PRODUCT_VERSION_MINOR
 #define PRODUCT_VERSION_MINOR @PRODUCT_VERSION_MINOR@
-#endif
-
-#ifndef PRODUCT_VERSION_PATCH
 #define PRODUCT_VERSION_PATCH @PRODUCT_VERSION_PATCH@
-#endif
-
-#ifndef PRODUCT_VERSION_BUILD
 #define PRODUCT_VERSION_BUILD @PRODUCT_VERSION_BUILD@
-#endif
 
 #ifndef __TO_STRING
 #define __TO_STRING_IMPL(x) #x
@@ -49,11 +39,28 @@ SOFTWARE.
 #define PRODUCT_VERSION_MAJOR_MINOR_PATCH_STR  PRODUCT_VERSION_MAJOR_MINOR_STR "." __TO_STRING(PRODUCT_VERSION_PATCH)
 #define PRODUCT_VERSION_FULL_STR               PRODUCT_VERSION_MAJOR_MINOR_PATCH_STR "." __TO_STRING(PRODUCT_VERSION_BUILD)
 
-#define PRODUCT_VERSION_STR            "@PRODUCT_VERSION@"
-#ifndef PRODUCT_NAME
+#define PRODUCT_VERSION_STR        "@PRODUCT_VERSION@"
 #define PRODUCT_NAME               "@PRODUCT_NAME@"
+#define PRODUCT_COMMENTS           "@PRODUCT_COMMENTS@"
+#define PRODUCT_COMPANY_NAME       "@PRODUCT_COMPANY_NAME@"
+#define PRODUCT_COMPANY_COPYRIGHT  "@PRODUCT_COMPANY_COPYRIGHT@"
+#define PRODUCT_FILE_DESCRIPTION   "@PRODUCT_FILE_DESCRIPTION@"
+#define PRODUCT_INTERNAL_NAME      "@PRODUCT_NAME@"
+#define PRODUCT_ORIGINAL_FILENAME  "@PRODUCT_ORIGINAL_FILENAME@"
+#define PRODUCT_BUNDLE             "@PRODUCT_BUNDLE@"
+
+#if @PRODUCT_PRIVATE_BUILD_FLAG@
+#define PRODUCT_PRIVATE_BUILD      "@PRODUCT_PRIVATE_BUILD@"
 #endif
 
-#ifndef PRODUCT_COMMENTS
-#define PRODUCT_COMMENTS           "@PRODUCT_COMMENTS@"
+#if @PRODUCT_SPECIAL_BUILD_FLAG@
+#define PRODUCT_SPECIAL_BUILD      "@PRODUCT_SPECIAL_BUILD@"
+#endif
+
+#if @PRODUCT_PRERELEASE_FLAG@
+#define PRODUCT_PRERELEASE         1
+#endif
+
+#if @PRODUCT_PATCHED_FLAG@
+#define PRODUCT_PATCHED            1
 #endif

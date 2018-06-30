@@ -47,84 +47,127 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 # You can specify resource strings in arguments:
 #   NAME               - name of executable (no defaults, ex: Microsoft Word)
 #   BUNDLE             - bundle (${NAME} is default, ex: Microsoft Office)
-#   ICON               - path to application icon (${CMAKE_SOURCE_DIR}/product.ico by default)
+#   ICON               - path to application icon (optional)
 #   VERSION_MAJOR      - 1 is default
 #   VERSION_MINOR      - 0 is default
 #   VERSION_PATCH      - 0 is default
 #   VERSION_BUILD      - 0 is default
-#   COMPANY_NAME       - your company name (no defaults)
-#   COMPANY_COPYRIGHT  - ${COMPANY_NAME} (C) Copyright ${CURRENT_YEAR} is default
+#   COMPANY_NAME       - your company name (optional)
+#   COMPANY_COPYRIGHT  - copyright (optional, (C) Copyright ${CURRENT_YEAR} ${COMPANY_NAME} is default
+#                        if ${COMPANY_NAME} is defined)
 #   COMMENTS           - ${NAME} v${VERSION_MAJOR}.${VERSION_MINOR} is default
 #   ORIGINAL_FILENAME  - ${NAME} is default
 #   INTERNAL_NAME      - ${NAME} is default
 #   FILE_DESCRIPTION   - ${NAME} is default
-function(generate_product_version outfiles)
-    set (options
-    	EXPORT_TO_PARENT_SCOPE)
-    set (oneValueArgs
-        NAME
-        BUNDLE
-        ICON
-        VERSION_MAJOR
-        VERSION_MINOR
-        VERSION_PATCH
-        VERSION_BUILD
-        VERSION_SUFFIX
-        COMPANY_NAME
-        COMPANY_COPYRIGHT
-        COMMENTS
-        ORIGINAL_FILENAME
-        INTERNAL_NAME
-        FILE_DESCRIPTION)
-    set (multiValueArgs)
-    cmake_parse_arguments(PRODUCT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+#   PRIVATE_BUILD      - description of a private build (optional)
+#   SPECIAL_BUILD      - description of a special build (optional)
+#   PRERELEASE         - set to an expression that evaluates to true for prereleases (optional)
+#   PATCHED            - set to an expression that evaluates to true for patched releases (optional)
+function( generate_product_version outfiles )
+    set( options
+    	 EXPORT_TO_PARENT_SCOPE 
+    )
+    set( oneValueArgs
+         NAME
+         BUNDLE
+         ICON
+         VERSION_MAJOR
+         VERSION_MINOR
+         VERSION_PATCH
+         VERSION_BUILD
+         VERSION_SUFFIX
+         COMPANY_NAME
+         COMPANY_COPYRIGHT
+         COMPANY_TRADEMARKS
+         COMMENTS
+         ORIGINAL_FILENAME
+         INTERNAL_NAME
+         FILE_DESCRIPTION
+         PRIVATE_BUILD
+         SPECIAL_BUILD
+         PRERELEASE
+         PATCHED
+    )
+    set( multiValueArgs )
+    cmake_parse_arguments( PRODUCT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-    if (NOT PRODUCT_BUNDLE OR "${PRODUCT_BUNDLE}" STREQUAL "")
-        set(PRODUCT_BUNDLE "${PRODUCT_NAME}")
-    endif()
-    if (NOT PRODUCT_ICON OR "${PRODUCT_ICON}" STREQUAL "")
-        set(PRODUCT_ICON "${CMAKE_SOURCE_DIR}/product.ico")
-    endif()
-
-    if (NOT PRODUCT_VERSION_MAJOR OR "${PRODUCT_VERSION_MAJOR}" STREQUAL "")
-        set(PRODUCT_VERSION_MAJOR 0)
-    endif()
-    if (NOT PRODUCT_VERSION_MINOR OR "${PRODUCT_VERSION_MINOR}" STREQUAL "")
-        set(PRODUCT_VERSION_MINOR 0)
-    endif()
-    if (NOT PRODUCT_VERSION_PATCH OR "${PRODUCT_VERSION_PATCH}" STREQUAL "")
-        set(PRODUCT_VERSION_PATCH 0)
-    endif()
-    if (NOT PRODUCT_VERSION_BUILD OR "${PRODUCT_VERSION_BUILD}" STREQUAL "")
-        set(PRODUCT_VERSION_BUILD 0)
+    if( NOT PRODUCT_BUNDLE )
+        set( PRODUCT_BUNDLE "${PRODUCT_NAME}" )
     endif()
     
-    if(PRODUCT_VERSION_PATCH GREATER 0)
-        set(PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}${PRODUCT_VERSION_SUFFIX}")
+    if( PRODUCT_ICON )
+        set( PRODUCT_ICON_FLAG "1" )
     else()
-        set(PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}${PRODUCT_VERSION_SUFFIX}")
+        set( PRODUCT_ICON_FLAG "0" )
     endif()
 
-    if (NOT PRODUCT_COMPANY_COPYRIGHT OR "${PRODUCT_COMPANY_COPYRIGHT}" STREQUAL "")
-        string(TIMESTAMP PRODUCT_CURRENT_YEAR "%Y")
-        set(PRODUCT_COMPANY_COPYRIGHT "${PRODUCT_COMPANY_NAME} (C) Copyright ${PRODUCT_CURRENT_YEAR}")
+    if( NOT PRODUCT_VERSION_MAJOR )
+        set( PRODUCT_VERSION_MAJOR 0 )
     endif()
-    if (NOT PRODUCT_COMMENTS OR "${PRODUCT_COMMENTS}" STREQUAL "")
-        set(PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION}")
+    if( NOT PRODUCT_VERSION_MINOR )
+        set( PRODUCT_VERSION_MINOR 0 )
     endif()
-    if (NOT PRODUCT_ORIGINAL_FILENAME OR "${PRODUCT_ORIGINAL_FILENAME}" STREQUAL "")
-        set(PRODUCT_ORIGINAL_FILENAME "${PRODUCT_NAME}")
+    if( NOT PRODUCT_VERSION_PATCH )
+        set( PRODUCT_VERSION_PATCH 0 )
     endif()
-    if (NOT PRODUCT_INTERNAL_NAME OR "${PRODUCT_INTERNAL_NAME}" STREQUAL "")
-        set(PRODUCT_INTERNAL_NAME "${PRODUCT_NAME}")
+    if( NOT PRODUCT_VERSION_BUILD )
+        set( PRODUCT_VERSION_BUILD 0 )
     endif()
-    if (NOT PRODUCT_FILE_DESCRIPTION OR "${PRODUCT_FILE_DESCRIPTION}" STREQUAL "")
-        set(PRODUCT_FILE_DESCRIPTION "${PRODUCT_NAME}")
+    
+    if( PRODUCT_VERSION_PATCH GREATER 0 )
+        set( PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_PATCH}${PRODUCT_VERSION_SUFFIX}" )
+    else()
+        set( PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}${PRODUCT_VERSION_SUFFIX}" )
     endif()
 
-    set (_VersionInfoHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h)
-    set (_VersionResourceHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.h)
-    set (_VersionResourceFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.rc)
+    if( NOT PRODUCT_COMPANY_COPYRIGHT AND PRODUCT_COMPANY_NAME )
+        string( TIMESTAMP PRODUCT_CURRENT_YEAR "%Y" )
+        set( PRODUCT_COMPANY_COPYRIGHT "(C) Copyright ${PRODUCT_CURRENT_YEAR} ${PRODUCT_COMPANY_NAME}")
+    endif()
+    
+    if( NOT PRODUCT_COMMENTS )
+        set( PRODUCT_COMMENTS "${PRODUCT_NAME} v${PRODUCT_VERSION}" )
+    endif()
+    
+    if( NOT PRODUCT_ORIGINAL_FILENAME )
+        set( PRODUCT_ORIGINAL_FILENAME "${PRODUCT_NAME}" )
+    endif()
+    
+    if( NOT PRODUCT_INTERNAL_NAME )
+        set( PRODUCT_INTERNAL_NAME "${PRODUCT_NAME}" )
+    endif()
+    
+    if( NOT PRODUCT_FILE_DESCRIPTION )
+        set( PRODUCT_FILE_DESCRIPTION "${PRODUCT_NAME}" )
+    endif()
+    
+    if( PRODUCT_PRIVATE_BUILD )
+        set( PRODUCT_PRIVATE_BUILD_FLAG "1" )
+    else()
+        set(PRODUCT_PRIVATE_BUILD_FLAG "0")
+    endif()
+
+    if( PRODUCT_SPECIAL_BUILD )
+        set( PRODUCT_SPECIAL_BUILD_FLAG "1" )
+    else()
+        set( PRODUCT_SPECIAL_BUILD_FLAG "0" )
+    endif()
+
+    if( PRODUCT_PRERELEASE )
+        set( PRODUCT_PRERELEASE_FLAG "1" )
+    else()
+        set( PRODUCT_PRERELEASE_FLAG "0" )
+    endif()
+
+    if( PRODUCT_PATCHED )
+        set( PRODUCT_PATCHED_FLAG "1" )
+    else()
+        set( PRODUCT_PATCHED_FLAG "0" )
+    endif()
+
+    set( _VersionInfoHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h )
+    set( _VersionResourceHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.h )
+    set( _VersionResourceFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.rc )
     configure_file(
         ${GenerateProductVersionCurrentDir}/VersionInfo.in.h
         ${_VersionInfoHeaderFile}
@@ -137,24 +180,28 @@ function(generate_product_version outfiles)
         ${GenerateProductVersionCurrentDir}/VersionResource.rc
         ${_VersionResourceFile}
         COPYONLY)
-    list(APPEND ${outfiles} ${_VersionInfoHeaderFile} ${_VersionResourceHeaderFile} ${_VersionResourceFile})
-    set (${outfiles} ${${outfiles}} PARENT_SCOPE)
+    list( APPEND ${outfiles} ${_VersionInfoHeaderFile} ${_VersionResourceHeaderFile} ${_VersionResourceFile} )
+    set( ${outfiles} ${${outfiles}} PARENT_SCOPE )
 
-    if(PRODUCT_EXPORT_TO_PARENT_SCOPE)
-        set(PRODUCT_NAME ${PRODUCT_NAME} PARENT_SCOPE)
-        set(PRODUCT_BUNDLE ${PRODUCT_BUNDLE} PARENT_SCOPE)
-        set(PRODUCT_ICON ${PRODUCT_ICON} PARENT_SCOPE)
-        set(PRODUCT_VERSION_MAJOR ${PRODUCT_VERSION_MAJOR} PARENT_SCOPE)
-        set(PRODUCT_VERSION_MINOR ${PRODUCT_VERSION_MINOR} PARENT_SCOPE)
-        set(PRODUCT_VERSION_PATCH ${PRODUCT_VERSION_PATCH} PARENT_SCOPE)
-        set(PRODUCT_VERSION_BUILD ${PRODUCT_VERSION_BUILD} PARENT_SCOPE)
-        set(PRODUCT_VERSION_SUFFIX ${PRODUCT_VERSION_SUFFIX} PARENT_SCOPE)
-        set(PRODUCT_VERSION ${PRODUCT_VERSION} PARENT_SCOPE)
-        set(PRODUCT_COMPANY_NAME ${PRODUCT_COMPANY_NAME} PARENT_SCOPE)
-        set(PRODUCT_COMPANY_COPYRIGHT ${PRODUCT_COMPANY_COPYRIGHT} PARENT_SCOPE)
-        set(PRODUCT_COMMENTS ${PRODUCT_COMMENTS} PARENT_SCOPE)
-        set(PRODUCT_ORIGINAL_FILENAME ${PRODUCT_ORIGINAL_FILENAME} PARENT_SCOPE)
-        set(PRODUCT_INTERNAL_NAME ${PRODUCT_INTERNAL_NAME} PARENT_SCOPE)
-        set(PRODUCT_FILE_DESCRIPTION ${PRODUCT_FILE_DESCRIPTION} PARENT_SCOPE)
+    if( PRODUCT_EXPORT_TO_PARENT_SCOPE )
+        set( PRODUCT_NAME ${PRODUCT_NAME} PARENT_SCOPE )
+        set( PRODUCT_BUNDLE ${PRODUCT_BUNDLE} PARENT_SCOPE )
+        set( PRODUCT_ICON ${PRODUCT_ICON} PARENT_SCOPE )
+        set( PRODUCT_VERSION_MAJOR ${PRODUCT_VERSION_MAJOR} PARENT_SCOPE )
+        set( PRODUCT_VERSION_MINOR ${PRODUCT_VERSION_MINOR} PARENT_SCOPE )
+        set( PRODUCT_VERSION_PATCH ${PRODUCT_VERSION_PATCH} PARENT_SCOPE )
+        set( PRODUCT_VERSION_BUILD ${PRODUCT_VERSION_BUILD} PARENT_SCOPE )
+        set( PRODUCT_VERSION_SUFFIX ${PRODUCT_VERSION_SUFFIX} PARENT_SCOPE )
+        set( PRODUCT_VERSION ${PRODUCT_VERSION} PARENT_SCOPE )
+        set( PRODUCT_COMPANY_NAME ${PRODUCT_COMPANY_NAME} PARENT_SCOPE )
+        set( PRODUCT_COMPANY_COPYRIGHT ${PRODUCT_COMPANY_COPYRIGHT} PARENT_SCOPE )
+        set( PRODUCT_COMMENTS ${PRODUCT_COMMENTS} PARENT_SCOPE )
+        set( PRODUCT_ORIGINAL_FILENAME ${PRODUCT_ORIGINAL_FILENAME} PARENT_SCOPE )
+        set( PRODUCT_INTERNAL_NAME ${PRODUCT_INTERNAL_NAME} PARENT_SCOPE )
+        set( PRODUCT_FILE_DESCRIPTION ${PRODUCT_FILE_DESCRIPTION} PARENT_SCOPE )
+        set( PRODUCT_PRIVATE_BUILD ${PRODUCT_PRIVATE_BUILD} PARENT_SCOPE )
+        set( PRODUCT_SPECIAL_BUILD ${PRODUCT_SPECIAL_BUILD} PARENT_SCOPE )
+        set( PRODUCT_PRERELEASE ${PRODUCT_PRERELEASE} PARENT_SCOPE )
+        set( PRODUCT_PATCHED ${PRODUCT_PATCHED} PARENT_SCOPE )
     endif()
 endfunction()
