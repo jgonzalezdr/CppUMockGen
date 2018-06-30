@@ -46,6 +46,7 @@ include( ${CMAKE_SOURCE_DIR}/cmake/generate_product_version.cmake )
 generate_product_version(
     PRODUCT_VERSION_FILES
     NAME ${PROJECT_NAME}
+    FILE_DESCRIPTION "Mock generator for CppUTest"
     VERSION_MAJOR ${PROJECT_VERSION_MAJOR}
     VERSION_MINOR ${PROJECT_VERSION_MINOR}
     VERSION_PATCH ${PROJECT_VERSION_PATCH}
@@ -53,7 +54,6 @@ generate_product_version(
     VERSION_SUFFIX "${PROJECT_VERSION_SUFFIX}"
     COMPANY_NAME "www.gdr-sistemas.com"
     COMPANY_COPYRIGHT "(C) Copyright 2017-2018 Jesus Gonzalez"
-    COMMENTS "Mock generator for CppUTest"
     EXPORT_TO_PARENT_SCOPE
 )
 
@@ -96,12 +96,25 @@ set( CPACK_PACKAGE_VERSION_PATCH ${PRODUCT_VERSION_PATCH} )
 set( CPACK_PACKAGE_VERSION ${PRODUCT_VERSION} )
 set( CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PRODUCT_COMMENTS} )
 set( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt )
+set( CPACK_BINARIES_SUBDIRECTORY "bin" )
 
-set( CPACK_NSIS_MODIFY_PATH OFF )
-set( CPACK_NSIS_MUI_ICON "\\\${NSISDIR}\\\\Contrib\\\\Graphics\\\\Icons\\\\orange-install.ico" )
-set( CPACK_NSIS_MUI_UNIICON "\\\${NSISDIR}\\\\Contrib\\\\Graphics\\\\Icons\\\\orange-uninstall.ico" )
-string_escape( CPACK_NSIS_EXTRA_INSTALL_COMMANDS "WriteRegStr SHCTX \"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\${PRODUCT_NAME}.exe\" \"\" \"\$INSTDIR\\${PRODUCT_NAME}.exe\"" )
-string_escape( CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "DeleteRegKey SHCTX \"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\${PRODUCT_NAME}.exe\"" )
+if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
+    set( CPACK_PACKAGE_ARCH_BITSIZE "64" )
+elseif( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "4" )
+    set( CPACK_PACKAGE_ARCH_BITSIZE "32" )
+else()
+    message( FATAL_ERROR "Could not determine architecture bitsize (32 or 64)" )
+endif()
+
+string_escape( CPACK_NSIS_MUI_ICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-install.ico" )
+string_escape( CPACK_NSIS_MUI_UNIICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-uninstall.ico" )
+string_escape( CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-metro.bmp" )
+string_escape( CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-grey.bmp" )
+string_escape( CPACK_NSIS_MUI_HEADERIMAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-metro.bmp" )
+string_escape( CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-grey.bmp" )
+#set( CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE "!define MUI_FINISHPAGE_NOAUTOCLOSE" )
+set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON" )
+set( CPACK_NSIS_MUI_FINISHPAGE_NOAUTOCLOSE "ON" )
 
 if( WIN32 )
     if( NOT INSTALLER_FILE_VERSION OR "${INSTALLER_FILE_VERSION}" STREQUAL "" )

@@ -1,0 +1,982 @@
+#------------------------------------------------------------------------------
+#
+# NSIS script for CPack / CMake installer generation
+#
+#------------------------------------------------------------------------------
+
+# Set compression
+!if "@CPACK_NSIS_COMPRESSOR@" != ""
+SetCompressor @CPACK_NSIS_COMPRESSOR@
+!endif
+
+#------------------------------------------------------------------------------
+# General defines
+#------------------------------------------------------------------------------
+
+!define INST_DIR "@CPACK_TEMPORARY_DIRECTORY@"
+!define UNINSTALL_REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
+!define STARTMENU_REG_KEY "StartMenu"
+
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
+
+Var STARTMENU_FOLDER
+Var OPTION_ADD_TO_PATH
+Var INSTALL_DESKTOP
+Var IS_DEFAULT_INSTALLDIR
+
+!ifdef CPACK_NSIS_ADD_REMOVE
+    Var RUNNING_ADDREMOVE
+!endif
+
+#------------------------------------------------------------------------------
+# Include MultiUser support
+#------------------------------------------------------------------------------
+
+!if "@CPACK_PACKAGE_ARCH_BITSIZE@" == "64"
+    !define MULTIUSER_USE_PROGRAMFILES64
+!endif
+
+!define MULTIUSER_INSTALLMODE_INSTDIR "@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY ${UNINSTALL_REG_KEY}
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "InstallLocation"
+
+!include MultiUser.nsh
+
+#------------------------------------------------------------------------------
+# Include Modern UI 2
+#------------------------------------------------------------------------------
+
+!include MUI2.nsh
+
+#------------------------------------------------------------------------------
+# General configuration
+#------------------------------------------------------------------------------
+
+# Default installation folder
+InstallDir "@CPACK_NSIS_INSTALL_ROOT@\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+
+# Name and output (installer) file
+Name "@CPACK_NSIS_PACKAGE_NAME@"
+OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
+
+# Uninstaller executable name
+!if "@CPACK_NSIS_UNINSTALLER_NAME@" != ""
+    !define UNINSTALLER_NAME "@CPACK_NSIS_UNINSTALLER_NAME@"
+!else
+    !define UNINSTALLER_NAME "Uninstall"
+!endif
+
+# Installation modifier executable name
+!if "@CPACK_NSIS_ADDREMOVE_NAME@" != ""
+    !define ADDREMOVE_NAME "@CPACK_NSIS_ADDREMOVE_NAME@"
+!else
+    !define ADDREMOVE_NAME "AddRemove"
+!endif
+
+# Binaries subdirectory
+!if "@CPACK_BINARIES_SUBDIRECTORY@" != ""
+    !define BINARIES_SUBDIRECTORY "\@CPACK_BINARIES_SUBDIRECTORY@"
+!else
+    !define BINARIES_SUBDIRECTORY ""
+!endif
+
+@CPACK_NSIS_DEFINES@
+
+#------------------------------------------------------------------------------
+# Component support
+#------------------------------------------------------------------------------
+
+!include Sections.nsh
+
+# The code for the add/remove functionality is from:
+#   http://nsis.sourceforge.net/Add/Remove_Functionality
+#
+# It has been modified slightly and extended to provide inter-component dependencies.
+
+Var AR_SecFlags
+Var AR_RegFlags
+@CPACK_NSIS_SECTION_SELECTED_VARS@
+
+# Loads the "selected" flag for the section named SecName into the variable VarName.
+!macro LoadSectionSelectedIntoVar SecName VarName
+    SectionGetFlags ${${SecName}} $${VarName}
+    IntOp $${VarName} $${VarName} & ${SF_SELECTED}  # Turn off all other bits
+!macroend
+
+# Loads the value of a variable
+!macro LoadVar VarName
+    IntOp $R0 0 + $${VarName}
+!macroend
+
+# Sets the value of a variable
+!macro StoreVar VarName IntValue
+  IntOp $${VarName} 0 + ${IntValue}
+!macroend
+
+!macro InitSection SecName
+    # This macro reads component installed flag from the registry and changes checked state of the section on the components page.
+    # Input: section index constant name specified in Section command.
+
+    ClearErrors
+    # Reading component status from registry
+    ReadRegDWORD $AR_RegFlags HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" "Installed"
+    IfErrors "default_${SecName}"
+    
+    # Status will stay default if registry value not found (component was never installed)
+    IntOp $AR_RegFlags $AR_RegFlags & ${SF_SELECTED}  #Turn off all other bits
+    SectionGetFlags ${${SecName}} $AR_SecFlags  #Reading default section flags
+    IntOp $AR_SecFlags $AR_SecFlags & 0xFFFE  # Turn lowest (enabled) bit off
+    IntOp $AR_SecFlags $AR_RegFlags | $AR_SecFlags  # Change lowest bit
+
+    # Note whether this component was installed before
+    !insertmacro StoreVar ${SecName}_was_installed $AR_RegFlags
+    IntOp $R0 $AR_RegFlags & $AR_RegFlags
+
+    # Writing modified flags
+    SectionSetFlags ${${SecName}} $AR_SecFlags
+
+  "default_${SecName}:"
+    !insertmacro LoadSectionSelectedIntoVar ${SecName} ${SecName}_selected
+!macroend
+
+!macro FinishSection SecName
+    # This macro reads section flag set by user and removes the section if it is not selected. Then it writes component installed flag to registry
+    # Input: section index constant name specified in Section command.
+
+    SectionGetFlags ${${SecName}} $AR_SecFlags  # Reading section flags
+    
+    # Checking lowest bit:
+    IntOp $AR_SecFlags $AR_SecFlags & ${SF_SELECTED}
+    IntCmp $AR_SecFlags 1 "leave_${SecName}"
+    
+    # Section is not selected:
+    # Calling Section uninstall macro and writing zero installed flag
+    !insertmacro "Remove_${${SecName}}"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" "Installed" 0
+    Goto "exit_${SecName}"
+
+  "leave_${SecName}:"
+    # Section is selected:
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" "Installed" 1
+
+  "exit_${SecName}:"
+!macroend
+
+!macro RemoveSection_CPack SecName
+    # This macro is used to call section's Remove_... macro from the uninstaller.
+    # Input: section index constant name specified in Section command.
+
+    !insertmacro "Remove_${${SecName}}"
+!macroend
+
+# Determine whether the selection of SecName changed
+!macro MaybeSelectionChanged SecName
+    !insertmacro LoadVar ${SecName}_selected
+    SectionGetFlags ${${SecName}} $R1
+    IntOp $R1 $R1 & ${SF_SELECTED}  # Turn off all other bits
+
+    # See if the status has changed:
+    IntCmp $R0 $R1 "${SecName}_unchanged"
+    !insertmacro LoadSectionSelectedIntoVar ${SecName} ${SecName}_selected
+
+    IntCmp $R1 ${SF_SELECTED} "${SecName}_was_selected"
+    !insertmacro "Deselect_required_by_${SecName}"
+    goto "${SecName}_unchanged"
+
+  "${SecName}_was_selected:"
+    !insertmacro "Select_${SecName}_depends"
+
+  "${SecName}_unchanged:"
+!macroend
+
+#------------------------------------------------------------------------------
+# Helper functions & macros
+#------------------------------------------------------------------------------
+
+!include x64.nsh
+
+!macro ContextSetup
+    !if "@CPACK_PACKAGE_ARCH_BITSIZE@" == "64"
+    ${If} ${RunningX64}
+        SetRegView 64
+    ${Else}
+        MessageBox MB_OK|MB_ICONSTOP "This installer is for a 64 bits application, but you are running a 32 bits OS."
+        Abort
+    ${EndIf}
+    !endif
+!macroend
+
+Function ConditionalAddToRegistyUninstallKey
+    Pop $0 # Value
+    Pop $1 # Key Name
+
+    ${If} "$0" != ""
+        WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "$1" "$0"
+        ;DetailPrint "Set install registry entry: '$1' to '$0'"
+    ${EndIf}
+FunctionEnd
+
+!ifdef CPACK_USES_DOWNLOAD
+Function DownloadFile
+    IfFileExists $INSTDIR\* +2
+    CreateDirectory $INSTDIR
+    Pop $0
+
+    # Skip if already downloaded
+    IfFileExists $INSTDIR\$0 0 +2
+    Return
+
+    StrCpy $1 "@CPACK_DOWNLOAD_SITE@"
+
+  try_again:
+    NSISdl::download "$1/$0" "$INSTDIR\$0"
+
+    Pop $1
+    StrCmp $1 "success" success
+    StrCmp $1 "Cancelled" cancel
+    MessageBox MB_OK "Download failed: $1"
+  cancel:
+    Return
+  success:
+FunctionEnd
+!endif
+
+!include WinCore.nsh
+!ifndef NSIS_CHAR_SIZE
+!define NSIS_CHAR_SIZE 1
+!endif
+
+# Appends a string with separator to a Windows registry key value, overcoming the NSIS limitation in the maximum size of internal variables.
+#
+# Based on stackoverflow user Anders shared code (https://stackoverflow.com/a/31342128/4279098)
+Function RegAppendString
+    System::Store S
+    Pop $R0 # String to append
+    Pop $R1 # Separator
+    Pop $R2 # Registry key value
+    Pop $R3 # Registry key path
+    Pop $R4 # Registry hkey
+
+    # Open registry key
+    System::Call 'ADVAPI32::RegCreateKey(i$R4,tR3,*i.r1)i.r0'
+    # $1 contains key handler
+    ${If} $0 = 0
+        # Get size of key value
+        System::Call 'ADVAPI32::RegQueryValueEx(ir1,tR2,i0,*i.r2,i0,*i0r3)i.r0'
+        # $2 contains key value type
+        # $3 contains key value size
+        ${If} $0 <> 0
+            StrCpy $2 ${REG_SZ}
+            StrCpy $3 0
+        ${EndIf}
+        
+        # Calculate size of buffer to store new value
+        StrLen $4 $R0
+        StrLen $5 $R1
+        IntOp $4 $4 + $5
+        IntOp $4 $4 + 1  # For \0
+        !if ${NSIS_CHAR_SIZE} > 1
+            IntOp $4 $4 * ${NSIS_CHAR_SIZE}
+        !endif
+        IntOp $4 $4 + $3
+        # $4 contains size of buffer (in bytes)
+        
+        # Allocate buffer for new value
+        System::Alloc $4
+        
+        # Get old value into allocated buffer
+        System::Call 'ADVAPI32::RegQueryValueEx(ir1,tR2,i0,i0,isr9,*ir4r4)i.r0'
+        # $4 contains actual key value size (in bytes)
+        # $9 contains key value buffer
+        ${If} $0 = 0
+        ${OrIf} $0 = ${ERROR_FILE_NOT_FOUND}
+            # Check if actual value is empty
+            System::Call 'KERNEL32::lstrlen(t)(ir9)i.r0'
+            ${If} $0 <> 0
+                # Check if value already contains the string to be appended
+                System::Call 'SHLWAPI::StrStr(ir9,tR0)i.r0'
+                ${If} $0 <> 0
+                    StrCpy $0 -1
+                    Goto free_buffer
+                ${EndIf}
+                
+                # Append separator
+                System::Call 'KERNEL32::lstrcat(t)(ir9,tR1)'
+            ${EndIf}
+            
+            # Append string
+            System::Call 'KERNEL32::lstrcat(t)(ir9,tR0)'
+            
+            # Get actual length of new value
+            System::Call 'KERNEL32::lstrlen(t)(ir9)i.r0'
+            IntOp $0 $0 + 1
+            !if ${NSIS_CHAR_SIZE} > 1
+                IntOp $0 $0 * ${NSIS_CHAR_SIZE}
+            !endif
+            
+            # Store new value
+            System::Call 'ADVAPI32::RegSetValueEx(ir1,tR2,i0,ir2,ir9,ir0)i.r0'
+        ${EndIf}
+        
+      free_buffer:
+        # Free buffer
+        System::Free $9
+        
+        # Close registry key
+        System::Call 'ADVAPI32::RegCloseKey(ir1)'
+    ${EndIf}
+    
+    # Return: 0 = OK, -1 = Already Exists, 2 = Error
+    Push $0
+    System::Store L
+FunctionEnd
+
+# Removes a string with separator from a Windows registry key value, overcoming the NSIS limitation in the maximum size of internal variables.
+Function un.RegRemoveString
+    System::Store S
+    Pop $R0 # String to remove
+    Pop $R1 # Separator
+    Pop $R2 # Registry key value
+    Pop $R3 # Registry key path
+    Pop $R4 # Registry hkey
+    
+    # Open registry key
+    System::Call 'ADVAPI32::RegCreateKey(i$R4,tR3,*i.r1)i.r0'
+    # $1 contains key handler
+    ${If} $0 = 0
+        # Get size of key value
+        System::Call 'ADVAPI32::RegQueryValueEx(ir1,tR2,i0,*i.r2,i0,*i0r3)i.r0'
+        # $2 contains key value type
+        # $3 contains key value size
+        ${If} $0 == 0
+            # Calculate size of buffer to store value
+            IntOp $4 $3 + ${NSIS_CHAR_SIZE}  # For \0
+            # $4 contains size of buffer (in bytes)
+            
+            # Allocate buffer for value
+            System::Alloc $4
+            
+            # Get value into allocated buffer
+            System::Call 'ADVAPI32::RegQueryValueEx(ir1,tR2,i0,i0,isr9,*ir4)i.r0'
+            # $9 contains key value buffer
+            ${If} $0 = 0
+                # Check if the value contains the separator and string
+                StrCpy $R5 "$R1$R0"
+                System::Call 'SHLWAPI::StrStr(ir9,tR5)i.r5'
+                ${If} $5 == 0
+                    # Check if the value contains the string and the separator
+                    StrCpy $R5 "$R0$R1"
+                    System::Call 'SHLWAPI::StrStr(ir9,tR5)i.r5'
+                    ${If} $5 == 0 # string not found
+                        # Check if the value contains only the string
+                        StrCpy $R5 "$R0"
+                        System::Call 'SHLWAPI::StrStr(ir9,tR5)i.r5'
+                        ${If} $5 == 0 # string not found
+                        ${OrIf} $5 <> $9 # string without separator not at the start
+                            StrCpy $0 -1
+                            Goto free_buffer
+                        ${Else}
+                            # Check that the string is the only entry
+                            StrLen $6 $R5
+                            System::Call 'KERNEL32::lstrlen(t)(ir5)i.r0'
+                            ${If} $0 > $6
+                                StrCpy $0 -1
+                                Goto free_buffer
+                            ${EndIf}
+                        ${EndIf}
+                    ${ElseIf} $5 <> $9 # string followed by separator not at the start
+                        StrCpy $0 -1
+                        Goto free_buffer
+                    ${EndIf}
+                ${Else}
+                    # Check that the string is at the end or followed by a separator
+                    StrLen $6 $R5
+                    System::Call 'KERNEL32::lstrlen(t)(ir5)i.r0'
+                    ${If} $0 > $6
+                        StrCpy $R6 "$R1$R0$R1"
+                        System::Call 'SHLWAPI::StrStr(ir9,tR6)i.r5'
+                        ${If} $5 == 0 # separated string not found
+                            StrCpy $0 -1
+                            Goto free_buffer
+                        ${EndIf}
+                    ${EndIf}
+                ${EndIf}
+                # $5 contains pointer to first char of the string
+                
+                # Calculate length of value before the removed string
+                IntOp $6 $5 - $9
+                !if ${NSIS_CHAR_SIZE} > 1
+                    IntOp $6 $6 / ${NSIS_CHAR_SIZE}
+                !endif
+                IntOp $6 $6 + 1  # For \0
+                
+                # Allocate buffer for new value
+                System::Alloc $4
+                
+                # Copy value before removed string
+                System::Call 'KERNEL32::lstrcpyn(t)(isr7,ir9,ir6)'
+                # $7 contains new value buffer
+                
+                # Calculate size of removed part
+                StrLen $6 $R5
+                !if ${NSIS_CHAR_SIZE} > 1
+                    IntOp $6 $6 * ${NSIS_CHAR_SIZE}
+                !endif
+                
+                # Calculate position of value after the removed string
+                IntOp $8 $5 + $6
+                
+                # Copy value after removed string
+                System::Call 'KERNEL32::lstrcat(t)(ir7,ir8)'
+
+                # Get actual length of new value
+                System::Call 'KERNEL32::lstrlen(t)(ir7)i.r0'
+                IntOp $0 $0 + 1
+                !if ${NSIS_CHAR_SIZE} > 1
+                    IntOp $0 $0 * ${NSIS_CHAR_SIZE}
+                !endif
+                
+                # Store new value
+                System::Call 'ADVAPI32::RegSetValueEx(ir1,tR2,i0,ir2,ir7,ir0)i.r0'
+                
+                # Free buffer
+                System::Free $7
+            ${EndIf}
+        
+          free_buffer:
+            # Free buffer
+            System::Free $9
+        ${EndIf}
+        
+        # Close registry key
+        System::Call 'ADVAPI32::RegCloseKey(ir1)'
+    ${EndIf}
+    
+    # Return: 0 = OK, -1 = Not found, 2 = Error
+    Push $0
+    System::Store L
+FunctionEnd
+
+Function AddToPath
+    Exch $0 # Directory path to add
+
+    ${If} "$MultiUser.InstallMode" == "AllUsers"
+        Push ${HKEY_LOCAL_MACHINE}
+        Push "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+    ${Else}
+        Push ${HKEY_CURRENT_USER}
+        Push "Environment"
+    ${EndIf}
+    Push "Path"
+    Push ";"
+    Push $0
+    Call RegAppendString
+    Pop $0
+
+    # Return: 0 = OK, -1 = Already Exists, 2 = Error
+    Exch $0
+FunctionEnd
+
+Function un.RemoveFromPath
+    Exch $0 # Directory path to remove
+
+    ${If} "$MultiUser.InstallMode" == "AllUsers"
+        Push ${HKEY_LOCAL_MACHINE}
+        Push "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+    ${Else}
+        Push ${HKEY_CURRENT_USER}
+        Push "Environment"
+    ${EndIf}
+    Push "Path"
+    Push ";"
+    Push $0
+    Call un.RegRemoveString
+    Pop $0
+
+    # Return: 0 = OK, -1 = Not found, 2 = Error
+    Exch $0
+FunctionEnd
+
+#------------------------------------------------------------------------------
+# Installation types
+#------------------------------------------------------------------------------
+
+@CPACK_NSIS_INSTALLATION_TYPES@
+
+#------------------------------------------------------------------------------
+# Component sections
+#------------------------------------------------------------------------------
+
+@CPACK_NSIS_COMPONENT_SECTIONS@
+
+#------------------------------------------------------------------------------
+# GUI Settings
+#------------------------------------------------------------------------------
+
+!define MUI_HEADERIMAGE
+!define MUI_ABORTWARNING
+
+#------------------------------------------------------------------------------
+# User customization of the GUI
+#------------------------------------------------------------------------------
+
+@CPACK_NSIS_INSTALLER_MUI_ICON_CODE@
+@CPACK_NSIS_INSTALLER_ICON_CODE@
+@CPACK_NSIS_INSTALLER_MUI_WELCOMEFINISH_CODE@
+@CPACK_NSIS_INSTALLER_MUI_UNWELCOMEFINISH_CODE@
+@CPACK_NSIS_INSTALLER_MUI_COMPONENTS_DESC@
+@CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE@
+
+!if "@CPACK_NSIS_MUI_HEADERIMAGE_BITMAP@" != ""
+    !define MUI_HEADERIMAGE_BITMAP "@CPACK_NSIS_MUI_HEADERIMAGE_BITMAP@"
+!endif
+!if "@CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP@" != ""
+    !define MUI_HEADERIMAGE_UNBITMAP "@CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP@"
+!endif
+!if "@CPACK_NSIS_MUI_FINISHPAGE_NOAUTOCLOSE@" == "ON"
+    !define MUI_FINISHPAGE_NOAUTOCLOSE
+!endif
+
+#------------------------------------------------------------------------------
+# Pages
+#------------------------------------------------------------------------------
+
+!insertmacro MUI_PAGE_WELCOME
+
+!insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
+Page custom OptionsPageInit OptionsPageLeave
+!insertmacro MUI_PAGE_DIRECTORY
+
+# Start Menu Folder Page Configuration
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT SHCTX
+!define MUI_STARTMENUPAGE_REGISTRY_KEY ${UNINSTALL_REG_KEY}
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME ${STARTMENU_REG_KEY}
+!insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
+
+@CPACK_NSIS_PAGE_COMPONENTS@
+
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+#------------------------------------------------------------------------------
+# Options page
+#------------------------------------------------------------------------------
+
+!include nsDialogs.nsh
+
+Var OptionsPage
+Var OptionsPageCtrl_AddToPath
+
+Function OptionsPageInit
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+
+    !insertmacro MUI_HEADER_TEXT "Install Options" "Choose options for installing @CPACK_NSIS_PACKAGE_NAME@"
+
+    nsDialogs::Create 1018
+    Pop $OptionsPage
+
+    ${If} $OptionsPage == error
+        MessageBox MB_OK "Error creating Options page"
+        Abort
+    ${EndIf}
+
+    ${NSD_CreateGroupBox} 10u 10u 280u 120u "Install Options"
+
+    ${If} "$MultiUser.InstallMode" == "AllUsers"
+        StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the system PATH"
+    ${Else}
+        StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the current user PATH"
+    ${EndIf}
+
+    ${NSD_CreateCheckBox} 30u 30u 100% 12u $0
+    Pop $OptionsPageCtrl_AddToPath
+
+    ${IfNot} $OPTION_ADD_TO_PATH == 0
+        ${NSD_Check} $OptionsPageCtrl_AddToPath
+    ${EndIf}
+
+    nsDialogs::Show
+
+    !endif
+FunctionEnd
+
+Function OptionsPageLeave
+    ${NSD_GetState} $OptionsPageCtrl_AddToPath $0
+    ${If} $0 == ${BST_CHECKED}
+        StrCpy $OPTION_ADD_TO_PATH 1
+    ${Else}
+        StrCpy $OPTION_ADD_TO_PATH 0
+    ${EndIf}
+FunctionEnd
+
+#------------------------------------------------------------------------------
+# Languages
+#------------------------------------------------------------------------------
+
+!insertmacro MUI_LANGUAGE "English"  # First language is the default language
+!insertmacro MUI_LANGUAGE "Albanian"
+!insertmacro MUI_LANGUAGE "Arabic"
+!insertmacro MUI_LANGUAGE "Basque"
+!insertmacro MUI_LANGUAGE "Belarusian"
+!insertmacro MUI_LANGUAGE "Bosnian"
+!insertmacro MUI_LANGUAGE "Breton"
+!insertmacro MUI_LANGUAGE "Bulgarian"
+!insertmacro MUI_LANGUAGE "Croatian"
+!insertmacro MUI_LANGUAGE "Czech"
+!insertmacro MUI_LANGUAGE "Danish"
+!insertmacro MUI_LANGUAGE "Dutch"
+!insertmacro MUI_LANGUAGE "Estonian"
+!insertmacro MUI_LANGUAGE "Farsi"
+!insertmacro MUI_LANGUAGE "Finnish"
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "German"
+!insertmacro MUI_LANGUAGE "Greek"
+!insertmacro MUI_LANGUAGE "Hebrew"
+!insertmacro MUI_LANGUAGE "Hungarian"
+!insertmacro MUI_LANGUAGE "Icelandic"
+!insertmacro MUI_LANGUAGE "Indonesian"
+!insertmacro MUI_LANGUAGE "Irish"
+!insertmacro MUI_LANGUAGE "Italian"
+!insertmacro MUI_LANGUAGE "Japanese"
+!insertmacro MUI_LANGUAGE "Korean"
+!insertmacro MUI_LANGUAGE "Kurdish"
+!insertmacro MUI_LANGUAGE "Latvian"
+!insertmacro MUI_LANGUAGE "Lithuanian"
+!insertmacro MUI_LANGUAGE "Luxembourgish"
+!insertmacro MUI_LANGUAGE "Macedonian"
+!insertmacro MUI_LANGUAGE "Malay"
+!insertmacro MUI_LANGUAGE "Mongolian"
+!insertmacro MUI_LANGUAGE "Norwegian"
+!insertmacro MUI_LANGUAGE "Polish"
+!insertmacro MUI_LANGUAGE "Portuguese"
+!insertmacro MUI_LANGUAGE "PortugueseBR"
+!insertmacro MUI_LANGUAGE "Romanian"
+!insertmacro MUI_LANGUAGE "Russian"
+!insertmacro MUI_LANGUAGE "Serbian"
+!insertmacro MUI_LANGUAGE "SerbianLatin"
+!insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "Slovak"
+!insertmacro MUI_LANGUAGE "Slovenian"
+!insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "Swedish"
+!insertmacro MUI_LANGUAGE "Thai"
+!insertmacro MUI_LANGUAGE "TradChinese"
+!insertmacro MUI_LANGUAGE "Turkish"
+!insertmacro MUI_LANGUAGE "Ukrainian"
+!insertmacro MUI_LANGUAGE "Welsh"
+
+#------------------------------------------------------------------------------
+# Component dependencies
+#------------------------------------------------------------------------------
+
+!macro SectionList MacroName
+    # This macro used to perform operation on multiple sections. List all of your components in following manner here.
+    @CPACK_NSIS_COMPONENT_SECTION_LIST@
+!macroend
+
+Function .onSelChange
+    !insertmacro SectionList MaybeSelectionChanged
+FunctionEnd
+
+#------------------------------------------------------------------------------
+# Installer initialization
+#------------------------------------------------------------------------------
+
+Function .onInit
+
+    !insertmacro ContextSetup
+    
+    !insertmacro MULTIUSER_INIT
+
+    ;MessageBox MB_OK "INSTDIR = $INSTDIR"
+    
+    !ifdef CPACK_NSIS_ADD_REMOVE
+        # Get the name of the installer executable
+        System::Call 'kernel32::GetModuleFileNameA(i 0, t .R0, i 1024) i r1'
+        
+        StrCpy $R4 "${ADDREMOVE_NAME}.exe"
+        StrLen $R5 $R4
+        
+        StrCpy $R2 $R0 -$R5
+        ${If} $R2 == $R4
+            StrCpy $RUNNING_ADDREMOVE 1
+        ${Else}
+            StrCpy $RUNNING_ADDREMOVE 0
+        ${EndIf}
+    !endif
+    
+    !if "@CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL@" == "ON"
+        !ifdef CPACK_NSIS_ADD_REMOVE
+            ${If} $RUNNING_ADDREMOVE != 1
+        !endif
+        
+        ReadRegStr $0 SHCTX ${UNINSTALL_REG_KEY} "UninstallString"
+        StrCmp $0 "" install
+
+        MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION \
+        "@CPACK_NSIS_PACKAGE_NAME@ is already installed. $\n$\nDo you want to uninstall the old version before installing the new one?" \
+        IDYES uninstall IDNO install
+        Abort
+
+        # Run the uninstaller
+      uninstall:
+        # Copy uninstaller to temporary dir, otherwise it won't be able to erase itself. 
+        # Additionally, for some reason in 64 bits OS the installer cannot execute the uninstaller from the Program Files location.
+        
+        StrCpy $7 "$TEMP\@CPACK_NSIS_PACKAGE_NAME@"
+        ClearErrors
+        CreateDirectory $7
+        IfErrors 0 create_uninstaller_copier
+        MessageBox MB_OK "Can't create temporary directory: $7"
+        Abort
+        
+      create_uninstaller_copier:
+        StrCpy $0 "$7\${UNINSTALLER_NAME}.exe"
+        StrCpy $8 "$7\CopyUninstaller.bat"            
+
+        # Create uninstaller copier batch file
+        ClearErrors
+        FileOpen $9 $8 w
+        FileWrite $9 '@copy "$INSTDIR\${UNINSTALLER_NAME}.exe" "$7\"$\r$\n'
+        FileClose $9
+        IfErrors 0 copy_uninstaller
+        MessageBox MB_OK|MB_ICONSTOP "Can't create copier batch file: $8"
+        StrCpy $1 3
+        Goto clean_uninstall
+
+      copy_uninstaller:
+        # Execute copier batch file
+        ClearErrors
+        ExecWait '"$8"' $1
+        ;MessageBox MB_OK "Copier exit code: $1"
+        IfErrors +2
+        StrCmp $1 0 execute_uninstaller
+        MessageBox MB_OK|MB_ICONSTOP "Couldn't copy uninstaller"
+        StrCpy $1 3
+        Goto clean_uninstall
+            
+      execute_uninstaller:
+        # Execute temporary uninstaller
+        ClearErrors
+        ExecWait '"$0" _?=$INSTDIR' $1
+        ;MessageBox MB_OK|MB_ICONSTOP "Uninstaller exit code: $1"
+        IfErrors 0 clean_uninstall
+        MessageBox MB_OK|MB_ICONSTOP "Couldn't execute uninstaller"
+        StrCpy $1 3
+        
+      clean_uninstall:
+        # Delete temporary files
+        Delete $8
+        Delete $0
+        RMDir $7
+
+        ${If} $1 == 0
+            Goto install
+        ${ElseIf} $1 == 1
+            # Cancelled by used
+            Quit
+        ${ElseIf} $1 == 2
+            MessageBox MB_OK|MB_ICONSTOP "Uninstall failed"
+            Abort
+        ${Else}
+            Abort
+        ${EndIf}
+        
+        !ifdef CPACK_NSIS_ADD_REMOVE
+            ${EndIf}
+        !endif
+    !endif
+
+  install:
+    # Reads components status for registry
+    !insertmacro SectionList "InitSection"
+
+FunctionEnd
+
+#------------------------------------------------------------------------------
+# Installer sections
+#------------------------------------------------------------------------------
+
+Section -CoreInstallation
+
+    SetOutPath "$INSTDIR"
+    @CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS@
+    @CPACK_NSIS_FULL_INSTALL@
+
+    # Create uninstaller
+    WriteUninstaller "$INSTDIR\${UNINSTALLER_NAME}.exe"
+
+    # Store installation folder
+    WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "InstallLocation" "$INSTDIR"
+
+    # Write uninstall info to registry
+    WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "UninstallString" '"$INSTDIR\${UNINSTALLER_NAME}.exe"'
+    WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "QuietUninstallString" '"$INSTDIR\${UNINSTALLER_NAME}.exe" /S'
+    WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "NoRepair" 1
+
+    !ifdef CPACK_NSIS_ADD_REMOVE
+        # Create add/remove functionality
+        WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "ModifyPath" '"$INSTDIR\${ADDREMOVE_NAME}.exe"'
+    !else
+        WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "NoModify" 1
+    !endif
+
+    # Optional registration
+
+    Push "DisplayName"
+    Push "@CPACK_NSIS_DISPLAY_NAME@"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "DisplayVersion"
+    Push "@CPACK_PACKAGE_VERSION@"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "Publisher"
+    Push "@CPACK_PACKAGE_VENDOR@"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "HelpLink"
+    Push "@CPACK_NSIS_HELP_LINK@"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "URLInfoAbout"
+    Push "@CPACK_NSIS_URL_INFO_ABOUT@"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "Contact"
+    Push "@CPACK_NSIS_CONTACT@"
+    Call ConditionalAddToRegistyUninstallKey
+
+    !if "@CPACK_NSIS_INSTALLED_ICON_NAME@" != ""
+        WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "DisplayIcon" "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
+    !endif
+
+    # Write user options to registry
+    Push "OptionAddToPath"
+    Push "$OPTION_ADD_TO_PATH"
+    Call ConditionalAddToRegistyUninstallKey
+    Push "InstallToDesktop"
+    Push "$INSTALL_DESKTOP"
+    Call ConditionalAddToRegistyUninstallKey
+
+    # Create shortcuts
+    
+    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+
+    CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
+    @CPACK_NSIS_CREATE_ICONS@
+    @CPACK_NSIS_CREATE_ICONS_EXTRA@
+    CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\${UNINSTALLER_NAME}.exe"
+
+    !insertmacro MUI_STARTMENU_WRITE_END
+
+    @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
+
+SectionEnd
+
+Section -AddToPath
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ${If} $OPTION_ADD_TO_PATH == 1
+            StrCpy $1 "$INSTDIR${BINARIES_SUBDIRECTORY}"
+            Push $1
+            Call AddToPath
+            Pop $0
+            ${If} $0 < 0
+                DetailPrint "Binaries directory '$1' is already in the PATH. PATH will not be modified."
+            ${ElseIf} $0 > 0
+                DetailPrint "Error '$0' found when modifying PATH."
+            ${Else}
+                DetailPrint "Binaries directory '$1' added to PATH."
+            ${EndIf}
+        ${EndIf}
+    !endif
+SectionEnd
+
+Section -FinishComponents
+    # Removes unselected components and writes component status to registry
+    !insertmacro SectionList "FinishSection"
+
+    !ifdef CPACK_NSIS_ADD_REMOVE
+        ${If} $RUNNING_ADDREMOVE != 1
+            CopyFiles $R3 "$INSTDIR\${ADDREMOVE_NAME}.exe"
+        ${EndIf}
+    !endif
+SectionEnd
+
+#------------------------------------------------------------------------------
+# Uninstaller initialization
+#------------------------------------------------------------------------------
+
+Function un.onInit
+
+    !insertmacro ContextSetup
+
+    !insertmacro MULTIUSER_UNINIT
+    
+    ;MessageBox MB_OK "INSTDIR = $INSTDIR"
+    
+FunctionEnd
+
+#------------------------------------------------------------------------------
+# Uninstaller sections
+#------------------------------------------------------------------------------
+
+Section Uninstall
+
+    ReadRegStr $OPTION_ADD_TO_PATH SHCTX ${UNINSTALL_REG_KEY} "OptionAddToPath"
+    ;MessageBox MB_OK "Add to path: $OPTION_ADD_TO_PATH"
+    ReadRegStr $INSTALL_DESKTOP SHCTX ${UNINSTALL_REG_KEY} "InstallToDesktop"
+    ;MessageBox MB_OK "Install to desktop: $INSTALL_DESKTOP "
+
+    @CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
+
+    @CPACK_NSIS_DELETE_FILES@
+    @CPACK_NSIS_DELETE_DIRECTORIES@
+
+    !ifdef CPACK_NSIS_ADD_REMOVE
+        # Remove the add/remove program
+        Delete "$INSTDIR\${ADDREMOVE_NAME}.exe"
+    !endif
+
+    # Remove the uninstaller program
+    Delete "$INSTDIR\${UNINSTALLER_NAME}.exe"
+    DeleteRegKey SHCTX ${UNINSTALL_REG_KEY}
+
+    # Remove the installation directory if it is empty
+    RMDir "$INSTDIR"
+
+    # Removes all optional components
+    !insertmacro SectionList "RemoveSection_CPack"
+
+    # Delete start menu
+    !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENU_FOLDER
+
+    Delete "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk"
+    @CPACK_NSIS_DELETE_ICONS@
+    @CPACK_NSIS_DELETE_ICONS_EXTRA@
+
+    RMDir "$SMPROGRAMS\$STARTMENU_FOLDER"
+    
+SectionEnd
+    
+Section -un.RemoveFromPath
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ${If} $OPTION_ADD_TO_PATH == 1
+            StrCpy $1 "$INSTDIR${BINARIES_SUBDIRECTORY}"
+            Push $1
+            Call un.RemoveFromPath
+            Pop $0
+            ${If} $0 < 0
+                DetailPrint "Binaries directory '$1' is not found in the PATH."
+            ${ElseIf} $0 > 0
+                DetailPrint "Error '$0' found when modifying PATH."
+            ${Else}
+                DetailPrint "Binaries directory '$1' removed from PATH."
+            ${EndIf}
+        ${EndIf}
+    !endif
+SectionEnd
