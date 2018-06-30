@@ -37,7 +37,7 @@ if( $env:APPVEYOR_REPO_TAG -eq 'false' )
     $repo_provider = $env:APPVEYOR_REPO_PROVIDER 
     $build_id = "$repo_provider-$commit_id"
     
-    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPROJECT_VERSION_SUFFIX=-$build_id -DINSTALLER_FILE_VERSION=Experimental -DPRERELEASE=ON -DPRIVATE_BUILD=$build_id"
+    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPROJECT_VERSION_SUFFIX=-$build_id -DINSTALLER_FILE_VERSION=Experimental -DPRERELEASE=ON -DPRIVATE_BUILD_INFO=$build_id"
 }
 
 switch -Wildcard ($env:Platform)
