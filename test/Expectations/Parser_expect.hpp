@@ -6,7 +6,7 @@
  * Generation options: -p Parser::Parse#error=Pointer/&$ -t "#const std::string &=String/$.c_str()" -t "#const Config &=ConstPointer/&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string" 
  */
 
-#include <CppUMockGen.h>
+#include <CppUMockGen.hpp>
 
 #include "Parser.hpp"
 

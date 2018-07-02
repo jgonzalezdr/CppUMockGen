@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Implementation of Parser class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #include "Parser.hpp"
 
 #include <iostream>
@@ -208,7 +217,7 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
 {
     GenerateFileHeading( genOpts, output );
 
-    output << "#include <CppUMockGen.h>" << std::endl;
+    output << "#include <CppUMockGen.hpp>" << std::endl;
     output << std::endl;
 
     if( !m_interpretAsCpp )

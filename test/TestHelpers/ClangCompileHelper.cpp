@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Implementation of Clang compiling helper class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #include "ClangCompileHelper.hpp"
 #include "ClangHelper.hpp"
 #include <iostream>
@@ -71,7 +80,7 @@ bool ClangCompileHelper::CheckExpectationCompilation( const std::string &testedH
     std::string compiledCode =
             "#include <CppUTest/TestHarness.h>\n"
             "#include <CppUTestExt/MockSupport.h>\n"
-            "#include <CppUMockGen.h>\n";
+            "#include <CppUMockGen.hpp>\n";
 #ifdef INTERPRET_C
     compiledCode += "extern \"C\" {\n";
 #endif

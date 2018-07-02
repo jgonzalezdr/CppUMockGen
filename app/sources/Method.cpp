@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Implementation of Method class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #include "Method.hpp"
 
 #include <stdexcept>

@@ -13,7 +13,7 @@ if( MSVC )
     include( ${CMAKE_SOURCE_DIR}/cmake/VSHelper.cmake )
 
     generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} sources )
-#    generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} include )
+    generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} include )
 endif( MSVC )
 
 include_directories( ${LibClang_INCLUDE_DIRS}  ${CMAKE_CURRENT_SOURCE_DIR}/libs/cxxopts/include )
@@ -37,6 +37,18 @@ set( SRC_LIST
      sources/ConsoleColorizer.cpp
      sources/Config.cpp
      sources/FileHelper.cpp
+)
+
+set( INC_LIST
+     sources/App.hpp
+     sources/Parser.hpp
+     sources/ClangHelper.hpp
+     sources/Function.hpp
+     sources/Method.hpp
+     sources/ConsoleColorizer.hpp
+     sources/Config.hpp
+     sources/FileHelper.hpp
+     include/CppUMockGen.hpp
 )
 
 set( PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}" )
@@ -67,7 +79,7 @@ if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
 endif()
 
-add_executable( ${PROJECT_NAME} ${SRC_LIST} ${PRODUCT_VERSION_FILES} )
+add_executable( ${PROJECT_NAME} ${SRC_LIST} ${INC_LIST} ${PRODUCT_VERSION_FILES} )
 
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11 )
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
@@ -116,7 +128,6 @@ string_escape( CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Gr
 string_escape( CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-grey.bmp" )
 string_escape( CPACK_NSIS_MUI_HEADERIMAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-metro.bmp" )
 string_escape( CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-grey.bmp" )
-#set( CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE "!define MUI_FINISHPAGE_NOAUTOCLOSE" )
 set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON" )
 set( CPACK_NSIS_MUI_FINISHPAGE_NOAUTOCLOSE "ON" )
 

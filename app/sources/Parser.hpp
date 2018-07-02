@@ -1,5 +1,14 @@
-#ifndef CPPUMOCKGEN_MOCKGENERATOR_HPP_
-#define CPPUMOCKGEN_MOCKGENERATOR_HPP_
+/**
+ * @file
+ * @brief      Header of Parser class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
+#ifndef CPPUMOCKGEN_PARSER_HPP_
+#define CPPUMOCKGEN_PARSER_HPP_
 
 #include <vector>
 #include <string>
@@ -10,6 +19,9 @@
 
 class Config;
 
+/**
+ * Class used to parse C/C++ headers and generate mocks and expectations.
+ */
 class Parser
 {
 public:

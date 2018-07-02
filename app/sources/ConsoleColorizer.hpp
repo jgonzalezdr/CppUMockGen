@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Header of ConsoleColorizer class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #ifndef CONSOLECOLORIZED_HPP_
 #define CONSOLECOLORIZED_HPP_
 
@@ -5,6 +14,9 @@
 #include "windows.h"
 #endif
 
+/**
+ * Helper class to colorize console output.
+ */
 class ConsoleColorizer
 {
 public:
@@ -30,9 +42,23 @@ public:
         RESET
     };
 
+    /**
+     * Constructor.
+     *
+     * @param consoleType [in] Console to colorize
+     */
     ConsoleColorizer( ConsoleType consoleType ) noexcept;
+
+    /**
+     * Destructor.
+     */
     ~ConsoleColorizer() noexcept;
 
+    /**
+     * Sets (or resets) the console color.
+     *
+     * @param color [in] Color to be set, or RESET to reset to default value
+     */
     void SetColor( Color color ) noexcept;
 
 private:

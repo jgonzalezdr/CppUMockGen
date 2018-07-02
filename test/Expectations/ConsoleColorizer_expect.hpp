@@ -4,7 +4,7 @@
  * Contents will NOT be preserved if it is regenerated!!!
  */
 
-#include <CppUMockGen.h>
+#include <CppUMockGen.hpp>
 
 #include "ConsoleColorizer.hpp"
 

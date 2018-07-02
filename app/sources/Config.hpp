@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Header of Config class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #ifndef CPPUMOCKGEN_CONFIG_HPP_
 #define CPPUMOCKGEN_CONFIG_HPP_
 
@@ -24,7 +33,7 @@ enum class MockedType
 };
 
 /**
- * Configuration to be used for function parsing, and mock generation.
+ * Class that manages the configuration to be used for function parsing, and mock generation.
  */
 class Config
 {

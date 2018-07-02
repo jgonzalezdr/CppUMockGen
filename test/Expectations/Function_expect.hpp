@@ -6,7 +6,7 @@
  * Generation options: -t "#const CXCursor &=ConstPointer/&$" -t "#const Config &=ConstPointer/&$" -t @std::string=String 
  */
 
-#include <CppUMockGen.h>
+#include <CppUMockGen.hpp>
 
 #include "Function.hpp"
 

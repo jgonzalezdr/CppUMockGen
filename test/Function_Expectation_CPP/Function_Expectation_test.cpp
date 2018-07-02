@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief      Unit tests for the "Function" class
+ * @brief      Unit tests for the "Function" class (expectation generation)
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
  * @copyright  Copyright (c) 2018 Jesus Gonzalez. All rights reserved.

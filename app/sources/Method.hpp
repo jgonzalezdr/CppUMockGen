@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief      Header of Method class
+ * @project    CppUMockGen
+ * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+ * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @license    See LICENSE.txt
+ */
+
 #ifndef CPPUMOCKGEN_METHOD_HPP_
 #define CPPUMOCKGEN_METHOD_HPP_
 

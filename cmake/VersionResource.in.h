@@ -2,7 +2,7 @@
 The MIT License (MIT)
 
 Copyright (c) 2015, by [halex2005](mailto:akharlov@gmail.com)
-Copyright (c) 2018, by Jesús Gonzalez <jgonzalez@gdr-sistemas.com>
+Copyright (c) 2018, by Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

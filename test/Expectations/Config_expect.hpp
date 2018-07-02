@@ -6,7 +6,7 @@
  * Generation options: -t "#const std::string &=String/$.c_str()" 
  */
 
-#include <CppUMockGen.h>
+#include <CppUMockGen.hpp>
 
 #include "Config.hpp"
 
