@@ -754,7 +754,7 @@ Function .onInit
 
         MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION \
         "@CPACK_NSIS_PACKAGE_NAME@ is already installed. $\n$\nDo you want to uninstall the old version before installing the new one?" \
-        IDYES uninstall IDNO install
+        /SD IDYES IDYES uninstall IDNO install
         Abort
 
         # Run the uninstaller
@@ -797,7 +797,11 @@ Function .onInit
       execute_uninstaller:
         # Execute temporary uninstaller
         ClearErrors
-        ExecWait '"$0" _?=$INSTDIR' $1
+        ${If} ${Silent}
+            ExecWait '"$0" /S _?=$INSTDIR' $1
+        ${Else}
+            ExecWait '"$0" _?=$INSTDIR' $1
+        ${EndIf}
         ;MessageBox MB_OK|MB_ICONSTOP "Uninstaller exit code: $1"
         IfErrors 0 clean_uninstall
         MessageBox MB_OK|MB_ICONSTOP "Couldn't execute uninstaller"
