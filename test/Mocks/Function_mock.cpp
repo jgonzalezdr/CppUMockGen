@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -t "#const CXCursor &=ConstPointer/&$" -t "#const Config &=ConstPointer/&$" -t @std::string=String 
+ * Generation options: -t "#const CXCursor &=ConstPointer~&$" -t "#const Config &=ConstPointer~&$" -t @std::string=String
  */
 
 #include "Function.hpp"
@@ -17,7 +17,7 @@ class Function::Return
 {};
 
 Function::Function() noexcept
-: m_isConst( false )
+: m_isConst( false ), m_exceptionSpec( Function::EExceptionSpec::Any )
 {}
 
 Function::~Function() noexcept

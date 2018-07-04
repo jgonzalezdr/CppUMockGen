@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -t "#const std::string &=String/$.c_str()" 
+ * Generation options: -t "#const std::string &=String~$.c_str()"
  */
 
 #include <CppUMockGen.hpp>

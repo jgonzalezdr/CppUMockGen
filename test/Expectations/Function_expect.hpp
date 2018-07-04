@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -t "#const CXCursor &=ConstPointer/&$" -t "#const Config &=ConstPointer/&$" -t @std::string=String 
+ * Generation options: -t "#const CXCursor &=ConstPointer~&$" -t "#const Config &=ConstPointer~&$" -t @std::string=String
  */
 
 #include <CppUMockGen.hpp>

@@ -12,7 +12,7 @@
 #include <set>
 #include <vector>
 
-static const char EXPR_MOD_SEPARATOR = '/';
+static const char EXPR_MOD_SEPARATOR = '~';
 static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
 static const char EXPECTATION_ARG_TYPE_SEPARATOR = '<';
 

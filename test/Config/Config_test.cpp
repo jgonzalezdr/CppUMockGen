@@ -241,12 +241,12 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
 {
     // Prepare
     Config testConfig( false,
-                       std::vector<std::string> { "function1#p=Int/($)",
-                                                  "ns1::function1@=ConstPointer/&$",
-                                                  "func2#p=InputOfType:TypeZ/$->getZ()",
-                                                  "func3#p=OutputOfType:TypeW/(*$).getW()",
-                                                  "func4#p=InputOfType:TypeM<OtherTypeA/$->getM()",
-                                                  "func5#p=OutputOfType:TypeN<OtherTypeB/(*$).getN()" },
+                       std::vector<std::string> { "function1#p=Int~($)",
+                                                  "ns1::function1@=ConstPointer~&$",
+                                                  "func2#p=InputOfType:TypeZ~$->getZ()",
+                                                  "func3#p=OutputOfType:TypeW~(*$).getW()",
+                                                  "func4#p=InputOfType:TypeM<OtherTypeA~$->getM()",
+                                                  "func5#p=OutputOfType:TypeN<OtherTypeB~(*$).getN()" },
                        std::vector<std::string>() );
 
     // Exercise
@@ -319,12 +319,12 @@ TEST( Config, TypeOverrideOptions_ArgumentExpression )
     // Prepare
     Config testConfig( false,
                        std::vector<std::string>(),
-                       std::vector<std::string> { "#const int *=Int/(*$)",
-                                                  "@const int *=LongInt/&$",
-                                                  "#typeX=InputOfType:TypeY/&($.getY())",
-                                                  "#typeQ=OutputOfType:TypeQ/&$->getQ()",
-                                                  "#typeI=InputOfType:TypeK<OtherTypeC/&($.getK())",
-                                                  "#typeJ=OutputOfType:TypeL<OtherTypeD/&$->getL()" } );
+                       std::vector<std::string> { "#const int *=Int~(*$)",
+                                                  "@const int *=LongInt~&$",
+                                                  "#typeX=InputOfType:TypeY~&($.getY())",
+                                                  "#typeQ=OutputOfType:TypeQ~&$->getQ()",
+                                                  "#typeI=InputOfType:TypeK<OtherTypeC~&($.getK())",
+                                                  "#typeJ=OutputOfType:TypeL<OtherTypeD~&$->getL()" } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#const int *");
@@ -406,13 +406,13 @@ TEST( Config, Exception_ParameterOverrideBadFormat )
                   Config( false, std::vector<std::string> { "function1#p=abc" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=/" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=~" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int/" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int~" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int/abc" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int~abc" }, std::vector<std::string>() ) );
 
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "function1@=Output" }, std::vector<std::string>() ) );
@@ -468,13 +468,13 @@ TEST( Config, Exception_TypeOverrideBadFormat )
                   Config( false, std::vector<std::string>(), std::vector<std::string> { "#type1=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=/" } ) );
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1=Int/" } ) );
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1=Int~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type2=Int/abc" } ) );
+                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type2=Int~abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Output" } ) );

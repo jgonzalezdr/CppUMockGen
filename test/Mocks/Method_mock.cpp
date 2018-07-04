@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -t "#const CXCursor &=ConstPointer/&$" 
+ * Generation options: -t "#const CXCursor &=ConstPointer~&$"
  */
 
 #include "Method.hpp"

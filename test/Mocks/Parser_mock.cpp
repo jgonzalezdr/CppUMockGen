@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -p Parser::Parse#error=Pointer/&$ -t "#const std::string &=String/$.c_str()" -t "#const Config &=ConstPointer/&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string/&$" 
+ * Generation options: -p Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$"
  */
 
 #include "Parser.hpp"
