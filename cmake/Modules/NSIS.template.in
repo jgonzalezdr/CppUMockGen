@@ -52,7 +52,14 @@ SetCompressor @CPACK_NSIS_COMPRESSOR@
 #------------------------------------------------------------------------------
 
 Var STARTMENU_FOLDER
-Var OPTION_ADD_TO_PATH
+!if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+    Var OPTION_ADD_TO_PATH
+    !define /ifndef ENABLE_OPTIONS_PAGE
+!endif
+!if "@CPACK_HOME_ENVVAR@" != ""
+    Var OPTION_SET_ENV_HOME
+    !define /ifndef ENABLE_OPTIONS_PAGE
+!endif
 Var INSTALL_DESKTOP
 Var IS_DEFAULT_INSTALLDIR
 
@@ -250,6 +257,14 @@ Function ConditionalAddToRegistyUninstallKey
         ;DetailPrint "Set install registry entry: '$1' to '$0'"
     ${EndIf}
 FunctionEnd
+
+!define ConditionalAddToRegistyUninstallKey "!insertmacro ConditionalAddToRegistyUninstallKey"
+!macro ConditionalAddToRegistyUninstallKey KeyName KeyValue
+    Push "${KeyName}"
+    Push "${KeyValue}"
+    Call ConditionalAddToRegistyUninstallKey
+!macroend
+
 
 !ifdef CPACK_USES_DOWNLOAD
 Function DownloadFile
@@ -492,35 +507,46 @@ Function un.RegRemoveString
     System::Store L
 FunctionEnd
 
+!define ENV_ALL_USERS "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+!define ENV_CURRENT_USER "Environment"
+
 Function AddToPath
     Exch $0 # Directory path to add
 
     ${If} "$MultiUser.InstallMode" == "AllUsers"
         Push ${HKEY_LOCAL_MACHINE}
-        Push "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+        Push "${ENV_ALL_USERS}"
     ${Else}
         Push ${HKEY_CURRENT_USER}
-        Push "Environment"
+        Push "${ENV_CURRENT_USER}"
     ${EndIf}
     Push "Path"
     Push ";"
     Push $0
     Call RegAppendString
     Pop $0
+    
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
     # Return: 0 = OK, -1 = Already Exists, 2 = Error
     Exch $0
 FunctionEnd
+
+!define AddToPath "!insertmacro AddToPath"
+!macro AddToPath PathToAdd
+    Push "${PathToAdd}"
+    Call AddToPath
+!macroend
 
 Function un.RemoveFromPath
     Exch $0 # Directory path to remove
 
     ${If} "$MultiUser.InstallMode" == "AllUsers"
         Push ${HKEY_LOCAL_MACHINE}
-        Push "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+        Push "${ENV_ALL_USERS}"
     ${Else}
         Push ${HKEY_CURRENT_USER}
-        Push "Environment"
+        Push "${ENV_CURRENT_USER}"
     ${EndIf}
     Push "Path"
     Push ";"
@@ -528,9 +554,79 @@ Function un.RemoveFromPath
     Call un.RegRemoveString
     Pop $0
 
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
     # Return: 0 = OK, -1 = Not found, 2 = Error
     Exch $0
 FunctionEnd
+
+!define RemoveFromPath "!insertmacro RemoveFromPath"
+!macro RemoveFromPath PathToRemove
+    Push "${PathToRemove}"
+    Call un.RemoveFromPath
+!macroend
+
+Function SetEnvVar
+    Exch $0 # Environment variable value
+    Exch
+    Exch $1 # Environment variable name
+    Push $2
+    
+    ${If} "$MultiUser.InstallMode" == "AllUsers"
+        StrCpy $2 "${ENV_ALL_USERS}"
+    ${Else}
+        StrCpy $2 "${ENV_CURRENT_USER}"
+    ${EndIf}
+
+    ClearErrors
+    WriteRegStr SHCTX $2 $1 $0
+    
+    StrCpy $0 0
+    IfErrors 0 +3
+    StrCpy $0 1
+    
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+    Pop $2
+    Pop $1
+    Exch $0
+FunctionEnd
+
+!define SetEnvVar "!insertmacro SetEnvVar"
+!macro SetEnvVar VarName VarValue
+    Push "${VarName}"
+    Push "${VarValue}"
+    Call SetEnvVar
+!macroend
+
+Function un.DeleteEnvVar
+    Exch $0 # Environment variable name
+    Push $2
+    
+    ${If} "$MultiUser.InstallMode" == "AllUsers"
+        StrCpy $2 "${ENV_ALL_USERS}"
+    ${Else}
+        StrCpy $2 "${ENV_CURRENT_USER}"
+    ${EndIf}
+    
+    ClearErrors
+    DeleteRegValue SHCTX $2 $0
+
+    StrCpy $0 0
+    IfErrors 0 +3
+    StrCpy $0 1
+    
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+    
+    Pop $2
+    Exch $0
+FunctionEnd
+
+!define DeleteEnvVar "!insertmacro DeleteEnvVar"
+!macro DeleteEnvVar VarName
+    Push "${VarName}"
+    Call un.DeleteEnvVar
+!macroend
 
 #------------------------------------------------------------------------------
 # Installation types
@@ -580,7 +676,9 @@ FunctionEnd
 
 !insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
-Page custom OptionsPageInit OptionsPageLeave
+!ifdef ENABLE_OPTIONS_PAGE
+    Page custom OptionsPageInit OptionsPageLeave
+!endif
 !insertmacro MUI_PAGE_DIRECTORY
 
 # Start Menu Folder Page Configuration
@@ -601,13 +699,21 @@ Page custom OptionsPageInit OptionsPageLeave
 # Options page
 #------------------------------------------------------------------------------
 
+!ifdef ENABLE_OPTIONS_PAGE
+
 !include nsDialogs.nsh
 
 Var OptionsPage
-Var OptionsPageCtrl_AddToPath
+!if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+    Var OptionsPageCtrl_AddToPath
+!endif
+!if "@CPACK_HOME_ENVVAR@" != ""
+    Var OptionsPageCtrl_SetEnvHome
+!endif
 
 Function OptionsPageInit
-    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+    Push $0
+    Push $1
 
     !insertmacro MUI_HEADER_TEXT "Install Options" "Choose options for installing @CPACK_NSIS_PACKAGE_NAME@"
 
@@ -619,34 +725,72 @@ Function OptionsPageInit
         Abort
     ${EndIf}
 
-    ${NSD_CreateGroupBox} 10u 10u 280u 120u "Install Options"
+    ${NSD_CreateLabel} 1u 1u 280u 12u "Select your preferred installation options. $(^ClickNext)"
+    Pop $0
+    
+    StrCpy $1 50
 
-    ${If} "$MultiUser.InstallMode" == "AllUsers"
-        StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the system PATH"
-    ${Else}
-        StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the current user PATH"
-    ${EndIf}
+    !if "@CPACK_HOME_ENVVAR@" != ""
+        ${If} "$MultiUser.InstallMode" == "AllUsers"
+            StrCpy $0 "Set environment variable @CPACK_HOME_ENVVAR@ for all users"
+        ${Else}
+            StrCpy $0 "Set environment variable @CPACK_HOME_ENVVAR@ for the current user"
+        ${EndIf}
 
-    ${NSD_CreateCheckBox} 30u 30u 100% 12u $0
-    Pop $OptionsPageCtrl_AddToPath
+        ${NSD_CreateCheckBox} 20u $1u 80% 12u $0
+        Pop $OptionsPageCtrl_SetEnvHome
 
-    ${IfNot} $OPTION_ADD_TO_PATH == 0
-        ${NSD_Check} $OptionsPageCtrl_AddToPath
-    ${EndIf}
+        ${IfNot} $OPTION_SET_ENV_HOME == 0
+            ${NSD_Check} $OptionsPageCtrl_SetEnvHome
+        ${EndIf}
+        
+        IntOp $1 $1 + 20
+    !endif
+    
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ${If} "$MultiUser.InstallMode" == "AllUsers"
+            StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the system PATH"
+        ${Else}
+            StrCpy $0 "Add @CPACK_PACKAGE_NAME@ to the current user PATH"
+        ${EndIf}
+
+        ${NSD_CreateCheckBox} 20u $1u 80% 12u $0
+        Pop $OptionsPageCtrl_AddToPath
+
+        ${IfNot} $OPTION_ADD_TO_PATH == 0
+            ${NSD_Check} $OptionsPageCtrl_AddToPath
+        ${EndIf}
+        
+        IntOp $1 $1 + 20
+    !endif
 
     nsDialogs::Show
 
-    !endif
+    Pop $1
+    Pop $0
 FunctionEnd
 
 Function OptionsPageLeave
-    ${NSD_GetState} $OptionsPageCtrl_AddToPath $0
-    ${If} $0 == ${BST_CHECKED}
-        StrCpy $OPTION_ADD_TO_PATH 1
-    ${Else}
-        StrCpy $OPTION_ADD_TO_PATH 0
-    ${EndIf}
+    !if "@CPACK_HOME_ENVVAR@" != ""
+        ${NSD_GetState} $OptionsPageCtrl_SetEnvHome $0
+        ${If} $0 == ${BST_CHECKED}
+            StrCpy $OPTION_SET_ENV_HOME 1
+        ${Else}
+            StrCpy $OPTION_SET_ENV_HOME 0
+        ${EndIf}
+    !endif
+    
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ${NSD_GetState} $OptionsPageCtrl_AddToPath $0
+        ${If} $0 == ${BST_CHECKED}
+            StrCpy $OPTION_ADD_TO_PATH 1
+        ${Else}
+            StrCpy $OPTION_ADD_TO_PATH 0
+        ${EndIf}
+    !endif
 FunctionEnd
+
+!endif
 
 #------------------------------------------------------------------------------
 # Languages
@@ -866,36 +1010,24 @@ Section -CoreInstallation
 
     # Optional registration
 
-    Push "DisplayName"
-    Push "@CPACK_NSIS_DISPLAY_NAME@"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "DisplayVersion"
-    Push "@CPACK_PACKAGE_VERSION@"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "Publisher"
-    Push "@CPACK_PACKAGE_VENDOR@"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "HelpLink"
-    Push "@CPACK_NSIS_HELP_LINK@"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "URLInfoAbout"
-    Push "@CPACK_NSIS_URL_INFO_ABOUT@"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "Contact"
-    Push "@CPACK_NSIS_CONTACT@"
-    Call ConditionalAddToRegistyUninstallKey
+    ${ConditionalAddToRegistyUninstallKey} "DisplayName" "@CPACK_NSIS_DISPLAY_NAME@"
+    ${ConditionalAddToRegistyUninstallKey} "DisplayVersion" "@CPACK_PACKAGE_VERSION@"
+    ${ConditionalAddToRegistyUninstallKey} "Publisher" "@CPACK_PACKAGE_VENDOR@"
+    ${ConditionalAddToRegistyUninstallKey} "HelpLink" "@CPACK_NSIS_HELP_LINK@"
+    ${ConditionalAddToRegistyUninstallKey} "URLInfoAbout" "@CPACK_NSIS_URL_INFO_ABOUT@"
+    ${ConditionalAddToRegistyUninstallKey} "Contact" "@CPACK_NSIS_CONTACT@"
 
     !if "@CPACK_NSIS_INSTALLED_ICON_NAME@" != ""
         WriteRegStr SHCTX ${UNINSTALL_REG_KEY} "DisplayIcon" "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
     !endif
 
     # Write user options to registry
-    Push "OptionAddToPath"
-    Push "$OPTION_ADD_TO_PATH"
-    Call ConditionalAddToRegistyUninstallKey
-    Push "InstallToDesktop"
-    Push "$INSTALL_DESKTOP"
-    Call ConditionalAddToRegistyUninstallKey
+    
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ${ConditionalAddToRegistyUninstallKey} "OptionAddToPath" "$OPTION_ADD_TO_PATH"
+    !endif
+    ${ConditionalAddToRegistyUninstallKey} "OptionSetEnvHome" "$OPTION_SET_ENV_HOME"
+    ${ConditionalAddToRegistyUninstallKey} "InstallToDesktop" "$INSTALL_DESKTOP"
 
     # Create shortcuts
     
@@ -912,23 +1044,35 @@ Section -CoreInstallation
 
 SectionEnd
 
+!if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
 Section -AddToPath
-    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
-        ${If} $OPTION_ADD_TO_PATH == 1
-            StrCpy $1 "$INSTDIR${BINARIES_SUBDIRECTORY}"
-            Push $1
-            Call AddToPath
-            Pop $0
-            ${If} $0 < 0
-                DetailPrint "Binaries directory '$1' is already in the PATH. PATH will not be modified."
-            ${ElseIf} $0 > 0
-                DetailPrint "Error '$0' found when modifying PATH."
-            ${Else}
-                DetailPrint "Binaries directory '$1' added to PATH."
-            ${EndIf}
+    ${If} $OPTION_ADD_TO_PATH == 1
+        ${AddToPath} "$INSTDIR${BINARIES_SUBDIRECTORY}"
+        Pop $0
+        ${If} $0 < 0
+            DetailPrint "Binaries directory '$1' is already in the PATH. PATH will not be modified."
+        ${ElseIf} $0 > 0
+            DetailPrint "Error '$0' found when modifying PATH."
+        ${Else}
+            DetailPrint "Binaries directory '$1' added to PATH."
         ${EndIf}
-    !endif
+    ${EndIf}
 SectionEnd
+!endif
+
+!if "@CPACK_HOME_ENVVAR@" != ""
+Section -SetEnvHome
+    ${If} $OPTION_SET_ENV_HOME == 1
+        ${SetEnvVar} "@CPACK_HOME_ENVVAR@" "$INSTDIR"
+        Pop $0
+        ${If} $0 > 0
+            DetailPrint "Could not set environment variable @CPACK_HOME_ENVVAR@."
+        ${Else}
+            DetailPrint "Environment variable @CPACK_HOME_ENVVAR@ set to $INSTDIR."
+        ${EndIf}
+    ${EndIf}
+SectionEnd
+!endif
 
 Section -FinishComponents
     # Removes unselected components and writes component status to registry
@@ -961,8 +1105,14 @@ FunctionEnd
 
 Section Uninstall
 
-    ReadRegStr $OPTION_ADD_TO_PATH SHCTX ${UNINSTALL_REG_KEY} "OptionAddToPath"
-    ;MessageBox MB_OK "Add to path: $OPTION_ADD_TO_PATH"
+    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
+        ReadRegStr $OPTION_ADD_TO_PATH SHCTX ${UNINSTALL_REG_KEY} "OptionAddToPath"
+        ;MessageBox MB_OK "Add to path: $OPTION_ADD_TO_PATH"
+    !endif
+    !if "@CPACK_HOME_ENVVAR@" != ""
+        ReadRegStr $OPTION_SET_ENV_HOME SHCTX ${UNINSTALL_REG_KEY} "OptionSetEnvHome"
+        ;MessageBox MB_OK "Set environment home: $OPTION_SET_ENV_HOME"
+    !endif
     ReadRegStr $INSTALL_DESKTOP SHCTX ${UNINSTALL_REG_KEY} "InstallToDesktop"
     ;MessageBox MB_OK "Install to desktop: $INSTALL_DESKTOP "
 
@@ -997,20 +1147,33 @@ Section Uninstall
     
 SectionEnd
     
+!if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
 Section -un.RemoveFromPath
-    !if "@CPACK_NSIS_MODIFY_PATH@" != "OFF"
-        ${If} $OPTION_ADD_TO_PATH == 1
-            StrCpy $1 "$INSTDIR${BINARIES_SUBDIRECTORY}"
-            Push $1
-            Call un.RemoveFromPath
-            Pop $0
-            ${If} $0 < 0
-                DetailPrint "Binaries directory '$1' is not found in the PATH."
-            ${ElseIf} $0 > 0
-                DetailPrint "Error '$0' found when modifying PATH."
-            ${Else}
-                DetailPrint "Binaries directory '$1' removed from PATH."
-            ${EndIf}
+    ${If} $OPTION_ADD_TO_PATH == 1
+        StrCpy $1 "$INSTDIR${BINARIES_SUBDIRECTORY}"
+        ${RemoveFromPath} $1
+        Pop $0
+        ${If} $0 < 0
+            DetailPrint "Binaries directory '$1' is not found in the PATH."
+        ${ElseIf} $0 > 0
+            DetailPrint "Error '$0' found when modifying PATH."
+        ${Else}
+            DetailPrint "Binaries directory '$1' removed from PATH."
         ${EndIf}
-    !endif
+    ${EndIf}
 SectionEnd
+!endif
+
+!if "@CPACK_HOME_ENVVAR@" != ""
+Section -un.DeleteEnvHome
+    ${If} $OPTION_SET_ENV_HOME == 1
+        ${DeleteEnvVar} "@CPACK_HOME_ENVVAR@"
+        Pop $0
+        ${If} $0 > 0
+            DetailPrint "Could not remove environment variable @CPACK_HOME_ENVVAR@."
+        ${Else}
+            DetailPrint "Environment variable @CPACK_HOME_ENVVAR@ removed."
+        ${EndIf}
+    ${EndIf}
+SectionEnd
+!endif
