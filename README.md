@@ -24,55 +24,47 @@ The previously described manual tasks are highly systematic, and can be automate
 
 #### Example
 
-Assuming that we have the following function that we want to test:
+Assume that we have the following function that we want to test:
 
-###### MyFunction.h
+###### FunctionToTest.h
 ```cpp
-char* myFunction( const char *p );
+bool FunctionToTest( char *p );
+```
+
+And that this function calls another function, that we need to mock:
+
+###### FunctionToMock.h
+```cpp
+const char* FunctionToMock( const char *p );
 ```
 
 CppUMockGen would generate the following mock:
 
-###### MyFunction_mock.cpp
+###### FunctionToMock_mock.cpp
 ```cpp
-char * myFunction(const char * p)
+const char * FunctionToMock(const char * p)
 {
-    return static_cast<char*>(mock().actualCall("myFunction").withConstPointerParameter("p", p).returnStringValue());
+    return mock().actualCall("FunctionToMock").withStringParameter("p", p).returnStringValue();
 }
 ```
 
 CppUMockGen would generate the following expectation helper function:
 
-###### MyFunction_expect.h
+###### FunctionToMock_expect.h
 ```cpp
 namespace expect {
-MockExpectedCall& myFunction(CppUMockGen::Parameter<const char *> p, char * __return__);
-}
-```
-
-###### MyFunction_expect.cpp
-```cpp
-namespace expect {
-MockExpectedCall& myFunction(CppUMockGen::Parameter<const char *> p, char * __return__)
-{
-    bool __ignoreOtherParams__ = false;
-    MockExpectedCall& __expectedCall__ = mock().expectOneCall("myFunction");
-    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter("p", p); }
-    __expectedCall__.andReturnValue(static_cast<void*>(__return__));
-    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
-    return __ignoreOtherParams__;
-}
+MockExpectedCall& FunctionToMock(CppUMockGen::Parameter<const char *> p, const char * __return__);
 }
 ```
 
 And we could use these in an unit test like this:
 
-###### MyFunction_test.cpp
+###### FunctionToTest_test.cpp
 ```cpp
-TEST( myTestSuite, myOtherFunction )
+TEST( TestSuite, FunctionToTest )
 {
-    expect::myFunction("ABC", "123");
-    CHECK_EQUAL( true, myOtherFunction("ABC") );
+    expect::FunctionToMock("ABC", "123");
+    CHECK_EQUAL( true, FunctionToTest("ABC") );
     mock().checkExpectations();
 }
 ```
