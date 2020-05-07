@@ -24,4 +24,6 @@ std::string RemoveFilenameExtension( const std::string &filepath ) noexcept;
 
 bool IsDirPath( const std::string &path ) noexcept;
 
+void ConvertToDirPath( std::string& path ) noexcept;
+
 #endif // header guard

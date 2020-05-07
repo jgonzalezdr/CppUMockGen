@@ -134,6 +134,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             {
                 if( mockOutputFilepath.empty() || IsDirPath(mockOutputFilepath) )
                 {
+                    ConvertToDirPath( mockOutputFilepath );
                     mockOutputFilepath += RemoveFilenameExtension( GetFilenameFromPath(inputFilename) ) + "_mock.cpp";
                 }
                 mockOutputFile.open( mockOutputFilepath );
@@ -156,6 +157,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             {
                 if( expectHeaderOutputFilepath.empty() || IsDirPath(expectHeaderOutputFilepath) )
                 {
+                    ConvertToDirPath( expectHeaderOutputFilepath );
                     std::string baseFilename = RemoveFilenameExtension( GetFilenameFromPath(inputFilename) );
                     expectImplOutputFilepath = expectHeaderOutputFilepath + baseFilename + "_expect.cpp";
                     expectHeaderOutputFilepath += baseFilename + "_expect.hpp";

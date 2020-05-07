@@ -12,7 +12,7 @@ CppUMockGen additionally generates automatically expectation helper functions to
 
 ##### Generating Mocks
 
-To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input in the first non-option parameter or explicitly with the `-i` / `--input` option, and the path where you want the file with the mocked functions to be generated as output using the `-m` / `--mock-output` option. If the output option parameter is a directory path (i.e. ending with a path separator) then the output file name will be deduced from the input file name by replacing its extension by *"_mock.cpp"* and appended to the passed directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output option parameter is considered the output file name.
+To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input in the first non-option parameter or explicitly with the `-i` / `--input` option, and the path where you want the file with the mocked functions to be generated as output using the `-m` / `--mock-output` option. If the output option parameter is the path to an existing directory (or ends with a path separator) then the output file name will be deduced from the input file name by replacing its extension with *"_mock.cpp"* and will be generated in that directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output option parameter is considered the output file name.
 
 CppUMock by default interprets header files with the extensions .hh, .hpp or .hxx as C\++. Other extensions are interpreted by default as C. To force the interpretation of a header file as C++ use the `-x` / `--cpp` option.
 
@@ -30,7 +30,7 @@ CppUMockGen can automatically generate for each mockable function its correspond
 
 ##### Generating Expectation Helper Functions
 
-To generate expectation helper functions, pass the path where you want the files with the expectation helper functions to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option). If the output option parameter is a directory path (i.e. ending with a path separator) then the output file names will be deduced from the input file name by replacing its extension by *"_expect.cpp"* / *"_expect.hpp"* and appended to the passed directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output file names will be deduced from the output option parameter by replacing its extension by *".cpp"* / *".hpp"*.
+To generate expectation helper functions, pass the path where you want the files with the expectation helper functions to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option). If the output option parameter is the path to an existing directory (or ends with a path separator) then the output file names will be deduced from the input file name by replacing its extension by *"_expect.cpp"* / *"_expect.hpp"* and will be generated in that directory. If the output option parameter is empty it is equivalent to passing the current directory. If the output option parameter is **'@'**, the mock is printed to the console. In other cases the output file names will be deduced from the output option parameter by replacing its extension by *".cpp"* / *".hpp"*.
 
 Expectation helper functions are declared inside root namespace `expect`, using the same namespace hierarchy than the mocked function but appending character **'$'** to each original namespace to avoid name clashes. Additionally, for member functions an innermost namespace hierarchy is declared according to the function class nesting hierarchy, also appending **'$'** to class names (e.g., expectation helper for member functions of class `foo` inside namespace `bar ` are declared inside namespace `expect::bar$::foo$`). 
 
@@ -85,7 +85,7 @@ Override specifications also define the <code>with<i>&lt;MockedType></i>Paramete
 
 ### Specific Mocked Parameter / Return Type Override
 
-A function/parameter specifc override specification is passed on the command line using the `-p` / `--param-override` option.
+An override specification for a paramater or return type of a single function is passed on the command line using the `-p` / `--param-override` option.
 
 ##### Specific parameter type override
 
@@ -119,7 +119,9 @@ Where:
 
 ### Generic Mocked Parameter / Return Type Override
 
-A generic override specification is passed on the command line using the `-t` / `--type-override` option.
+A generic override specification which applies to all functions parameters or return types is passed on the command line using the `-t` / `--type-override` option.
+
+> **Note:** Specific overrides take preference over generic overrides.
 
 ##### Generic parameter type override
 

@@ -9,6 +9,8 @@
 
 #include "FileHelper.hpp"
 
+#include <filesystem>
+
 std::string GetFilenameFromPath( const std::string& filepath ) noexcept
 {
     size_t sepPos = filepath.rfind( PATH_SEPARATOR );
@@ -37,5 +39,15 @@ std::string RemoveFilenameExtension( const std::string &filepath ) noexcept
 
 bool IsDirPath( const std::string& path ) noexcept
 {
-    return ( !path.empty() && ( path.back() == PATH_SEPARATOR ) );
+    return ( !path.empty() && 
+             ( ( path.back() == PATH_SEPARATOR ) ||
+               std::filesystem::is_directory( path ) ) );
+}
+
+void ConvertToDirPath( std::string& path ) noexcept
+{
+    if( !path.empty() && ( path.back() != PATH_SEPARATOR ) )
+    {
+        path += PATH_SEPARATOR;
+    }
 }

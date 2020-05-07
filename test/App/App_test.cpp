@@ -76,14 +76,14 @@ public:
 StdOstreamCopier stdOstreamCopier;
 
 static const std::string tempDirPath = std::string(std::getenv("TEMP"));
-static const std::string outDirPath = tempDirPath + PATH_SEPARATOR;
+static const std::string outDirPath = tempDirPath;
 static const std::string inputFilename = "foo.h";
 static const std::string mockOutputFilename = "foo_mock.cpp";
-static const std::string mockOutputFilePath = outDirPath + mockOutputFilename;
+static const std::string mockOutputFilePath = outDirPath + PATH_SEPARATOR + mockOutputFilename;
 static const std::string expectationHeaderOutputFilename = "foo_expect.hpp";
-static const std::string expectationHeaderOutputFilePath = outDirPath + expectationHeaderOutputFilename;
+static const std::string expectationHeaderOutputFilePath = outDirPath + PATH_SEPARATOR + expectationHeaderOutputFilename;
 static const std::string expectationImplOutputFilename = "foo_expect.cpp";
-static const std::string expectationImplOutputFilePath = outDirPath + expectationImplOutputFilename;
+static const std::string expectationImplOutputFilePath = outDirPath + PATH_SEPARATOR + expectationImplOutputFilename;
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -287,7 +287,7 @@ TEST( App, MockOutput_CurrentDir )
 
     const char* inputFilename = "bar";
     const std::string outputFilename = "bar_mock.cpp";
-    outputFilepath1 = outDirPath + outputFilename;
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + outputFilename;
     std::remove( outputFilepath1.c_str() );
 
     std::ostringstream output;
@@ -334,7 +334,7 @@ TEST( App, MockOutput_OutFile )
     std::ostringstream error;
     App app( output, error );
 
-    outputFilepath1 = outDirPath + "mymock.cpp";
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + "mymock.cpp";
     std::remove( outputFilepath1.c_str() );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
@@ -410,7 +410,7 @@ TEST( App, MockOutput_CannotOpenFile )
     std::ostringstream error;
     App app( output, error );
 
-    std::string outputDir = outDirPath + "NonExistantDirectory123898876354874" + PATH_SEPARATOR;
+    std::string outputDir = outDirPath + PATH_SEPARATOR + "NonExistantDirectory123898876354874" + PATH_SEPARATOR;
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputDir.c_str() };
 
@@ -698,10 +698,10 @@ TEST( App, ExpectationOutput_CurrentDir )
     const std::string outputFilename1 = "bar_expect.hpp";
     const std::string outputFilename2 = "bar_expect.cpp";
 
-    outputFilepath1 = outDirPath + outputFilename1;
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + outputFilename1;
     std::remove( outputFilepath1.c_str() );
 
-    outputFilepath2 = outDirPath + outputFilename2;
+    outputFilepath2 = outDirPath + PATH_SEPARATOR + outputFilename2;
     std::remove( outputFilepath2.c_str() );
 
     std::ostringstream output;
@@ -751,10 +751,10 @@ TEST( App, ExpectationMockOutput_OutFile_Header )
     std::ostringstream error;
     App app( output, error );
 
-    outputFilepath1 = outDirPath + "my_expect.hpp";
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + "my_expect.hpp";
     std::remove( outputFilepath1.c_str() );
 
-    outputFilepath2 = outDirPath + "my_expect.cpp";
+    outputFilepath2 = outDirPath + PATH_SEPARATOR + "my_expect.cpp";
     std::remove( outputFilepath2.c_str() );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath1.c_str() };
@@ -798,10 +798,10 @@ TEST( App, ExpectationMockOutput_OutFile_Impl )
     std::ostringstream error;
     App app( output, error );
 
-    outputFilepath1 = outDirPath + "my_expect.hpp";
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + "my_expect.hpp";
     std::remove( outputFilepath1.c_str() );
 
-    outputFilepath2 = outDirPath + "my_expect.cpp";
+    outputFilepath2 = outDirPath + PATH_SEPARATOR + "my_expect.cpp";
     std::remove( outputFilepath2.c_str() );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath2.c_str() };
@@ -845,12 +845,12 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
-    std::string outputFilepathOther = outDirPath + "my_expect.blablabla";
+    std::string outputFilepathOther = outDirPath + PATH_SEPARATOR + "my_expect.blablabla";
 
-    outputFilepath1 = outDirPath + "my_expect.hpp";
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + "my_expect.hpp";
     std::remove( outputFilepath1.c_str() );
 
-    outputFilepath2 = outDirPath + "my_expect.cpp";
+    outputFilepath2 = outDirPath + PATH_SEPARATOR + "my_expect.cpp";
     std::remove( outputFilepath2.c_str() );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
@@ -894,12 +894,12 @@ TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
     std::ostringstream error;
     App app( output, error );
 
-    std::string outputFilepathOther = outDirPath + "my_expect";
+    std::string outputFilepathOther = outDirPath + PATH_SEPARATOR + "my_expect";
 
-    outputFilepath1 = outDirPath + "my_expect.hpp";
+    outputFilepath1 = outDirPath + PATH_SEPARATOR + "my_expect.hpp";
     std::remove( outputFilepath1.c_str() );
 
-    outputFilepath2 = outDirPath + "my_expect.cpp";
+    outputFilepath2 = outDirPath + PATH_SEPARATOR + "my_expect.cpp";
     std::remove( outputFilepath2.c_str() );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
@@ -980,20 +980,22 @@ TEST( App, ExpectationOutput_CannotOpenFile )
     std::ostringstream error;
     App app( output, error );
 
-    std::string outputDir = outDirPath + "NonExistantDirectory123898876354874" + PATH_SEPARATOR;
+    std::string outputDir = outDirPath + PATH_SEPARATOR + "NonExistantDirectory123898876354874" + PATH_SEPARATOR;
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputDir.c_str() };
 
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
-   // Exercise
-   int ret = app.Execute( (int) args.size(), args.data() );
+    // Exercise
+    //printf("Hello\n");
+    int ret = app.Execute( (int) args.size(), args.data() );
+    //printf("Goodbye\n");
 
-   // Verify
-   CHECK_EQUAL( 1, ret );
-   STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
-   STRCMP_CONTAINS( ("Expectation header output file '" + outputDir + expectationHeaderOutputFilename + "' could not be opened").c_str(), error.str().c_str() );
-   CHECK_EQUAL( 0, output.tellp() )
+    // Verify
+    CHECK_EQUAL( 1, ret );
+    STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectation header output file '" + outputDir + expectationHeaderOutputFilename + "' could not be opened").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() )
 
     // Cleanup
 }

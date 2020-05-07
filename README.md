@@ -105,8 +105,8 @@ For more information check the [CppUMockGen Usage Manual](MANUAL.md).
 
 ### Requirements
 
-- [cmake](https://cmake.org/) (tested with v3.7.1)
-- [clang](http://releases.llvm.org/download.html) (tested with v5.0.1)
+- [cmake](https://cmake.org/) (tested with v3.17.2)
+- [clang](http://releases.llvm.org/download.html) (tested with v10.0.0)
 - A C/C++ compiler, either:
   - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with x86_64-6.4.0-posix-seh-rt_v5-rev0)
   - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2015 and 2017)

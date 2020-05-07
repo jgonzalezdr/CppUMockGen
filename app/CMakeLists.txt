@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen VERSION 0.3.1 )
+project( CppUMockGen VERSION 0.3.2 )
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
 
@@ -80,7 +80,7 @@ endif()
 
 add_executable( ${PROJECT_NAME} ${SRC_LIST} ${INC_LIST} ${PRODUCT_VERSION_FILES} )
 
-set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11 )
+set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "_dbg" )
