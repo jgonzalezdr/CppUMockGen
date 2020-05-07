@@ -71,7 +71,12 @@ if (!($env:Test -eq 'False'))
     
     switch -Wildcard ($env:Platform)
     {
-        'MinGW*'
+        'MSVC*'
+        {
+            Invoke-Command "msbuild $logger_arg /property:Configuration=$build_config run_tests.vcxproj" "$build_dir\test"
+        }
+		
+        default
         {
             $mingw_path = Get-MinGWBin
 
@@ -83,11 +88,6 @@ if (!($env:Test -eq 'False'))
             Invoke-Command "mingw32-make $build_target" "$build_dir"
 
             Remove-PathFolder $mingw_path
-        }
-
-        'MSVC*'
-        {
-            Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg /property:Configuration=$build_config run_tests.vcxproj" "$build_dir\test"
         }
     }
 

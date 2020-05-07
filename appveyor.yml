@@ -4,29 +4,31 @@ environment:
   CPPUTEST_HOME: C:\cpputest
   matrix:
   - Platform: MSVC64
-    PlatformToolset: v141
+    PlatformToolset: v142
     Configuration: Debug
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  - Platform: MinGW64
-    PlatformToolset: 6.3.0
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - Platform: TDM-GCC-64
+    PlatformToolset: 9.2.0
     Configuration: Coverage
     CheckCompilation: True
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  - Platform: MinGW64
-    PlatformToolset: 6.3.0
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - Platform: TDM-GCC-64
+    PlatformToolset: 9.2.0
     Configuration: Release
     Test: False
     PublishArtifacts: True
     GenerateInstaller: True
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 cache:
     - C:\cpputest -> appveyor.yml
     - C:\Strawberry
     - C:\lcov -> appveyor.yml
+    - C:\TDM-GCC-64\ -> appveyor.yml
 
 install:
 - ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
+- ps: if ($env:Platform -eq 'TDM-GCC-64' -and !(Test-Path -Path "C:\TDM-GCC-64")) { choco install tdm-gcc-64 --version $env:PlatformToolset -r --no-progress -s ci\ }
 - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { choco install strawberryperl -r --no-progress }
 - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\lcov")) { ci\appveyor_ci_install_lcov.ps1 }
 - ps: if ($env:Configuration -eq 'Coverage') { choco install codecov -r --no-progress }

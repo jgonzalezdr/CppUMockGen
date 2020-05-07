@@ -4,14 +4,27 @@
 
 # Helper function to provide the bin-folder path to mingw
 function Get-MinGWBin() {
-    if ($env:PlatformToolset -eq "6.3.0" ) {
-        if ($env:Platform -like '*64') {
-            Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin'
-        }
-        else {
-            Write-Output 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw64\bin'
-        }
-    }
+	if ($env:Platform -like 'MinGW*') 
+	{
+		if ($env:PlatformToolset -eq "6.3.0" ) 
+		{
+			if ($env:Platform -like '*64') {
+				Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin'
+			}
+			else {
+				Write-Output 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw64\bin'
+			}
+		}
+	}
+	elseif ($env:Platform -like 'TDM-GCC*') 
+	{
+		if ($env:Platform -like '*64') {
+			Write-Output 'C:\TDM-GCC-64\bin'
+		}
+		else {
+			Write-Output 'C:\TDM-GCC\bin'
+		}
+	}
 }
 
 function Add-PathFolder($folder)

@@ -42,19 +42,6 @@ if( $env:APPVEYOR_REPO_TAG -eq 'false' )
 
 switch -Wildcard ($env:Platform)
 {
-    'MinGW*'
-    {
-        $mingw_path = Get-MinGWBin
-
-        # Add mingw to the path
-        Add-PathFolder $mingw_path
-
-        Invoke-Command "cmake .. -G 'MinGW Makefiles' $cmake_options -DCMAKE_BUILD_TYPE=$build_config" "$build_dir"
-        Invoke-Command "mingw32-make" "$build_dir"
-
-        Remove-PathFolder $mingw_path
-    }
-
     'MSVC*'
     {
         if ($env:APPVEYOR)
@@ -66,16 +53,22 @@ switch -Wildcard ($env:Platform)
             $logger_arg = ''
         }
 
-        if ($env:Platform -like '*32')
-        {
-            $cmake_generator = "Visual Studio 15 Win32"
-        }
-        else
-        {
-            $cmake_generator = "Visual Studio 15 Win64"
-        }
+		$cmake_generator = "Visual Studio 16 2019"
 
         Invoke-Command "cmake .. -G '$cmake_generator' $cmake_options" "$build_dir"
-        Invoke-Command "msbuild /ToolsVersion:15.0 $logger_arg /property:Configuration=$build_config build.vcxproj" "$build_dir"
+        Invoke-Command "msbuild $logger_arg /property:Configuration=$build_config build.vcxproj" "$build_dir"
+    }
+	
+    default
+    {
+        $mingw_path = Get-MinGWBin
+
+        # Add mingw to the path
+        Add-PathFolder $mingw_path
+
+        Invoke-Command "cmake .. -G 'MinGW Makefiles' $cmake_options -DCMAKE_BUILD_TYPE=$build_config" "$build_dir"
+        Invoke-Command "mingw32-make" "$build_dir"
+
+        Remove-PathFolder $mingw_path
     }
 }

@@ -24,9 +24,9 @@ if ($env:GenerateInstaller)
         throw "Installer generation is only supported for release builds"
     }
     
-    switch -Wildcard ($env:Platform)
+    switch -regex ($env:Platform)
     {
-        'MinGW*'
+        '(MinGW|TDM-GCC).*'
         {
             $mingw_path = Get-MinGWBin
 
