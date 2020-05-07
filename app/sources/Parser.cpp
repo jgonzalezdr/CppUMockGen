@@ -9,6 +9,10 @@
 
 #include "Parser.hpp"
 
+#ifdef _MSC_VER
+#pragma warning( disable : 26812 )
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <clang-c/Index.h>

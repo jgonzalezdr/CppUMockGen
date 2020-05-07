@@ -9,6 +9,8 @@
 
 #include "ClangParseHelper.hpp"
 
+#include <stdexcept>
+
 void ClangParseHelper::ParseHeader( const std::string &code, const std::function<void(CXCursor)> &callback )
 {
     CXIndex index = clang_createIndex( 0, 1 );

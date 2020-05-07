@@ -26,6 +26,11 @@ class Parser
 {
 public:
     /**
+     * Default constructor
+     */
+    Parser() : m_interpretAsCpp(false) {}
+
+    /**
      * Parses the C/C++ header located in @p inputFilename.
      *
      * @param inputFilepath [in] Filename for the C/C++ header file

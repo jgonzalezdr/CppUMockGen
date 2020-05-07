@@ -11,6 +11,7 @@
 
 #include <set>
 #include <vector>
+#include <stdexcept>
 
 static const char EXPR_MOD_SEPARATOR = '~';
 static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
@@ -63,6 +64,8 @@ static const std::vector<std::pair<std::string, MockedType>> validTypeOfOverride
 
 Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string &option, bool isReturn )
 {
+    m_type = MockedType::Skip;
+
     if( value.empty() )
     {
         std::string errorMsg = "Override option specification cannot be empty ['" + option + "']";

@@ -48,7 +48,7 @@ if( COVERAGE AND NOT MSVC )
     endif()
 
     if( WIN32 )
-        set( LCOV_PATHS "C:/Devel/lcov/bin" "C:/lcov/bin" )
+        set( LCOV_PATHS "C:/Work/lcov/bin" "C:/lcov/bin" "C:/Program Files/lcov/bin" )
     endif()
 
     find_program( LCOV lcov PATHS ${LCOV_PATHS} )
