@@ -26,48 +26,48 @@ The previously described manual tasks are highly systematic, and can be automate
 
 Assume that we have the following function that we want to test:
 
-###### FunctionToTest.h
-```cpp
-bool FunctionToTest( char *p );
-```
+> _ FunctionToTest.h _
+> ```cpp
+> bool FunctionToTest( char *p );
+> ```
 
 And that this function calls another function, that we need to mock:
 
-###### FunctionToMock.h
-```cpp
-const char* FunctionToMock( const char *p );
-```
+> _ FunctionToMock.h _
+> ```cpp
+> const char* FunctionToMock( const char *p );
+> ```
 
-CppUMockGen would generate the following mock:
+With CppUMockGen we can generate the following mock:
 
-###### FunctionToMock_mock.cpp
-```cpp
-const char * FunctionToMock(const char * p)
-{
-    return mock().actualCall("FunctionToMock").withStringParameter("p", p).returnStringValue();
-}
-```
+> _ FunctionToMock_mock.cpp _
+> ```cpp
+> const char * FunctionToMock(const char * p)
+> {
+>     return mock().actualCall("FunctionToMock").withStringParameter("p", p).returnStringValue();
+> }
+> ```
 
-CppUMockGen would generate the following expectation helper function:
+Additionaly, with CppUMockGen we can generate the following expectation helper function:
 
-###### FunctionToMock_expect.h
-```cpp
-namespace expect {
-MockExpectedCall& FunctionToMock(CppUMockGen::Parameter<const char *> p, const char * __return__);
-}
-```
+> _ FunctionToMock_expect.h _
+> ```cpp
+> namespace expect {
+> MockExpectedCall& FunctionToMock(CppUMockGen::Parameter<const char *> p, const char * __return__);
+> }
+> ```
 
-And we could use these in an unit test like this:
+Finally, we can use these generated mocks and expectation functions in an unit test like this:
 
-###### FunctionToTest_test.cpp
-```cpp
-TEST( TestSuite, FunctionToTest )
-{
-    expect::FunctionToMock("ABC", "123");
-    CHECK_EQUAL( true, FunctionToTest("ABC") );
-    mock().checkExpectations();
-}
-```
+> _ FunctionToTest_test.cpp _
+> ```cpp
+> TEST( TestSuite, FunctionToTest )
+> {
+>     expect::FunctionToMock("ABC", "123");
+>     CHECK_EQUAL( true, FunctionToTest("ABC") );
+>     mock().checkExpectations();
+> }
+> ```
 
 ## Download Binaries
 
@@ -110,6 +110,6 @@ For more information check the [CppUMockGen Usage Manual](MANUAL.md).
 - A C/C++ compiler, either:
   - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with [TDM-GCC 9.2.0](https://jmeubank.github.io/tdm-gcc/download/), will not work with MinGW-w64 releases &lt;= 8.1.0)
   - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2019)
-- [CppUTest](http://cpputest.github.io/) [Optional, not needed if tests are disabled] (tested with v3.7.1 and v3.8)
-- [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using GCC/MinGW] (requires at least v1.14.alpha0w)
+- [CppUTest](http://cpputest.github.io/) [Optional, not needed if tests are disabled] (requires at least [v3.9.alpha0](https://github.com/jgonzalezdr/cpputest/releases/download/v3.9.alpha0/cpputest-3.9.alpha0.zip))
+- [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using GCC/MinGW] (requires at least [v1.15.alpha0w](https://github.com/jgonzalezdr/lcov/releases/download/v1.15.alpha0w/lcov-v1.15.alpha0w.zip))
 - [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage) [Optional, needed if tests and coverage are enabled using Visual Studio 2019] (tested with v0.9.8.0)

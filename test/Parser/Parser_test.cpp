@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include <direct.h>
+#include <filesystem>
 
 #include "ClangParseHelper.hpp"
 #include "ClangCompileHelper.hpp"
@@ -53,25 +53,26 @@ Config* GetMockConfig()
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
-static const std::string tempDirPath = std::string(std::getenv("TEMP"));
+static const std::filesystem::path tempDirPath = std::filesystem::temp_directory_path();
 static const std::string tempFilename = "CppUMockGen_Parser.h";
-static const std::string tempFilePath = tempDirPath + PATH_SEPARATOR + tempFilename;
-static const std::string nonexistingFilePath = tempDirPath + PATH_SEPARATOR + "CppUMockGen_Parser_NotExisting.h";
+static const std::string tempFilePath = (tempDirPath / tempFilename).generic_string();
+static const std::string nonexistingFilePath = (tempDirPath / "CppUMockGen_Parser_NotExisting.h").generic_string();
 
 TEST_GROUP( Parser )
 {
     std::ofstream tempFile;
-    std::string initialDir;
+    std::filesystem::path initialDir;
 
     TEST_SETUP()
     {
-        initialDir = getcwd( NULL, 0 );
+        initialDir = std::filesystem::current_path();
     }
 
     TEST_TEARDOWN()
     {
-        chdir( initialDir.c_str() );
-        std::remove( tempFilePath.c_str() );
+        std::filesystem::current_path( initialDir );
+
+        std::filesystem::remove( tempFilePath );
     }
 
     void SetupTempFile( const SimpleString& contents )
@@ -103,12 +104,12 @@ TEST( Parser, MockedFunction )
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
    // Verify
    mock().checkExpectations();
    CHECK_EQUAL( true, result );
-   CHECK_EQUAL( 0, error.tellp() )
+   CHECK_EQUAL( 0, error.tellp() );
 
    // Cleanup
    mock().clear();
@@ -182,12 +183,12 @@ TEST( Parser, MockedMethod )
 
     // Exercise
     Parser parser;
-    bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
+    bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( true, result );
-    CHECK_EQUAL( 0, error.tellp() )
+    CHECK_EQUAL( 0, error.tellp() );
 
     // Prepare
     std::ostringstream output1;
@@ -237,6 +238,229 @@ TEST( Parser, MockedMethod )
 }
 
 /*
+ * Check that passing a language standard works as expected.
+ */
+TEST( Parser, MockedMethod_Cpp17 )
+{
+    // Prepare
+    Config *config = GetMockConfig();
+    std::ostringstream error;
+
+    SimpleString testHeader =
+        "#include <filesystem>\n"
+        "class class1 {\n"
+        "public:\n"
+        "    bool method1(std::filesystem::path &p);\n"
+        "};";
+    SetupTempFile( testHeader );
+
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, true, "c++17", std::vector<std::string>(), error );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Prepare
+    std::ostringstream output1;
+    const char *testMock = "###MOCK###";
+
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+
+    // Exercise
+    parser.GenerateMock( "", output1 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char *testExpect1 = "###EXPECT87828763###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char *testExpect2 = "###EXPECT87362###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+}
+
+/*
+ * Check that passing a C++ language standard implicitly set the language to C++.
+ */
+TEST( Parser, MockedMethod_Cpp14 )
+{
+    // Prepare
+    Config *config = GetMockConfig();
+    std::ostringstream error;
+
+    SimpleString testHeader =
+        "class class1 {\n"
+        "public:\n"
+        "    bool method1();\n"
+        "};";
+    SetupTempFile( testHeader );
+
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "c++14", std::vector<std::string>(), error );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Prepare
+    std::ostringstream output1;
+    const char *testMock = "###MOCK###";
+
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+
+    // Exercise
+    parser.GenerateMock( "", output1 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char *testExpect1 = "###EXPECT87828763###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char *testExpect2 = "###EXPECT87362###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+}
+
+/*
+ * Check that passing a GNU++ language standard implicitly set the language to C++.
+ */
+TEST( Parser, MockedMethod_Gnu98 )
+{
+    // Prepare
+    Config *config = GetMockConfig();
+    std::ostringstream error;
+
+    SimpleString testHeader =
+        "class class1 {\n"
+        "public:\n"
+        "    bool method1();\n"
+        "};";
+    SetupTempFile( testHeader );
+
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "gnu++98", std::vector<std::string>(), error );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Prepare
+    std::ostringstream output1;
+    const char *testMock = "###MOCK###";
+
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+
+    // Exercise
+    parser.GenerateMock( "", output1 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char *testExpect1 = "###EXPECT87828763###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char *testExpect2 = "###EXPECT87362###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+}
+
+/*
  * Check that mocking a method works as expected.
  */
 TEST( Parser, MultipleMockableFunctionsAndMethods )
@@ -259,12 +483,12 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
 
     // Exercise
     Parser parser;
-    bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
+    bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( true, result );
-    CHECK_EQUAL( 0, error.tellp() )
+    CHECK_EQUAL( 0, error.tellp() );
 
     // Prepare
     std::ostringstream output1;
@@ -349,7 +573,7 @@ TEST( Parser, FunctionNonMockable )
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -380,7 +604,7 @@ TEST( Parser, MethodNonMockable )
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
+   bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -416,12 +640,12 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
 
     // Exercise
     Parser parser;
-    bool result = parser.Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
+    bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
 
     // Verify
     mock().checkExpectations();
     CHECK_EQUAL( true, result );
-    CHECK_EQUAL( 0, error.tellp() )
+    CHECK_EQUAL( 0, error.tellp() );
 
     // Prepare
     std::ostringstream output1;
@@ -493,7 +717,7 @@ TEST( Parser, SyntaxError )
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -522,7 +746,7 @@ TEST( Parser, Warning )
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
+   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
    // Verify
    mock().checkExpectations();
@@ -586,13 +810,13 @@ TEST( Parser, NonExistingInputFile )
    Config* config = GetMockConfig();
    std::ostringstream error;
 
-   std::remove( nonexistingFilePath.c_str() );
+   std::filesystem::remove( nonexistingFilePath );
 
    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( nonexistingFilePath, *config, false, std::vector<std::string>(), error );
+   bool result = parser.Parse( nonexistingFilePath, *config, false, "", std::vector<std::string>(), error );
 
    // Verify
    CHECK_EQUAL( false, result );
@@ -611,24 +835,24 @@ TEST( Parser, IncludePaths )
    Config* config = GetMockConfig();
    std::ostringstream error;
 
-   std::string includePath = std::string(PROD_DIR) + PATH_SEPARATOR + "sources";
+   std::string includePath = (std::filesystem::path(PROD_DIR) / "sources").generic_string();
 
    SimpleString testHeader =
            "#include \"Config.hpp\"\n"
            "void method1(Config &c);\n";
    SetupTempFile( testHeader );
 
-   chdir( tempDirPath.c_str() );
+   std::filesystem::current_path( tempDirPath );
 
    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
    // Exercise
    Parser parser;
-   bool result = parser.Parse( tempFilename, *config, true, std::vector<std::string>{includePath}, error );
+   bool result = parser.Parse( tempFilename, *config, true, "", std::vector<std::string>{includePath}, error );
 
    // Verify
    CHECK_EQUAL( true, result );
-   CHECK_EQUAL( 0, error.tellp() )
+   CHECK_EQUAL( 0, error.tellp() );
 
    // Cleanup
 }

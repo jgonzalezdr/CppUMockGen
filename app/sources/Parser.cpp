@@ -83,8 +83,8 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
         (CXClientData) &parseData );
 }
 
-bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool interpretAsCpp,
-                    const std::vector<std::string> &includePaths, std::ostream &error )
+bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &config, bool interpretAsCpp,
+                    const std::string &languageStandard, const std::vector<std::string> &includePaths, std::ostream &error )
 {
     m_inputFilepath = inputFilepath;
     m_interpretAsCpp = interpretAsCpp;
@@ -92,10 +92,27 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
     CXIndex index = clang_createIndex( 0, 0 );
 
     std::vector<const char*> clangOpts;
-    if( interpretAsCpp )
+
+    std::string stdOpt;
+
+    if( !languageStandard.empty() )
+    {
+        stdOpt = "-std=" + languageStandard;
+
+        if( ( languageStandard.find( "c++" ) == 0 ) || ( languageStandard.find( "gnu++" ) == 0 ) )
+        {
+            m_interpretAsCpp = true;
+        }
+    }
+
+    if( m_interpretAsCpp )
     {
         clangOpts.push_back( "-xc++" );
-        clangOpts.push_back( "-std=c++17" );
+    }
+
+    if( !stdOpt.empty() )
+    {
+        clangOpts.push_back( stdOpt.c_str() );
     }
 
     std::vector<std::string> includePathOptions;
@@ -107,10 +124,12 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
         clangOpts.push_back( includePathOptions.back().c_str() );
     }
 
+    std::string inputFilepathStr = inputFilepath.generic_string();
+
     CXTranslationUnit tu;
     // Note: Use of CXTranslationUnit_SkipFunctionBodies is not allowed, otherwise libclang
     // will not detect properly methods defined inline (which must not be mocked).
-    CXErrorCode tuError = clang_parseTranslationUnit2( index, inputFilepath.c_str(),
+    CXErrorCode tuError = clang_parseTranslationUnit2( index, inputFilepathStr.c_str(),
                                                        clangOpts.data(), (int) clangOpts.size(),
                                                        nullptr, 0,
                                                        CXTranslationUnit_None,
@@ -122,10 +141,10 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
         cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
 
         // Check if file exists
-        std::ifstream inputFile( inputFilepath.c_str() );
-        if( !inputFile.good() )
+        
+        if( !std::filesystem::exists( inputFilepath ) )
         {
-            error << "Input file '" << inputFilepath.c_str() << "' does not exist." << std::endl;
+            error << "Input file '" << inputFilepathStr.c_str() << "' does not exist." << std::endl;
         }
 // LCOV_EXCL_START
         else
@@ -202,7 +221,7 @@ void Parser::GenerateMock( const std::string &genOpts, std::ostream &output ) co
     {
         output << "extern \"C\" {" << std::endl;
     }
-    output << "#include \"" <<  GetFilenameFromPath( m_inputFilepath ) << "\"" << std::endl;
+    output << "#include \"" <<  m_inputFilepath.filename().generic_string() << "\"" << std::endl;
     if( !m_interpretAsCpp )
     {
         output << "}" << std::endl;
@@ -229,7 +248,7 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
     {
         output << "extern \"C\" {" << std::endl;
     }
-    output << "#include \"" <<  GetFilenameFromPath( m_inputFilepath ) << "\"" << std::endl;
+    output << "#include \"" <<  m_inputFilepath.filename().generic_string() << "\"" << std::endl;
     if( !m_interpretAsCpp )
     {
         output << "}" << std::endl;
@@ -245,11 +264,11 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
     }
 }
 
-void Parser::GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const noexcept
+void Parser::GenerateExpectationImpl( const std::string &genOpts, const std::filesystem::path &headerFilepath, std::ostream &output ) const noexcept
 {
     GenerateFileHeading( genOpts, output );
 
-    output << "#include \"" <<  GetFilenameFromPath( headerFilepath ) << "\"" << std::endl;
+    output << "#include \"" <<  headerFilepath.filename().generic_string() << "\"" << std::endl;
     output << std::endl;
 
     for( const std::unique_ptr<const Function> &function : m_functions )

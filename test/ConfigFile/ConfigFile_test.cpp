@@ -78,12 +78,6 @@ StdOstreamCopier stdOstreamCopier;
 static const std::filesystem::path tempDirPath = std::filesystem::temp_directory_path();
 static const std::filesystem::path outDirPath = tempDirPath;
 static const std::string inputFilename = "foo.h";
-static const std::string mockOutputFilename = "foo_mock.cpp";
-static const std::string mockOutputFilePath = (outDirPath / mockOutputFilename ).generic_string();
-static const std::string expectationHeaderOutputFilename = "foo_expect.hpp";
-static const std::string expectationHeaderOutputFilePath = (outDirPath / expectationHeaderOutputFilename ).generic_string();
-static const std::string expectationImplOutputFilename = "foo_expect.cpp";
-static const std::string expectationImplOutputFilePath = (outDirPath / expectationImplOutputFilename).generic_string();
 
 /*===========================================================================
  *                          TEST GROUP DEFINITION
@@ -169,7 +163,7 @@ TEST( ConfigFile, IncludePaths )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
 
     // Exercise
@@ -207,7 +201,7 @@ TEST( ConfigFile, ParamOverrideOptions )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
 
     // Exercise
@@ -245,7 +239,7 @@ TEST( ConfigFile, TypeOverrideOptions )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
     // Exercise
@@ -285,7 +279,7 @@ TEST( ConfigFile, CannotOpenFile )
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Configuration file '" + nonExistingFile + "' could not be opened").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() )
+    CHECK_EQUAL( 0, output.tellp() );
 
     // Cleanup
 }
@@ -320,7 +314,7 @@ TEST( ConfigFile, IncludeOtherConfigFile_1Level )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
 
     // Exercise
@@ -369,7 +363,7 @@ TEST( ConfigFile, IncludeOtherConfigFile_2Level )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ -t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
     // Exercise
@@ -414,9 +408,9 @@ TEST( ConfigFile, IncludeOtherConfigFile_CannotOpenFile )
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ( "Configuration file '" + nonExistingFile + "' could not be opened" ).c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() )
+    CHECK_EQUAL( 0, output.tellp() );
 
-        // Cleanup
+    // Cleanup
 }
 
 /*
@@ -443,7 +437,7 @@ TEST( ConfigFile, IncludeOtherConfigFile_Recursive )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
 
     // Exercise
@@ -481,7 +475,7 @@ TEST( ConfigFile, ExtraWhiteSpaces )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
     // Exercise
@@ -519,7 +513,7 @@ TEST( ConfigFile, EscapedQuotes )
     std::string outputText = "#####FOO#####";
 
     expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String~$ + \\\"bar\\\"\" ", &outputText );
 
     // Exercise
@@ -560,7 +554,7 @@ TEST( ConfigFile, NotMatchingEndQuote )
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ( "In configuration file '" + outputFilepath1 + "':3:5 ending quote was not found" ).c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() )
+    CHECK_EQUAL( 0, output.tellp() );
 
     // Cleanup
 }

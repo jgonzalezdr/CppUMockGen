@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <filesystem>
 
 #include "Function.hpp"
 
@@ -40,8 +41,8 @@ public:
      * @param error [out] Stream where errors will be written
      * @return @c true if the input file could be parsed successfully, @c false otherwise
      */
-    bool Parse( const std::string &inputFilepath, const Config &config, bool interpretAsCpp,
-                const std::vector<std::string> &includePaths, std::ostream &error );
+    bool Parse( const std::filesystem::path &inputFilepath, const Config &config, bool interpretAsCpp,
+                const std::string &languageStandard, const std::vector<std::string> &includePaths, std::ostream &error );
 
     /**
      * Generates mocked functions for the C/C++ header parsed previously.
@@ -66,13 +67,13 @@ public:
      * @param headerFilepath [in] Filename for the expectation functions header file
      * @param output [out] Stream where the generated expectations implementation will be written
      */
-    void GenerateExpectationImpl( const std::string &genOpts, const std::string &headerFilepath, std::ostream &output ) const noexcept;
+    void GenerateExpectationImpl( const std::string &genOpts, const std::filesystem::path &headerFilepath, std::ostream &output ) const noexcept;
 
 private:
     void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const noexcept;
 
     std::vector<std::unique_ptr<const Function>> m_functions;
-    std::string m_inputFilepath;
+    std::filesystem::path m_inputFilepath;
     bool m_interpretAsCpp;
 };
 
