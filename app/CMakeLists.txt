@@ -34,6 +34,7 @@ set( SRC_LIST
      sources/ConsoleColorizer.cpp
      sources/Config.cpp
      sources/FileHelper.cpp
+     sources/ConfigFile.cpp
 )
 
 set( INC_LIST
@@ -45,6 +46,7 @@ set( INC_LIST
      sources/ConsoleColorizer.hpp
      sources/Config.hpp
      sources/FileHelper.hpp
+     sources/ConfigFile.hpp
      include/CppUMockGen.hpp
 )
 

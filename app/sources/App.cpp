@@ -3,7 +3,7 @@
  * @brief      Implementation of App class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2017-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -19,6 +19,7 @@
 #include "Config.hpp"
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
+#include "ConfigFile.hpp"
 
 #include "VersionInfo.h"
 
@@ -37,7 +38,7 @@ void App::PrintError( const char *msg ) noexcept
     m_cerr << msg << std::endl;
 }
 
-std::string QuotifyOption( const std::string &option ) noexcept
+static std::string QuotifyOption( const std::string &option ) noexcept
 {
     if( option.find(' ') != std::string::npos )
     {
@@ -49,7 +50,7 @@ std::string QuotifyOption( const std::string &option ) noexcept
     }
 }
 
-std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
+static std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
 {
     std::string ret;
 
@@ -84,13 +85,14 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
     options.add_options()
         ( "i,input", "Input file", cxxopts::value<std::string>(), "<input>" )
-        ( "m,mock-output", "Mock output path", cxxopts::value<std::string>()->implicit_value(""), "<mock-output>" )
-        ( "e,expect-output", "Expectation output path", cxxopts::value<std::string>()->implicit_value(""), "<expect-output>" )
+        ( "m,mock-output", "Mock output path", cxxopts::value<std::string>()->implicit_value( "" ), "<mock-output>" )
+        ( "e,expect-output", "Expectation output path", cxxopts::value<std::string>()->implicit_value( "" ), "<expect-output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
-        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" )
-        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
-        ( "p,param-override", "Override parameter type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
-        ( "t,type-override", "Override generic type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
+        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "[<underlying-typedef>]" );
+
+    AddConfigFileOptions( options );
+
+    options.add_options()
         ( "v,version", "Print version" )
         ( "h,help", "Print help" );
 
@@ -186,6 +188,8 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 }
             }
         }
+
+        ProcessConfigFiles( options );
 
         bool interpretAsCpp = false;
         if( options["cpp"].as<bool>() )

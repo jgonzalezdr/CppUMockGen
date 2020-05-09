@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen.Test.App )
+project( CppUMockGen.Test.ConfigFile )
 
 # Test configuration
 
@@ -21,7 +21,7 @@ set( PROD_SRC_FILES
 )
 
 set( TEST_SRC_FILES
-     App_test.cpp
+     ConfigFile_test.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Parser_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/ConsoleColorizer_mock.cpp
      ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp

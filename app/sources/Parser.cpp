@@ -95,6 +95,7 @@ bool Parser::Parse( const std::string &inputFilepath, const Config &config, bool
     if( interpretAsCpp )
     {
         clangOpts.push_back( "-xc++" );
+        clangOpts.push_back( "-std=c++17" );
     }
 
     std::vector<std::string> includePathOptions;
