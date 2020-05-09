@@ -11,7 +11,9 @@ else()
     set( DEFAULT_BUILD_TYPE "Release" )
 
     set( BUILD_TYPES_LIST "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Coverage" )
-
+	
+	set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Coverage" )
+	
     string( REPLACE ";" " " BUILD_TYPES_STRLIST "${BUILD_TYPES_LIST}" )
     
     if( NOT CMAKE_BUILD_TYPE )
