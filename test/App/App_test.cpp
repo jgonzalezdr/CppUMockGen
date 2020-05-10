@@ -1068,9 +1068,7 @@ TEST( App, ExpectationOutput_CannotOpenFile )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    //printf("Hello\n");
     int ret = app.Execute( (int) args.size(), args.data() );
-    //printf("Goodbye\n");
 
     // Verify
     CHECK_EQUAL( 1, ret );
