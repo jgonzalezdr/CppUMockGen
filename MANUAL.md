@@ -18,6 +18,8 @@ CppUMock by default interprets header files with the extensions .hh, .hpp or .hx
 
 CppUMock, just as any C/C++ compiler, needs to know where to find other include files referenced by the input file in order to interpret it properly. Pass the paths to the necessary include directories by using the `-I` / `--include-path` option. Like with most compilers, you may use this option several times to indicate multiple include directories.
 
+CppUMock parses C code according to the `gnu11` language standard, and parses C\+\+ code according to the `gnu++14` language standard. To indicate a different standard, use the `-s` / `--std` and pass a supported language standard. The list of supported language standards can be found in the [Clang compiler command line help](https://clang.llvm.org/docs/CommandGuide/clang.html#cmdoption-std).
+
 CppUMockGen deduces the data types to use with CppUMock from the actual function parameters and return types. If the API that you are mocking is well designed (e.g. pointers to non-const values are not used for input parameters), CppUMockGen will guess properly in most cases the correct types. Nevertheless, mocked data types can be overriden by using `-p` / `--param-override` options to override the type to use for specific function's parameters and return types, and using `-t` / `--type-override` options to override the type to use for matching parameter or return types in any mocked function (see [Overriding Mocked Parameter and Return Types](#overriding-mocked-parameter-and-return-types) below).
 
 ### Expectation Helper Functions
@@ -42,12 +44,23 @@ Expectation helper functions are declared inside root namespace `expect`, using 
 | -                                     | -                                             |
 | `-i, --input <input> `                | Input file                                    |
 | `-m, --mock-output <mock-output>`     | Mock output path                              |
-| `-e, --expect-output <expect-output>` | Expectation output path                              |
+| `-e, --expect-output <expect-output>` | Expectation output path                       |
 | `-x, --cpp`                           | Force interpretation of the input file as C++ |
+| `-s, --std`                           | Set language standard (c\+\+14, c\+\+17, etc.)|
 | `-I, --include-path <path>`           | Include path                                  |
 | `-p, --param-override <expr>`         | Override parameter type                       |
 | `-t, --type-override <expr>`          | Override generic type                         |
+| `-f, --config-file <file>`            | Config file to be parsed for options          |
+| `-v, --version`                       | Print version                                 |
 | `-h, --help`                          | Print help                                    |
+
+## Configuration Files
+
+Complex mocks will require a lot of override options, and many of them can be reused to generate mocks for other files. To facilitate reusing options, they can be stored in a text file that can be loaded using the `-f` / `--config-file` option.
+
+Options in a configuration file are stored as arguments similar as they are passed on the command line, separating them using whitespaces and/or newlines, and using double quotes (`"`) to delimit arguments that have whitespaces. Double quotes inside an argument can be escaped preceding it with a backslash (e.g. `-t "const std::string &=String~($+\"#\").c_str()"`).
+
+Multiple configuration files can be specified on the command line. Configuration files may even include other configuration files using the `-f` / `--config-file` option. If a configuration file includes another configuration file using a relative path, the path is resolved relative to the including file location (i.e. not relative to the directory from which CppUTest was executed).
 
 ## Mocked Parameter and Return Types
 
@@ -308,7 +321,9 @@ Assuming that we want to mock the following function:
 void bar( std::ostream & output );
 ```
 
-As it is hard (if not even impossible) to copy an output stream into another, we can define an asymetrical CppUMock copier that outputs a string into the output stream:
+The function `bar` should write something into the passed output stream, therefore since the passed object is modified `output` is considered as an output parameter.
+
+As it is hard (if not even impossible) to copy an output stream into another, a symetrical copier is not feasible. In this case we can define an asymetrical CppUMock copier that outputs a string into the output stream:
 
 ```cpp
 class StdOstreamCopier : public MockNamedValueCopier
