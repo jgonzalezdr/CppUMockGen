@@ -47,10 +47,16 @@ if( COVERAGE AND NOT MSVC )
         message( STATUS "Found Perl: ${PERL}" )
     endif()
 
-    if( WIN32 )
-        set( LCOV_PATHS "C:/Work/lcov/bin" "C:/lcov/bin" "C:/Program Files/lcov/bin" )
-    endif()
+	if( NOT DEFINED LCOV_HOME )
+		set( LCOV_HOME $ENV{LCOV_HOME} )
+	endif()
 
+	set( LCOV_PATHS "${LCOV_HOME}/bin" )
+
+    if( WIN32 )
+        set( LCOV_PATHS ${LCOV_PATHS} "C:/lcov/bin" "C:/Program Files/lcov/bin" )
+    endif()
+	
     find_program( LCOV lcov PATHS ${LCOV_PATHS} )
     if( NOT EXISTS ${LCOV} )
         message( FATAL_ERROR "LCOV is not installed" )

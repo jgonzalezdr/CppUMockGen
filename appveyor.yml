@@ -1,7 +1,8 @@
 version: 1.0.0-ci{build}
 
 environment:
-  CPPUTEST_HOME: C:\cpputest
+  CPPUTEST_HOME: C:\cpputest-3.9.alpha0
+  LCOV_HOME: C:\lcov-v1.15.alpha0w
   matrix:
   - Platform: MSVC64
     PlatformToolset: v142
@@ -21,16 +22,16 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 cache:
-    - C:\cpputest -> appveyor.yml
+    - C:\cpputest-3.9.alpha0 -> appveyor.yml
     - C:\Strawberry
-    - C:\lcov -> appveyor.yml
+    - C:\lcov-v1.15.alpha0w -> appveyor.yml
     - C:\TDM-GCC-64\ -> appveyor.yml
 
 install:
-- ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "C:\cpputest")) { ci\appveyor_ci_install_cpputest.ps1 }
+- ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "$env:CPPUTEST_HOME")) { ci\appveyor_ci_install_cpputest.ps1 }
 - ps: if ($env:Platform -eq 'TDM-GCC-64' -and !(Test-Path -Path "C:\TDM-GCC-64")) { choco install tdm-gcc-64 --version $env:PlatformToolset -r --no-progress -s ci\ }
 - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\Strawberry")) { choco install strawberryperl -r --no-progress }
-- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "C:\lcov")) { ci\appveyor_ci_install_lcov.ps1 }
+- ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "$env:LCOV_HOME")) { ci\appveyor_ci_install_lcov.ps1 }
 - ps: if ($env:Configuration -eq 'Coverage') { choco install codecov -r --no-progress }
 - cmd: set PATH=C:\Strawberry\perl\bin;%PATH%
 
