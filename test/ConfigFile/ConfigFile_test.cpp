@@ -3,7 +3,7 @@
  * @brief      Unit tests for the "ConfigFile" class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -153,56 +153,17 @@ TEST( ConfigFile, IncludePaths )
     App app( output, error );
 
     outputFilepath1 = (tempDirPath / "ConfigFile.cfg").generic_string();
-    SetupTempFile( outputFilepath1, "-I IncludePath1 -I IncludePath2" );
+    SetupTempFile( outputFilepath1, "-I IncludePath1 --include-path IncludePath2" );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str(), "-m", "@" };
 
-    std::vector<std::string> paramOverrideOptions;
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
-
-    // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
-
-    // Verify
-    CHECK_EQUAL( 0, ret );
-    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
-}
-
-/*
- * Check that include parameter override options are passed properly to the configuration
- */
-TEST( ConfigFile, ParamOverrideOptions )
-{
-    // Prepare
-    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
-    mock().installCopier( "std::ostream", stdOstreamCopier );
-
-    std::ostringstream output;
-    std::ostringstream error;
-    App app( output, error );
-
-    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
-    SetupTempFile( outputFilepath1, "-p foo#bar=String\n-p foo@=Int/&$" );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
-
-    std::vector<std::string> paramOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
-    std::vector<std::string> typeOverrideOptions;
-    std::vector<std::string> includePaths;
-    std::string outputText = "#####FOO#####";
-
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -229,18 +190,17 @@ TEST( ConfigFile, TypeOverrideOptions )
     App app( output, error );
 
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
-    SetupTempFile( outputFilepath1, "-t\n#foo=String\n-t\n\"@const bar=Int/&$\"" );
+    SetupTempFile( outputFilepath1, "-t\n#foo=String\n-t\n\"@const bar=Int/&$\"\n-t foo#bar=String\n-t foo@=Int/&$" );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
 
-    std::vector<std::string> paramOverrideOptions;
-    std::vector<std::string> typeOverrideOptions = { "#foo=String", "@const bar=Int/&$" };
+    std::vector<std::string> typeOverrideOptions = { "#foo=String", "@const bar=Int/&$", "foo#bar=String", "foo@=Int/&$" };
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" -t foo#bar=String -t foo@=Int/&$ ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -248,6 +208,231 @@ TEST( ConfigFile, TypeOverrideOptions )
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that force C++ options are passed properly to the configuration
+ */
+TEST( ConfigFile, ForceCpp )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "--cpp" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, true, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x ", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that language standard options are passed properly to the configuration
+ */
+TEST( ConfigFile, LanguageStandard )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "--std gnu++17" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "gnu++17", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s gnu++17 ", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that underlying typedef options are passed properly to the configuration
+ */
+TEST( ConfigFile, UnderlyingTypedef )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "--underlying-typedef" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( true, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u ", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that input file options are passed properly to the configuration
+ */
+TEST( ConfigFile, InputFile )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, ("--input " + inputFilename).c_str() );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-m", "@", "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that mock output options are passed properly to the configuration
+ */
+TEST( ConfigFile, MockOutput )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "--mock-output @" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation output options are passed properly to the configuration
+ */
+TEST( ConfigFile, ExpectationOutput )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "--expect-output @" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT1#####";
+    std::string outputText2 = "#####TEXT2#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText2 );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( outputText1.c_str(), output.str().c_str() );
+    STRCMP_CONTAINS( outputText2.c_str(), output.str().c_str() );
     CHECK_EQUAL( 0, error.tellp() );
 
     // Cleanup
@@ -304,18 +489,17 @@ TEST( ConfigFile, IncludeOtherConfigFile_1Level )
     std::filesystem::create_directory( nestedDirPath );
 
     outputFilepath2 = ( nestedDirPath / "NestedConfigFile.cfg" ).generic_string();
-    SetupTempFile( outputFilepath2, "-p foo#bar=String\n-p foo@=Int/&$" );
+    SetupTempFile( outputFilepath2, "-t foo#bar=String\n-t foo@=Int/&$" );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str(), "-m", "@" };
 
-    std::vector<std::string> paramOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
-    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> typeOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$ ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -350,21 +534,20 @@ TEST( ConfigFile, IncludeOtherConfigFile_2Level )
     std::filesystem::create_directory( nestedDirPath );
 
     outputFilepath2 = ( nestedDirPath / "NestedConfigFile.cfg" ).generic_string();
-    SetupTempFile( outputFilepath2, "-p foo#bar=String\n-p foo@=Int/&$\n-f ../ConfigFile2.cfg" );
+    SetupTempFile( outputFilepath2, "-t foo#bar=String\n-t foo@=Int/&$\n-f ../ConfigFile2.cfg" );
 
     outputFilepath3 = ( tempDirPath / "ConfigFile2.cfg" ).generic_string();
     SetupTempFile( outputFilepath3, "-t\n#foo=String\n-t\n\"@const bar=Int/&$\"" );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str(), "-m", "@" };
 
-    std::vector<std::string> paramOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
-    std::vector<std::string> typeOverrideOptions = { "#foo=String", "@const bar=Int/&$" };
+    std::vector<std::string> typeOverrideOptions = { "foo#bar=String", "foo@=Int/&$", "#foo=String", "@const bar=Int/&$" };
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ -t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$ -t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -427,18 +610,17 @@ TEST( ConfigFile, IncludeOtherConfigFile_Recursive )
     App app( output, error );
 
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
-    SetupTempFile( outputFilepath1, "-I IncludePath1 -I IncludePath2\n-f ConfigFile.cfg\n-p foo#bar=String\n-p foo@=Int/&$" );
+    SetupTempFile( outputFilepath1, "-I IncludePath1 -I IncludePath2\n-f ConfigFile.cfg\n-t foo#bar=String\n-t foo@=Int/&$" );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str(), "-m", "@" };
 
-    std::vector<std::string> paramOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
-    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> typeOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-p foo#bar=String -p foo@=Int/&$ ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$ ", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -469,12 +651,11 @@ TEST( ConfigFile, ExtraWhiteSpaces )
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
 
-    std::vector<std::string> paramOverrideOptions;
     std::vector<std::string> typeOverrideOptions = { "#foo=String", "@const bar=Int/&$" };
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
 
@@ -507,12 +688,11 @@ TEST( ConfigFile, EscapedQuotes )
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-f", outputFilepath1.c_str() };
 
-    std::vector<std::string> paramOverrideOptions;
     std::vector<std::string> typeOverrideOptions = { "#foo=String~$ + \\\"bar\\\"" };
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$( false, paramOverrideOptions, typeOverrideOptions );
+    expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String~$ + \\\"bar\\\"\" ", &outputText );
 

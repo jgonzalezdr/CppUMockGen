@@ -3,7 +3,7 @@
  * @brief      Implementation of Function class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2017-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -383,7 +383,7 @@ Function::Return* ReturnParser::Process( const std::string funcName, const CXTyp
     {
         // Check if a function specific override exists
         std::string overrideKey = funcName + "@";
-        const Config::OverrideSpec *override = m_config.GetParameterOverride( overrideKey );
+        const Config::OverrideSpec *override = m_config.GetTypeOverride( overrideKey );
 
         if( override == NULL )
         {
@@ -1212,7 +1212,7 @@ Function::Argument* ArgumentParser::Process( const std::string funcName, const C
 
     // Check if a function specific override exists
     std::string overrideKey = funcName + "#" + argName;
-    const Config::OverrideSpec *override = m_config.GetParameterOverride( overrideKey );
+    const Config::OverrideSpec *override = m_config.GetTypeOverride( overrideKey );
 
     if( override == NULL )
     {

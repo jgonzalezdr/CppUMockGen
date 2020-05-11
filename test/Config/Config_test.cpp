@@ -3,9 +3,13 @@
  * @brief      Unit tests for the "Config" class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2018-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
+
+#ifdef _MSC_VER
+#pragma warning( disable: 26444 6011 )
+#endif
 
 /*===========================================================================
  *                              INCLUDES
@@ -44,8 +48,8 @@ TEST_GROUP( Config )
 TEST( Config, UseUnderlyingTypedefType )
 {
     // Prepare
-    Config testConfigTrue( true, std::vector<std::string>(), std::vector<std::string>() );
-    Config testConfigFalse( false, std::vector<std::string>(), std::vector<std::string>() );
+    Config testConfigTrue( true, std::vector<std::string>() );
+    Config testConfigFalse( false, std::vector<std::string>() );
 
     // Exercise & Verify
     CHECK_TRUE( testConfigTrue.UseUnderlyingTypedefType() );
@@ -60,13 +64,12 @@ TEST( Config, UseUnderlyingTypedefType )
 TEST( Config, OverrideOptions_Empty )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string>(), std::vector<std::string>() );
+    Config testConfig( false, std::vector<std::string>() );
 
     // Exercise & Verify
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("f1#p") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("f2@") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("f1#p") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("f2@") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("#int*") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("@class1") );
 
@@ -74,59 +77,59 @@ TEST( Config, OverrideOptions_Empty )
 }
 
 /*
- * Check that parameter override options are handled properly with simple override.
+ * Check that specific type override options are handled properly with simple override.
  */
-TEST( Config, ParameterOverrideOptions_Simple )
+TEST( Config, SpecificTypeOverrideOptions_Simple )
 {
     // Prepare
-    Config testConfig( false,
-                       std::vector<std::string> { "function1#p=Int", "ns1::function2@=ConstPointer" },
-                       std::vector<std::string>() );
+    Config testConfig( false, std::vector<std::string> { "function1#p=Int", "ns1::function2@=ConstPointer" } );
 
     // Exercise
-    const Config::OverrideSpec* override1 = testConfig.GetParameterOverride("function1#p");
-    const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function2@");
+    const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("function1#p");
+    const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("ns1::function2@");
 
     // Verify
+    CHECK( override1 != NULL );
     CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
     STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
 
+    CHECK( override2 != NULL );
     CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
     STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
 
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1@") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#q") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#p2") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function2#p") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1@") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#q") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#p2") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function2#p") );
 
     // Cleanup
 }
 
 /*
- * Check that type override options are handled properly with simple override.
+ * Check that generic type override options are handled properly with simple override.
  */
-TEST( Config, TypeOverrideOptions_Simple )
+TEST( Config, GenericTypeOverrideOptions_Simple )
 {
     // Prepare
-    Config testConfig( false,
-                       std::vector<std::string>(),
-                       std::vector<std::string> { "#class1=Int", "@class2 *=ConstPointer" } );
+    Config testConfig( false, std::vector<std::string> { "#class1=Int", "@class2 *=ConstPointer" } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#class1");
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@class2 *");
 
     // Verify
+    CHECK( override1 != NULL );
     CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
     STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
 
+    CHECK( override2 != NULL );
     CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
     STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
     STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
@@ -142,9 +145,9 @@ TEST( Config, TypeOverrideOptions_Simple )
 }
 
 /*
- * Check that parameter override options allowed types are accepted.
+ * Check that specific type override options allowed types are accepted.
  */
-TEST( Config, ParameterOverrideOptions_AllowedTypes )
+TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
 {
     // Prepare
 
@@ -166,37 +169,37 @@ TEST( Config, ParameterOverrideOptions_AllowedTypes )
         "function1#p13=OutputOfType:MyType",
         "function1#p14=InputOfType:MyType<OtherType",
         "function1#p15=OutputOfType:MyType<OtherType",
-    }, std::vector<std::string>() );
+    } );
 
     // Verify
-    CHECK( testConfig.GetParameterOverride("function1#p1") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p2") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p3") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p4") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p5") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p6") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p7") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p8") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p9") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p10") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p11") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p12") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p13") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p14") != NULL );
-    CHECK( testConfig.GetParameterOverride("function1#p15") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p1") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p2") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p3") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p4") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p5") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p6") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p7") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p8") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p9") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p10") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p11") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p12") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p13") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p14") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p15") != NULL );
 
     // Cleanup
 }
 
 /*
- * Check that type override options allowed types are accepted.
+ * Check that generic type override options allowed types are accepted.
  */
-TEST( Config, TypeOverrideOptions_AllowedTypes )
+TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
 {
     // Prepare
 
     // Exercise
-    Config testConfig( false, std::vector<std::string>(), std::vector<std::string>
+    Config testConfig( false, std::vector<std::string>
     {
         "#type1=Int",
         "#type2=UnsignedInt",
@@ -236,9 +239,9 @@ TEST( Config, TypeOverrideOptions_AllowedTypes )
 }
 
 /*
- * Check that parameter override options are handled properly with override with argument expression.
+ * Check that specific type override options are handled properly with override with argument expression.
  */
-TEST( Config, ParameterOverrideOptions_ArgumentExpression )
+TEST( Config, SpecificTypeOverrideOptions_ArgumentExpression )
 {
     // Prepare
     Config testConfig( false,
@@ -247,16 +250,15 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
                                                   "func2#p=InputOfType:TypeZ~$->getZ()",
                                                   "func3#p=OutputOfType:TypeW~(*$).getW()",
                                                   "func4#p=InputOfType:TypeM<OtherTypeA~$->getM()",
-                                                  "func5#p=OutputOfType:TypeN<OtherTypeB~(*$).getN()" },
-                       std::vector<std::string>() );
+                                                  "func5#p=OutputOfType:TypeN<OtherTypeB~(*$).getN()" } );
 
     // Exercise
-    const Config::OverrideSpec* override1 = testConfig.GetParameterOverride("function1#p");
-    const Config::OverrideSpec* override2 = testConfig.GetParameterOverride("ns1::function1@");
-    const Config::OverrideSpec* override3 = testConfig.GetParameterOverride("func2#p");
-    const Config::OverrideSpec* override4 = testConfig.GetParameterOverride("func3#p");
-    const Config::OverrideSpec* override5 = testConfig.GetParameterOverride("func4#p");
-    const Config::OverrideSpec* override6 = testConfig.GetParameterOverride("func5#p");
+    const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("function1#p");
+    const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("ns1::function1@");
+    const Config::OverrideSpec* override3 = testConfig.GetTypeOverride("func2#p");
+    const Config::OverrideSpec* override4 = testConfig.GetTypeOverride("func3#p");
+    const Config::OverrideSpec* override5 = testConfig.GetTypeOverride("func4#p");
+    const Config::OverrideSpec* override6 = testConfig.GetTypeOverride("func5#p");
 
     // Verify
     CHECK( override1 != NULL );
@@ -302,24 +304,23 @@ TEST( Config, ParameterOverrideOptions_ArgumentExpression )
     STRCMP_EQUAL( "TypeN", override6->GetExposedTypeName().c_str() );
     STRCMP_EQUAL( "OtherTypeB", override6->GetExpectationArgTypeName().c_str() );
 
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("ABC") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#q") );
-    POINTERS_EQUAL( NULL, testConfig.GetParameterOverride("function1#p2") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#q") );
+    POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("function1#p2") );
 
     // Cleanup
 }
 
 /*
- * Check that type override options are handled properly with override with argument expression.
+ * Check that generic type override options are handled properly with override with argument expression.
  */
-TEST( Config, TypeOverrideOptions_ArgumentExpression )
+TEST( Config, GenericTypeOverrideOptions_ArgumentExpression )
 {
     // Prepare
     Config testConfig( false,
-                       std::vector<std::string>(),
                        std::vector<std::string> { "#const int *=Int~(*$)",
                                                   "@const int *=LongInt~&$",
                                                   "#typeX=InputOfType:TypeY~&($.getY())",
@@ -387,63 +388,113 @@ TEST( Config, TypeOverrideOptions_ArgumentExpression )
 }
 
 /*
- * Check that an exception is thrown when the parameter override options is not valid.
+ * Check that an exception is thrown when type override options is not valid.
  */
-TEST( Config, Exception_ParameterOverrideBadFormat )
+TEST( Config, Exception_TypeOverride_OverallBadFormat )
 {
     // Prepare
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p" } ) );
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1@" } ) );
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "#class1" } ) );
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "@class1" } ) );
+
+
+    // Cleanup
+}
+
+/*
+ * Check that an exception is thrown when keys of type override options is not valid.
+ */
+TEST( Config, Exception_TypeOverride_KeyBadFormat )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p#=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "=Int" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "#function1#p=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=abc" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "#type1#=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=~" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1@p=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int~" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "@type1@=Int" } ) );
+
+    // Cleanup
+}
+
+/*
+ * Check that an exception is thrown when values of type override options is not valid.
+ */
+TEST( Config, Exception_TypeOverride_SpecificValueBadFormat )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1#p=" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int~abc" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Output" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Skip" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int~abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1@=Output" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:a<" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1@=Skip" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<a" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:a<" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<a" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:a<" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<a" } ) );
 
     // Cleanup
 }
@@ -451,85 +502,102 @@ TEST( Config, Exception_ParameterOverrideBadFormat )
 /*
  * Check that an exception is thrown when the type override options is not valid.
  */
-TEST( Config, Exception_TypeOverrideBadFormat )
+TEST( Config, Exception_TypeOverride_GenericValueBadFormat )
 {
     // Prepare
 
-    // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1" } ) );
+                  Config( false, std::vector<std::string> { "@class1=" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=" } ) );
+                  Config( false, std::vector<std::string> { "#type1=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "=Int" } ) );
+                  Config( false, std::vector<std::string> { "@class1=~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type1=abc" } ) );
+                  Config( false, std::vector<std::string> { "#class1=Int~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=~" } ) );
+                  Config( false, std::vector<std::string> { "#type2=Int~abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#class1=Int~" } ) );
+                  Config( false, std::vector<std::string> { "@class1=Output" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type2=Int~abc" } ) );
+                  Config( false, std::vector<std::string> { "@class1=Skip" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Output" } ) );
+                  Config( false, std::vector<std::string> { "#type3=InputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Skip" } ) );
+                  Config( false, std::vector<std::string> { "#type3=InputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:" } ) );
+                  Config( false, std::vector<std::string> { "#type3=InputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:<" } ) );
+                  Config( false, std::vector<std::string> { "#type3=InputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:a<" } ) );
+                  Config( false, std::vector<std::string> { "#type4=OutputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type3=InputOfType:<a" } ) );
+                  Config( false, std::vector<std::string> { "#type4=OutputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:" } ) );
+                  Config( false, std::vector<std::string> { "#type4=OutputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:<" } ) );
-
-    CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:a<" } ) );
-
-    CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
+                  Config( false, std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
 
     // Cleanup
 }
 
 /*
- * Check that an exception is thrown when an parameter override option function identifier is repeated.
+ * Check that an exception is thrown when an specific type override option function identifier is repeated.
  */
-TEST( Config, Exception_FunctionRepeated )
+TEST( Config, Exception_FunctionParameterRepeated )
 {
     // Prepare
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" }, std::vector<std::string>() ) );
+                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" } ) );
+}
+
+/*
+ * Check that an exception is thrown when an specific type override option function identifier is repeated.
+ */
+TEST( Config, Exception_FunctionReturnRepeated )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function1@=Int", "function1@=Double" } ) );
 }
 
 /*
  * Check that an exception is thrown when an type override option type identifier is repeated.
  */
-TEST( Config, Exception_TypeRepeated )
+TEST( Config, Exception_TypeParameterRepeated )
 {
     // Prepare
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string>(), std::vector<std::string> { "@class1=Int", "@class1=Double" } ) );
+                  Config( false, std::vector<std::string> { "#class1=Int", "#class1=Double" } ) );
+}
+
+/*
+ * Check that an exception is thrown when an type override option type identifier is repeated.
+ */
+TEST( Config, Exception_TypeReturnRepeated )
+{
+    // Prepare
+
+    // Exercise & Verify
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "@class1=Int", "@class1=Double" } ) );
 }

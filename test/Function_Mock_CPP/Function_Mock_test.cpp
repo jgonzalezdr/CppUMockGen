@@ -3,7 +3,7 @@
  * @brief      Unit tests for the "Function" class (mock generation)
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2017-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -321,7 +321,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@%s", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -365,7 +365,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@" ENUM_TAG "Enum1", nullptr );
 
     SimpleString testHeader =
@@ -396,7 +396,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Enum1", nullptr );
 
     SimpleString testHeader =
@@ -426,7 +426,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1", nullptr );
 
     SimpleString testHeader =
@@ -456,7 +456,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1<int>", nullptr );
 
     SimpleString testHeader =
@@ -487,7 +487,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@" STRUCT_TAG "Struct1", nullptr );
 
     SimpleString testHeader =
@@ -523,7 +523,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -558,7 +558,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -589,7 +589,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -620,7 +620,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -651,7 +651,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -683,7 +683,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -718,7 +718,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@void *", nullptr );
 
     SimpleString testHeader = "void* function1();";
@@ -746,7 +746,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const void *", nullptr );
 
     SimpleString testHeader = "const void* function1();";
@@ -776,7 +776,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@%s *", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -811,7 +811,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@const %s *", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -844,7 +844,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const char *", nullptr );
 
     SimpleString testHeader = "const char* function1();";
@@ -873,7 +873,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1 *", nullptr );
 
     SimpleString testHeader =
@@ -903,7 +903,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1 *", nullptr );
 
     SimpleString testHeader =
@@ -933,7 +933,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1<int> *", nullptr );
 
     SimpleString testHeader =
@@ -963,7 +963,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1<char> *", nullptr );
 
     SimpleString testHeader =
@@ -994,7 +994,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@struct Struct1 *", nullptr );
 
     SimpleString testHeader =
@@ -1024,7 +1024,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const struct Struct1 *", nullptr );
 
     SimpleString testHeader =
@@ -1061,7 +1061,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@%s &", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -1096,7 +1096,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@const %s &", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -1129,7 +1129,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1 &", nullptr );
 
     SimpleString testHeader =
@@ -1161,7 +1161,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1 &", nullptr );
 
     SimpleString testHeader =
@@ -1193,7 +1193,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1<int> &", nullptr );
 
     SimpleString testHeader =
@@ -1225,7 +1225,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1<int> &", nullptr );
 
     SimpleString testHeader =
@@ -1257,7 +1257,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@struct Struct1 &", nullptr );
 
     SimpleString testHeader =
@@ -1289,7 +1289,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const struct Struct1 &", nullptr );
 
     SimpleString testHeader =
@@ -1327,7 +1327,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@%s &&", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -1362,7 +1362,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         SimpleString typeKey = StringFromFormat( "@const %s &&", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -1395,7 +1395,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1 &&", nullptr );
 
     SimpleString testHeader =
@@ -1427,7 +1427,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1 &&", nullptr );
 
     SimpleString testHeader =
@@ -1459,7 +1459,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Class1<int> &&", nullptr );
 
     SimpleString testHeader =
@@ -1491,7 +1491,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Class1<int> &&", nullptr );
 
     SimpleString testHeader =
@@ -1523,7 +1523,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@struct Struct1 &&", nullptr );
 
     SimpleString testHeader =
@@ -1555,7 +1555,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const struct Struct1 &&", nullptr );
 
     SimpleString testHeader =
@@ -1594,7 +1594,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1629,7 +1629,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1664,7 +1664,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@const Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1699,7 +1699,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1 *const", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1733,7 +1733,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1 *", nullptr );
 
     SimpleString testHeader =
@@ -1764,7 +1764,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1 *", nullptr );
 
     SimpleString testHeader =
@@ -1795,7 +1795,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Type1 *", nullptr );
 
     SimpleString testHeader =
@@ -1833,7 +1833,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1868,7 +1868,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1903,7 +1903,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1938,7 +1938,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@const Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -1971,7 +1971,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -2001,7 +2001,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Type1", nullptr );
 
     SimpleString testHeader =
@@ -2032,7 +2032,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -2063,7 +2063,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -2094,7 +2094,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
     SimpleString testHeader =
@@ -2125,7 +2125,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Type1", nullptr );
 
     SimpleString testHeader =
@@ -2168,7 +2168,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2205,7 +2205,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2245,7 +2245,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@int **", nullptr );
 
     SimpleString testHeader = "int* *function1();";
@@ -2273,7 +2273,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const unsigned char **", nullptr );
 
     SimpleString testHeader = "const unsigned char* *function1();";
@@ -2301,7 +2301,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@short *const *", nullptr );
 
     SimpleString testHeader = "short* const *function1();";
@@ -2334,7 +2334,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@double *&", nullptr );
 
     SimpleString testHeader = "double* &function1();";
@@ -2362,7 +2362,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@bool *const &", nullptr );
 
     SimpleString testHeader = "bool* const &function1();";
@@ -2397,7 +2397,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2439,7 +2439,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2475,7 +2475,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2511,7 +2511,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@const Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2547,7 +2547,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2583,7 +2583,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2619,7 +2619,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
         expect::Config$::GetTypeOverride( config, "@const Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2653,7 +2653,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
     SimpleString testHeader =
@@ -2684,7 +2684,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@Type2", nullptr );
 
     SimpleString testHeader =
@@ -2715,7 +2715,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
     expect::Config$::GetTypeOverride( config, "@const Type2", nullptr );
 
     SimpleString testHeader =
@@ -2758,7 +2758,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#%s", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -2791,7 +2791,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#" ENUM_TAG "Enum1", nullptr );
 
     SimpleString testHeader =
@@ -2822,7 +2822,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Enum1", nullptr );
 
     SimpleString testHeader =
@@ -2852,7 +2852,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1", nullptr );
 
@@ -2883,7 +2883,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1<short>", nullptr );
 
@@ -2915,7 +2915,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#" STRUCT_TAG "Struct1", nullptr );
 
@@ -2952,7 +2952,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -2987,7 +2987,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -3018,7 +3018,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -3049,7 +3049,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3081,7 +3081,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, true );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3113,7 +3113,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3145,7 +3145,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, true );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3178,7 +3178,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3210,7 +3210,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, true );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
@@ -3246,7 +3246,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#void *", nullptr );
 
     SimpleString testHeader = "void function1(void* p);";
@@ -3276,7 +3276,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#%s *", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3313,7 +3313,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#const %s *", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3348,7 +3348,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
 
     SimpleString testHeader = "void function1(const char* p);";
@@ -3377,7 +3377,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1 *", nullptr );
 
@@ -3408,7 +3408,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1 *", nullptr );
 
@@ -3439,7 +3439,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1<short> *", nullptr );
 
@@ -3470,7 +3470,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1<short> *", nullptr );
 
@@ -3502,7 +3502,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#struct Struct1 *", nullptr );
 
@@ -3533,7 +3533,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const struct Struct1 *", nullptr );
 
@@ -3571,7 +3571,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#%s &", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3608,7 +3608,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#const %s &", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3643,7 +3643,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1 &", nullptr );
 
@@ -3676,7 +3676,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1 &", nullptr );
 
@@ -3709,7 +3709,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1<short> &", nullptr );
 
@@ -3742,7 +3742,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1<short> &", nullptr );
 
@@ -3775,7 +3775,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#struct Struct1 &", nullptr );
 
@@ -3808,7 +3808,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const struct Struct1 &", nullptr );
 
@@ -3847,7 +3847,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#%s &&", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3884,7 +3884,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         SimpleString typeKey = StringFromFormat( "#const %s &&", typeData.mockedType.c_str() );
         expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
 
@@ -3919,7 +3919,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1 &&", nullptr );
 
@@ -3952,7 +3952,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1 &&", nullptr );
 
@@ -3985,7 +3985,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Class1<short> &&", nullptr );
 
@@ -4018,7 +4018,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Class1<short> &&", nullptr );
 
@@ -4051,7 +4051,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#struct Struct1 &&", nullptr );
 
@@ -4084,7 +4084,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const struct Struct1 &&", nullptr );
 
@@ -4122,7 +4122,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1 *", nullptr );
 
     SimpleString testHeader =
@@ -4152,7 +4152,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1 *const", nullptr );
 
     SimpleString testHeader =
@@ -4184,7 +4184,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4218,7 +4218,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4252,7 +4252,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#const Type1 *", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4286,7 +4286,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1 *const", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4319,7 +4319,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1 *", nullptr );
 
@@ -4351,7 +4351,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1 *", nullptr );
 
@@ -4383,7 +4383,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#const Type1 *", nullptr );
 
@@ -4415,7 +4415,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::UseUnderlyingTypedefType( config, false );
     expect::Config$::GetTypeOverride( config, "#Type1 *const", nullptr );
 
@@ -4454,7 +4454,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4489,7 +4489,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4524,7 +4524,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4559,7 +4559,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#const Type1", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -4592,7 +4592,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -4622,7 +4622,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#const Type1", nullptr );
 
     SimpleString testHeader =
@@ -4653,7 +4653,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -4684,7 +4684,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -4715,7 +4715,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
     SimpleString testHeader =
@@ -4746,7 +4746,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#const Type1", nullptr );
 
     SimpleString testHeader =
@@ -4791,7 +4791,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
         {
             // Prepare
             Config* config = GetMockConfig();
-            expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+            expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
             expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
 
             SimpleString testHeader = StringFromFormat(
@@ -4830,7 +4830,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#param", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#param", nullptr );
     expect::Config$::GetTypeOverride( config, "#int **", nullptr );
 
     SimpleString testHeader = "void function1(signed int* * param);";
@@ -4858,7 +4858,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "functionX#x", nullptr );
+    expect::Config$::GetTypeOverride( config, "functionX#x", nullptr );
     expect::Config$::GetTypeOverride( config, "#const struct ExternStruct **", nullptr );
 
     SimpleString testHeader = "void functionX(const struct ExternStruct* *x);";
@@ -4886,7 +4886,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "functionY#arg", nullptr );
+    expect::Config$::GetTypeOverride( config, "functionY#arg", nullptr );
     expect::Config$::GetTypeOverride( config, "#short *const *", nullptr );
 
     SimpleString testHeader = "void functionY(short* const * arg);";
@@ -4919,7 +4919,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#i", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
     expect::Config$::GetTypeOverride( config, "#double *&", nullptr );
 
     SimpleString testHeader = "void function1(double* &i);";
@@ -4947,7 +4947,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#j", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
     expect::Config$::GetTypeOverride( config, "#bool *const &", nullptr );
 
     SimpleString testHeader = "void function1(bool* const &j);";
@@ -4982,7 +4982,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5024,7 +5024,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5060,7 +5060,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5096,7 +5096,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#const Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5132,7 +5132,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5168,7 +5168,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5204,7 +5204,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
     {
         // Prepare
         Config* config = GetMockConfig();
-        expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
         expect::Config$::GetTypeOverride( config, "#const Type2", nullptr );
 
         SimpleString testHeader = StringFromFormat(
@@ -5238,7 +5238,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
     SimpleString testHeader =
@@ -5269,7 +5269,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#Type2", nullptr );
 
     SimpleString testHeader =
@@ -5300,7 +5300,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1#p", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
     expect::Config$::GetTypeOverride( config, "#const Type2", nullptr );
 
     SimpleString testHeader =
@@ -5337,11 +5337,11 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p2", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p4", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p2", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
     expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
     expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
     expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
@@ -5374,11 +5374,11 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#_unnamedArg0", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#_unnamedArg1", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#_unnamedArg3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#_unnamedArg0", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#_unnamedArg1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#_unnamedArg3", nullptr );
     expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
     expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
     expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
@@ -5442,11 +5442,11 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 
         Config* config = GetMockConfig();
         const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-        expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-        expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-        expect::Config$::GetParameterOverride( config, "function1#p2", override );
-        expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-        expect::Config$::GetParameterOverride( config, "function1#p4", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p2", override );
+        expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
 
         expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
         expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
@@ -5499,11 +5499,11 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 
     Config* config = GetMockConfig();
     const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p2", override );
-    expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p4", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p2", override );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
 
     expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
     expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
@@ -5556,11 +5556,11 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 
     Config* config = GetMockConfig();
     const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p2", override );
-    expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p4", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p2", override );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
 
     expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
     expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
@@ -5626,9 +5626,9 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
         // Prepare
         Config* config = GetMockConfig();
         const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(199);
-        expect::Config$::GetParameterOverride( config, "function1@", override );
-        expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-        expect::Config$::GetParameterOverride( config, "function1#p2", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1@", override );
+        expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p2", nullptr );
 
         expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
         expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
@@ -5668,11 +5668,11 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
 
     Config* config = GetMockConfig();
     const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    expect::Config$::GetParameterOverride( config, "function1@", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p1", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p2", override );
-    expect::Config$::GetParameterOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetParameterOverride( config, "function1#p4", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p2", override );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
 
     expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
     expect::Config$::GetTypeOverride( config, "#const int *", nullptr );

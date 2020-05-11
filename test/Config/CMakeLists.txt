@@ -12,6 +12,7 @@ include_directories(
 
 set( PROD_SRC_FILES
      ${PROD_DIR}/sources/Config.cpp
+     ${PROD_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES

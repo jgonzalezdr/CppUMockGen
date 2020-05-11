@@ -3,7 +3,7 @@
  * @brief      Implementation of Config class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2017-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -13,24 +13,19 @@
 #include <vector>
 #include <stdexcept>
 
+#include "StringHelper.hpp"
+
 static const char EXPR_MOD_SEPARATOR = '~';
 static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
 static const char EXPECTATION_ARG_TYPE_SEPARATOR = '<';
 
-Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
-                const std::vector<std::string> &typeOverrideOptions )
-: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_paramOverrideMap( paramOverrideOptions, false ),
-  m_typeOverrideMap( typeOverrideOptions, true )
+Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions )
+: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_typeOverrideMap( typeOverrideOptions )
 {}
 
 bool Config::UseUnderlyingTypedefType() const noexcept
 {
     return m_useUnderlyingTypedefType;
-}
-
-const Config::OverrideSpec* Config::GetParameterOverride( const std::string& key ) const noexcept
-{
-    return m_paramOverrideMap.GetOverride(key);
 }
 
 const Config::OverrideSpec* Config::GetTypeOverride( const std::string& key ) const noexcept
@@ -172,21 +167,35 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, const std::string 
     }
 }
 
-Config::OverrideMap::OverrideMap( const std::vector<std::string> &options, bool typeOverride )
+Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
 {
     for( const std::string &option : options )
     {
         size_t sepPos = option.find('=');
         if( sepPos != std::string::npos )
         {
-            std::string key = option.substr(0, sepPos);
+            bool isReturn = false;
+            std::string key = TrimString( option.substr(0, sepPos) );
             if( key.empty() )
             {
                 std::string errorMsg = "Override option key cannot be empty ['" + option + "'].";
                 throw std::runtime_error( errorMsg );
             }
-
-            bool isReturn = ( typeOverride ? ( key.front()  == '@' ) : ( key.back()  == '@' ) );
+            else if( StringCount( key, '#' ) == 1 )
+            {
+                isReturn = false;
+            }
+            else if( ( StringCount( key, '@' ) == 1 ) &&
+                     ( StringCount( key, '#' ) == 0 ) &&
+                     ( ( key.front() == '@' ) || ( key.back() == '@' ) ) )
+            {
+                isReturn = true;
+            }
+            else
+            {
+                std::string errorMsg = "Invalid override option key format ['" + option + "'].";
+                throw std::runtime_error( errorMsg );
+            }
 
             Config::OverrideSpec spec = Config::OverrideSpec( option.substr(sepPos+1), option, isReturn );
 

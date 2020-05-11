@@ -35,6 +35,7 @@ set( SRC_LIST
      sources/Config.cpp
      sources/FileHelper.cpp
      sources/ConfigFile.cpp
+     sources/StringHelper.cpp
 )
 
 set( INC_LIST
@@ -47,6 +48,7 @@ set( INC_LIST
      sources/Config.hpp
      sources/FileHelper.hpp
      sources/ConfigFile.hpp
+     sources/StringHelper.hpp
      include/CppUMockGen.hpp
 )
 

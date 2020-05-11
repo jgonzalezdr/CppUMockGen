@@ -3,7 +3,7 @@
  * @brief      Header of Config class
  * @project    CppUMockGen
  * @authors    Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
- * @copyright  Copyright (c) 2017-2018 Jesus Gonzalez. All rights reserved.
+ * @copyright  Copyright (c) 2017-2020 Jesus Gonzalez. All rights reserved.
  * @license    See LICENSE.txt
  */
 
@@ -97,11 +97,9 @@ public:
      *
      * @param useUnderlyingTypedefType [in] Indicates whether to use the underlying type of typedefs or the typedef name
      *                                      to identify function parameters types
-     * @param paramOverrideOptions [in] Override options for specific function parameter or return types (see OverrideMap)
-     * @param typeOverrideOptions [in] Override options for generic parameter or return types (see OverrideMap)
+     * @param typeOverrideOptions [in] Override options for specific or generic parameter or return types (see OverrideMap)
      */
-    Config( bool useUnderlyingTypedefType, const std::vector<std::string> &paramOverrideOptions,
-            const std::vector<std::string> &typeOverrideOptions );
+    Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions );
 
     /**
      * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function
@@ -110,16 +108,7 @@ public:
     bool UseUnderlyingTypedefType() const noexcept;
 
     /**
-     * Returns the override spec related to the specific function parameter or return
-     * type represented by @p key (if it exists).
-     *
-     * @param key [in] Identifier for a specific function parameter or return type
-     * @return A pointer to an override spec, or NULL if it does not exist
-     */
-    const OverrideSpec* GetParameterOverride( const std::string& key ) const noexcept;
-
-    /**
-     * Returns the override spec related to the generic parameter or return type represented
+     * Returns the override spec related to the parameter or return type represented
      * by @p key (if it exists).
      *
      * @param key [in] Identifier for a parameter or return type
@@ -139,9 +128,8 @@ private:
          *
          * @param options [in] Override options, each consisting in a pair of element identifier
          *                     (key) / override specification (value) separated by a '=' character
-         * @param typeOverride [in] Must be @p true for type overrides, or @false otherwise
          */
-        OverrideMap( const std::vector<std::string> &options, bool typeOverride );
+        OverrideMap( const std::vector<std::string> &options );
 
         /**
          * Returns the override specification related to an element represented by @p key
@@ -158,7 +146,6 @@ private:
     };
 
     bool m_useUnderlyingTypedefType;
-    OverrideMap m_paramOverrideMap;
     OverrideMap m_typeOverrideMap;
 };
 

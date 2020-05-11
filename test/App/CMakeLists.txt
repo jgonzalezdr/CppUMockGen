@@ -18,6 +18,7 @@ set( PROD_SRC_FILES
      ${PROD_DIR}/sources/App.cpp
      ${PROD_DIR}/sources/FileHelper.cpp
      ${PROD_DIR}/sources/ConfigFile.cpp
+     ${PROD_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES

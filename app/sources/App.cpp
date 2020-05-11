@@ -71,11 +71,6 @@ static std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
         ret += "-u ";
     }
 
-    for( auto paramOverride : options["param-override"].as<std::vector<std::string>>() )
-    {
-        ret += "-p " + QuotifyOption( paramOverride ) + " ";
-    }
-
     for( auto typeOverride : options["type-override"].as<std::vector<std::string>>() )
     {
         ret += "-t " + QuotifyOption( typeOverride ) + " ";
@@ -96,11 +91,10 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         ( "e,expect-output", "Expectation output path", cxxopts::value<std::string>()->implicit_value( "" ), "<expect-output>" )
         ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
         ( "s,std", "Set language standard", cxxopts::value<std::string>(), "<standard>" )
-        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "<underlying-typedef>" );
-
-    AddConfigFileOptions( options );
-
-    options.add_options()
+        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "<underlying-typedef>" )
+        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
+        ( "t,type-override", "Type override", cxxopts::value<std::vector<std::string>>(), "<expr>" )
+        ( "f,config-file", "Config file", cxxopts::value<std::vector<std::string>>(), "<file-path>" )
         ( "v,version", "Print version" )
         ( "h,help", "Print help" );
 
@@ -110,6 +104,8 @@ int App::Execute( int argc, const char* argv[] ) noexcept
     try
     {
         options.parse( argc, const_cast<char**&>(argv) );
+
+        ProcessConfigFiles( options );
 
         if( options.count("help") )
         {
@@ -200,8 +196,6 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             }
         }
 
-        ProcessConfigFiles( options );
-
         bool interpretAsCpp = options[ "cpp" ].as<bool>();
         if( !interpretAsCpp )
         {
@@ -211,7 +205,6 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         }
 
         Config config( options["underlying-typedef"].as<bool>(),
-                       options["param-override"].as<std::vector<std::string>>(),
                        options["type-override"].as<std::vector<std::string>>() );
 
         std::string genOpts = GetGenerationOptions( options );

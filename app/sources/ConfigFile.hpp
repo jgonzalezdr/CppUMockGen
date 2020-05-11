@@ -15,8 +15,6 @@ namespace cxxopts
 class Options;
 }
 
-void AddConfigFileOptions( cxxopts::Options &options );
-
 void ProcessConfigFiles( cxxopts::Options &options );
 
 #endif // header guard

@@ -18,15 +18,6 @@
 #include "ConsoleColorizer.hpp"
 #include "VersionInfo.h"
 
-void AddConfigFileOptions( cxxopts::Options &options )
-{
-    options.add_options()
-        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
-        ( "p,param-override", "Override parameter type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
-        ( "t,type-override", "Override generic type", cxxopts::value<std::vector<std::string>>(), "<expr>" )
-        ( "f,config-file", "Config file", cxxopts::value<std::vector<std::string>>(), "<file-path>" );
-}
-
 static void ProcessConfigLine( const std::string &line, std::vector<std::string> &params, const std::filesystem::path &configFilepath, unsigned int lineNum )
 {
     size_t curPos = 0;
@@ -164,61 +155,8 @@ static void ProcessConfigFiles( cxxopts::Options &options, std::set<std::filesys
     }
 }
 
-void ProcessConfigFiles( cxxopts::Options &cmdLineOptions )
+void ProcessConfigFiles( cxxopts::Options &options )
 {
-    // Create config file options parser
-
-    cxxopts::Options configFileOptions( PRODUCT_NAME, PRODUCT_FILE_DESCRIPTION );
-    AddConfigFileOptions( configFileOptions );
-
-    // Move config file options from command line to config file parser
-
-    {
-        std::vector<std::string> &cmdLineVector = 
-            const_cast<std::vector<std::string> &>( cmdLineOptions[ "config-file" ].as<std::vector<std::string>>() );
-        std::vector<std::string> &cfgFileVector = 
-            const_cast<std::vector<std::string> &>( configFileOptions[ "config-file" ].as<std::vector<std::string>>() );
-
-        cfgFileVector.insert( cfgFileVector.end(),
-                              std::make_move_iterator( cmdLineVector.begin() ),
-                              std::make_move_iterator( cmdLineVector.end() ) );
-    }
-
-    // Process config files
-
     std::set<std::filesystem::path> processedConfigFiles;
-    ProcessConfigFiles( configFileOptions, processedConfigFiles, "" );
-
-    // Move options from config files to command line parser
-
-    {
-        std::vector<std::string> &cmdLineVector =
-            const_cast<std::vector<std::string> &>( cmdLineOptions[ "include-path" ].as<std::vector<std::string>>() );
-        std::vector<std::string> &cfgFileVector =
-            const_cast<std::vector<std::string> &>( configFileOptions[ "include-path" ].as<std::vector<std::string>>() );
-
-        cmdLineVector.insert( cmdLineVector.end(),
-                              std::make_move_iterator( cfgFileVector.begin() ),
-                              std::make_move_iterator( cfgFileVector.end() ) );
-    }
-    {
-        std::vector<std::string> &cmdLineVector = 
-            const_cast<std::vector<std::string> &>( cmdLineOptions[ "param-override" ].as<std::vector<std::string>>() );
-        std::vector<std::string> &cfgFileVector = 
-            const_cast<std::vector<std::string> &>( configFileOptions[ "param-override" ].as<std::vector<std::string>>() );
-
-        cmdLineVector.insert( cmdLineVector.end(),
-                              std::make_move_iterator( cfgFileVector.begin() ),
-                              std::make_move_iterator( cfgFileVector.end() ) );
-    }
-    {
-        std::vector<std::string> &cmdLineVector = 
-            const_cast<std::vector<std::string> &>( cmdLineOptions[ "type-override" ].as<std::vector<std::string>>() );
-        std::vector<std::string> &cfgFileVector = 
-            const_cast<std::vector<std::string> &>( configFileOptions[ "type-override" ].as<std::vector<std::string>>() );
-
-        cmdLineVector.insert( cmdLineVector.end(),
-                              std::make_move_iterator( cfgFileVector.begin() ),
-                              std::make_move_iterator( cfgFileVector.end() ) );
-    }
+    ProcessConfigFiles( options, processedConfigFiles, "" );
 }
