@@ -489,7 +489,7 @@ TEST( App, MockOutput_InterpretAsCpp )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, true, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -523,7 +523,7 @@ TEST( App, MockOutput_LanguageStandard )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "lang-std", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s lang-std ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s lang-std", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -557,7 +557,7 @@ TEST( App, MockOutput_UseUnderlyingTypedefType )
 
     expect::Config$::Config$( true, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -625,7 +625,7 @@ TEST( App, MockOutput_specificTypeOverrideOptions )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$ ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -659,7 +659,7 @@ TEST( App, MockOutput_genericTypeOverrideOptions )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\" ", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\"", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );

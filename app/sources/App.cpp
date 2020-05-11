@@ -76,6 +76,12 @@ static std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
         ret += "-t " + QuotifyOption( typeOverride ) + " ";
     }
 
+    // Delete the trailing whitespace
+    if( !ret.empty() )
+    {
+        ret.pop_back();
+    }
+
     return ret;
 }
 
