@@ -1559,7 +1559,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, cons
 //*************************************************************************************************
 
 Function::Function() noexcept
-: m_isConst( false ), m_exceptionSpec( EExceptionSpec::Any )
+: m_isConstMethod( false ), m_isNonStaticMethod( false ), m_exceptionSpec( EExceptionSpec::Any )
 {
 }
 
@@ -1620,14 +1620,18 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
         // Get function name
         m_functionName = getQualifiedName( cursor );
 
-        if( IsMethod() )
+        if( clang_getCursorKind( cursor ) == CXCursor_CXXMethod )
         {
+            // Get method staticness
+            m_isNonStaticMethod = !clang_CXXMethod_isStatic( cursor );
+
             // Get method constantness
-            m_isConst = clang_CXXMethod_isConst(cursor);
+            m_isConstMethod = clang_CXXMethod_isConst(cursor);
 
             // Get method class
             m_className = getMethodClassName(cursor);
 
+            // Get exception specification
             m_exceptionSpec = ParseClangExceptionSpec(cursor);
 
             // LCOV_EXCL_START
@@ -1692,7 +1696,7 @@ std::string Function::GenerateMock() const noexcept
 
     std::string body = m_return->GetMockBodyFront() + "mock().actualCall(\"" + m_functionName + "\")";
 
-    if( IsMethod() )
+    if( m_isNonStaticMethod )
     {
         body += ".onObject(this)";
     }
@@ -1711,7 +1715,7 @@ std::string Function::GenerateMock() const noexcept
 
     signature += ")";
 
-    if( m_isConst )
+    if( m_isConstMethod )
     {
         signature += " const";
     }
@@ -1796,7 +1800,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
         addSignatureSeparator = true;
     }
 
-    if( IsMethod() )
+    if( m_isNonStaticMethod )
     {
         if( addSignatureSeparator )
         {
@@ -1824,7 +1828,7 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
             body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectNCalls(" NUM_CALLS_ARG_NAME ", \"" + m_functionName + "\");\n";
         }
 
-        if( IsMethod() )
+        if( m_isNonStaticMethod )
         {
             body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<" +
                     m_className + "*>(" OBJECT_ARG_NAME ".getValue())); }\n";

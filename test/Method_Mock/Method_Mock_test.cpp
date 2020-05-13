@@ -358,7 +358,7 @@ TEST( Method_Mock, VirtualPrivateMethod )
 }
 
 /*
- * Check that a virtual private method is mocked properly.
+ * Check that a virtual protected method is mocked properly.
  */
 TEST( Method_Mock, VirtualProtectedMethod )
 {
@@ -456,7 +456,7 @@ TEST( Method_Mock, PublicExceptionSpecifiersMethod )
 }
 
 /*
- * Check that a public constmethod with exception specifiers is mocked properly.
+ * Check that a public const method with exception specifiers is mocked properly.
  */
 TEST( Method_Mock, PublicExceptionSpecifiersConstMethod )
 {
@@ -527,3 +527,30 @@ TEST( Method_Mock, MethodWithinNamespace )
     // Cleanup
 }
 
+/*
+ * Check that a static public method is mocked properly.
+ */
+TEST( Method_Mock, PublicStaticMethod )
+{
+    // Prepare
+    Config *config = GetMockConfig();
+
+    SimpleString testHeader =
+        "class class1 {\n"
+        "public:\n"
+        "    static void method1();\n"
+        "};";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "void class1::method1()\n{\n"
+                  "    mock().actualCall(\"class1::method1\");\n"
+                  "}\n", results[ 0 ].c_str() );
+
+    // Cleanup
+}

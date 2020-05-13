@@ -73,14 +73,6 @@ protected:
      */
     virtual bool IsMockable( const CXCursor &cursor ) const noexcept;
 
-    /**
-     * Returns whether the object is a method (a.k.a member function).
-     */
-    virtual bool IsMethod() const noexcept
-    {
-        return false;
-    }
-
     std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const noexcept;
 
     bool HasIgnorableArguments() const noexcept;
@@ -89,7 +81,8 @@ protected:
     std::string m_functionName;
     std::unique_ptr<Return> m_return;
     std::vector<std::unique_ptr<Argument>> m_arguments;
-    bool m_isConst;
+    bool m_isConstMethod;
+    bool m_isNonStaticMethod;
     EExceptionSpec m_exceptionSpec;
     std::string m_className;
 };

@@ -536,3 +536,43 @@ TEST( Method_Expectation, MethodWithinNamespace )
 
     // Cleanup
 }
+
+/*
+ * Check that a static public method generates a expectation helper function.
+ */
+TEST( Method_Expectation, StaticPublicMethod )
+{
+    // Prepare
+    Config *config = GetMockConfig();
+
+    SimpleString testHeader =
+        "class class1 {\n"
+        "public:\n"
+        "    static void method1();\n"
+        "};";
+
+    // Exercise
+    std::vector<std::string> resultsProto;
+    std::vector<std::string> resultsImpl;
+    unsigned int methodCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+    // Verify
+    CHECK_EQUAL( 1, methodCount );
+    CHECK_EQUAL( 1, resultsProto.size() );
+    STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
+                  "MockExpectedCall& method1();\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__);\n"
+                  "} }\n", resultsProto[ 0 ].c_str() );
+    STRCMP_EQUAL( "namespace expect { namespace class1$ {\n"
+                  "MockExpectedCall& method1()\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectOneCall(\"class1::method1\");\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "MockExpectedCall& method1(unsigned int __numCalls__)\n{\n"
+                  "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"class1::method1\");\n"
+                  "    return __expectedCall__;\n"
+                  "}\n"
+                  "} }\n", resultsImpl[ 0 ].c_str() );
+
+    // Cleanup
+}

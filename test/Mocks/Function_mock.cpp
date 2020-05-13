@@ -17,7 +17,7 @@ class Function::Return
 {};
 
 Function::Function() noexcept
-: m_isConst( false ), m_exceptionSpec( Function::EExceptionSpec::Any )
+: m_isConstMethod( false ), m_isNonStaticMethod( false ), m_exceptionSpec( Function::EExceptionSpec::Any )
 {}
 
 Function::~Function() noexcept

@@ -25,11 +25,6 @@ public:
 
 protected:
     virtual bool IsMockable( const CXCursor &cursor ) const noexcept override;
-
-    virtual bool IsMethod() const noexcept override
-    {
-        return true;
-    }
 };
 
 #endif // header guard
