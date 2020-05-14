@@ -139,6 +139,43 @@ TEST_GROUP( ConfigFile )
  *                    TEST CASES IMPLEMENTATION
  *===========================================================================*/
 
+ /*
+  * Check that an empty configuration file is handled properly
+  */
+TEST( ConfigFile, EmptyFile )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
+    SetupTempFile( outputFilepath1, "" );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-f", outputFilepath1.c_str(), "-m", "@" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
 /*
  * Check that include paths are passed properly to the parser
  */

@@ -108,7 +108,7 @@ static void ProcessConfigFile( const std::filesystem::path &configFilepath, cxxo
         throw std::runtime_error( errorMsg );
     }
 
-    if( params.size() > 0 )
+    if( params.size() > 1 )
     {
         int argc = (int) params.size();
         char **argv = new char *[ argc ]; // LCOV_EXCL_BR_LINE: False positive
