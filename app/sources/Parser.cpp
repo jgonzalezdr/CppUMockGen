@@ -53,7 +53,7 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
                     }
                     else
                     {
-                        delete function;
+                        delete function; // LCOV_EXCL_BR_LINE: False positive
                     }
                     return CXChildVisit_Continue;
                 }
@@ -66,7 +66,7 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
                     }
                     else
                     {
-                        delete method;
+                        delete method; // LCOV_EXCL_BR_LINE: False positive
                     }
                     return CXChildVisit_Continue;
                 }
@@ -146,7 +146,7 @@ bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &co
         {
             error << "Input file '" << inputFilepathStr.c_str() << "' does not exist." << std::endl;
         }
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
         else
         {
             error << "Unable to parse input file (Error code = " << tuError << ")." << std::endl;
@@ -167,7 +167,7 @@ bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &co
 
             CXDiagnosticSeverity diagSeverity = clang_getDiagnosticSeverity( diag );
 
-            switch( diagSeverity )
+            switch( diagSeverity ) // LCOV_EXCL_BR_LINE: Defensive
             {
                 case CXDiagnosticSeverity::CXDiagnostic_Fatal:
                 case CXDiagnosticSeverity::CXDiagnostic_Error:
@@ -181,7 +181,7 @@ bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &co
                     error << "PARSE WARNING: ";
                     break;
 
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
                 default:
                     break;
 // LCOV_EXCL_STOP

@@ -2,7 +2,7 @@ version: 1.0.0-ci{build}
 
 environment:
   CPPUTEST_HOME: C:\cpputest-3.9.alpha0
-  LCOV_HOME: C:\lcov-v1.15.alpha0w
+  LCOV_HOME: C:\lcov-1.15.alpha1w
   matrix:
   - Platform: MSVC64
     PlatformToolset: v142
@@ -24,7 +24,7 @@ environment:
 cache:
     - C:\cpputest-3.9.alpha0 -> appveyor.yml
     - C:\Strawberry
-    - C:\lcov-v1.15.alpha0w -> appveyor.yml
+    - C:\lcov-1.15.alpha1w -> appveyor.yml
     - C:\TDM-GCC-64\ -> appveyor.yml
 
 install:

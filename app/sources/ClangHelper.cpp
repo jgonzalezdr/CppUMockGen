@@ -55,7 +55,7 @@ std::string getQualifiedName( const CXCursor &cursor ) noexcept
     {
         CXCursor parent = clang_getCursorSemanticParent( cursor );
 
-        if( !clang_Cursor_isNull( parent ) )
+        if( !clang_Cursor_isNull( parent ) ) //LCOV_EXCL_BR_LINE: Defensive
         {
             ret = getQualifiedName( parent );
         }
@@ -107,7 +107,7 @@ std::string getMethodClassName( const CXCursor &cursor ) noexcept
 
     CXCursor parent = clang_getCursorSemanticParent( cursor );
 
-    if( !clang_Cursor_isNull( parent ) )
+    if( !clang_Cursor_isNull( parent ) ) //LCOV_EXCL_BR_LINE: Defensive
     {
         ret = getQualifiedName( parent );
     }
@@ -120,7 +120,7 @@ bool isMethodPublic( const CXCursor &cursor ) noexcept
     CXCursorKind cursorKind = clang_getCursorKind( cursor );
     CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
 
-    // LCOV_EXCL_START
+    // LCOV_EXCL_START: Defensive
     if( cursorKind == CXCursor_TranslationUnit )
     {
         return true;

@@ -111,7 +111,7 @@ static void ProcessConfigFile( const std::filesystem::path &configFilepath, cxxo
     if( params.size() > 0 )
     {
         int argc = (int) params.size();
-        char **argv = new char *[ argc ];
+        char **argv = new char *[ argc ]; // LCOV_EXCL_BR_LINE: False positive
 
         for( int i = 0; i < argc; i++ )
         {
@@ -120,7 +120,7 @@ static void ProcessConfigFile( const std::filesystem::path &configFilepath, cxxo
 
         options.parse( argc, argv );
 
-        delete[] argv;
+        delete[] argv; // LCOV_EXCL_BR_LINE: False positive
     }
 }
 

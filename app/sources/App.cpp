@@ -115,7 +115,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
         if( options.count("help") )
         {
-            m_cout << options.help();
+            m_cout << options.help(); // LCOV_EXCL_BR_LINE: False positive
             return 0;
         }
 
@@ -192,13 +192,13 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 }
 
                 expectImplOutputFile.open( expectImplOutputFilepath );
+                // LCOV_EXCL_START: Defensive
                 if( !expectImplOutputFile.is_open() )
                 {
-                    // LCOV_EXCL_START
                     std::string errorMsg = "Expectation implementation output file '" + expectImplOutputFilepath.generic_string() + "' could not be opened.";
                     throw std::runtime_error( errorMsg );
-                    // LCOV_EXCL_STOP
                 }
+                // LCOV_EXCL_STOP
             }
         }
 

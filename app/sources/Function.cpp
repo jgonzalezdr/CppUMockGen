@@ -412,7 +412,7 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
     ReturnStandard *ret;
     MockedType overrideType = override->GetType();
 
-    switch( overrideType )
+    switch( overrideType ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case MockedType::Bool:
             ret = new ReturnBool;
@@ -450,7 +450,7 @@ Function::Return* ReturnParser::ProcessOverride( const Config::OverrideSpec *ove
             ret = new ReturnConstPointer;
             break;
 
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
         default:
             throw std::runtime_error( "<INTERNAL ERROR> Unsupported mocked return type override" );
 // LCOV_EXCL_STOP
@@ -469,7 +469,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
 
     bool mockNeedsCast = false;
 
-    switch( returnType.kind )
+    switch( returnType.kind ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case CXType_Bool:
             ret = new ReturnBool;
@@ -559,7 +559,7 @@ ReturnStandard* ReturnParser::ProcessType( const CXType &returnType, bool inheri
             ret = ProcessType( clang_Type_getNamedType( returnType ), inheritConst, enableCast );
             break;
 
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
         default:
             throw std::runtime_error( "Unsupported return type " + clang_getTypeSpelling( returnType ) +
                                       " (kind: " +  clang_getTypeKindSpelling( returnType.kind) + ")" );
@@ -1253,7 +1253,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
         static_cast<ArgumentOutputOfType*>(ret)->SetExposedType( override->GetExposedTypeName() );
         static_cast<ArgumentOutputOfType*>(ret)->SetExpectationArgType( override->GetExpectationArgTypeName() );
     }
-    else switch( overrideType )
+    else switch( overrideType ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case MockedType::Bool:
             ret = new ArgumentBool;
@@ -1298,7 +1298,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
         case MockedType::Skip:
             return new ArgumentSkip;
 
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
         default:
             throw std::runtime_error( "<INTERNAL ERROR> Unsupported mocked argument type override" );
 // LCOV_EXCL_STOP
@@ -1315,7 +1315,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
 {
     ArgumentStandard *ret;
 
-    switch( argType.kind )
+    switch( argType.kind ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case CXType_Bool:
             ret = new ArgumentBool;
@@ -1381,7 +1381,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
             ret = ProcessType( clang_Type_getNamedType( argType ), origArgType, inheritConst );
             break;
 
-// LCOV_EXCL_START
+// LCOV_EXCL_START: Defensive
         default:
             throw std::runtime_error( "Unsupported parameter type " + clang_getTypeSpelling( argType ) +
                                       " (kind: " +  clang_getTypeKindSpelling( argType.kind) + ")" );
@@ -1585,7 +1585,7 @@ static Function::EExceptionSpec ParseClangExceptionSpec( const CXCursor &cursor 
 {
     int exceptionSpec = clang_getCursorExceptionSpecificationType( cursor );
 
-    switch( exceptionSpec )
+    switch( exceptionSpec ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case CXCursor_ExceptionSpecificationKind_None:
             return Function::EExceptionSpec::Any; // No spec means any exception can be thrown
@@ -1602,7 +1602,7 @@ static Function::EExceptionSpec ParseClangExceptionSpec( const CXCursor &cursor 
         case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
             return Function::EExceptionSpec::None;
 
-        // LCOV_EXCL_START
+        // LCOV_EXCL_START: Defensive
         default:
             throw std::runtime_error( "<UNEXPECTED ERROR> Unexpected exception kind '" + std::to_string(exceptionSpec)  +
                                       "' for method '" + clang_getCursorSpelling(cursor) + "'" );

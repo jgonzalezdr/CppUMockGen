@@ -74,9 +74,7 @@ if( COVERAGE AND NOT MSVC )
         endif()
     endif()
 
-    if( NOT CI_MODE )
-        set( LCOV_ARGS --rc lcov_branch_coverage=1 )
-    endif()
+    set( LCOV_ARGS --rc lcov_branch_coverage=exclude-exceptions )
 
     set( COVSRC_DIR ${CMAKE_SOURCE_DIR} )
 
