@@ -5,6 +5,13 @@ project( CppUMockGen.Top )
 option( ENABLE_TEST "Enable building tests" ON )
 option( CI_MODE "Enable continuous integration mode" OFF )
 
+if( WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.2.0") )
+    message( FATAL_ERROR "MinGW must be at least version 8.2.0" )
+endif()
+if( NOT WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0") )
+    message( FATAL_ERROR "GCC must be at least version 8.0.0" )
+endif()
+
 if( CMAKE_CONFIGURATION_TYPES )
     option( COVERAGE "Enable coverage analysis" ON )
 else()

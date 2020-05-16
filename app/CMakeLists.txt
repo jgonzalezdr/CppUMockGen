@@ -13,8 +13,8 @@ if( MSVC )
     generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} include )
 endif( MSVC )
 
-include_directories( ${LibClang_INCLUDE_DIRS}  ${CMAKE_CURRENT_SOURCE_DIR}/libs/cxxopts/include )
-link_directories( ${LibClang_LIBRARY_DIRS} )
+include_directories( ${LibClang_INCLUDE_DIR}  ${CMAKE_CURRENT_SOURCE_DIR}/libs/cxxopts/include )
+link_directories( ${LibClang_LIBRARY_DIR} )
 
 include( CheckFunctionExists )
 
@@ -91,7 +91,11 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "_dbg" )
 set_target_properties( ${PROJECT_NAME} PROPERTIES COVERAGE_POSTFIX "_cov" )
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION} )
 
-target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARY} )
+
+if( (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0.0") )
+    target_link_libraries( ${PROJECT_NAME} stdc++fs )
+endif()
 
 add_dependencies( build ${PROJECT_NAME} )
 

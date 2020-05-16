@@ -25,6 +25,10 @@ set( TEST_SRC_FILES
      ${CMAKE_SOURCE_DIR}/test/Expectations/Config_expect.cpp
 )
 
+if( NOT WIN32 )
+    add_definitions( -DAVOID_LIBCLANG_MEMLEAK )
+endif()
+
 # Generate test target
 
 include( ../GenerateTest.cmake )

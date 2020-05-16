@@ -11,7 +11,9 @@
 ConsoleColorizer cerrColorizer( ConsoleColorizer::ConsoleType::STD_ERROR );
 
 ConsoleColorizer::ConsoleColorizer( ConsoleType consoleType ) noexcept
-: m_handle( NULL ), m_origConsoleAttrs( 0 )
+#ifdef WIN32
+    : m_handle( NULL ), m_origConsoleAttrs( 0 )
+#endif
 {
 }
 

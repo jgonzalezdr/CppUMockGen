@@ -76,7 +76,7 @@ public:
 StdOstreamCopier stdOstreamCopier;
 
 static const std::filesystem::path tempDirPath = std::filesystem::temp_directory_path();
-static const std::filesystem::path outDirPath = tempDirPath;
+static const std::filesystem::path outDirPath = ( tempDirPath / "" );
 static const std::string inputFilename = "foo.h";
 static const std::string mockOutputFilename = "foo_mock.cpp";
 static const std::string mockOutputFilePath = (outDirPath / mockOutputFilename).generic_string();

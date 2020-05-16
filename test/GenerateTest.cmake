@@ -1,11 +1,3 @@
-if( NOT DEFINED CPPUTEST_HOME )
-    set( CPPUTEST_HOME $ENV{CPPUTEST_HOME} )
-endif()
-
-if( NOT DEFINED CPPUTEST_HOME )
-    message(FATAL_ERROR "CPPUTEST_HOME variable must define the path of the CppUTest home directory")
-endif()
-
 if( NOT MSVC )
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall" )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
@@ -18,14 +10,13 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 
 find_package( LibClang REQUIRED )
 
-include_directories( ${CPPUTEST_HOME}/include ${LibClang_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/test/TestHelpers )
-link_directories( ${CPPUTEST_HOME}/lib ${LibClang_LIBRARY_DIRS} )
+find_package( CppUTest REQUIRED )
 
-string( REPLACE \\ \\\\ CPPUTEST_INCLUDE_DIR ${CPPUTEST_HOME}\\include )
-string( REPLACE \\ \\\\ CPPUMOCKGEN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}\\app\\include )
+include_directories( ${CppUTest_INCLUDE_DIR} ${LibClang_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/test/TestHelpers )
+link_directories( ${CppUTest_LIBRARY_DIR} ${LibClang_LIBRARY_DIR} )
 
-add_definitions( -DCPPUTEST_INCLUDE_DIR="${CPPUTEST_INCLUDE_DIR}" )
-add_definitions( -DCPPUMOCKGEN_INCLUDE_DIR="${CPPUMOCKGEN_INCLUDE_DIR}" )
+add_definitions( -DCPPUTEST_INCLUDE_DIR="${CppUTest_INCLUDE_DIR}" )
+add_definitions( -DCPPUMOCKGEN_INCLUDE_DIR="${CMAKE_SOURCE_DIR}/app/include" )
 
 if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
@@ -36,14 +27,25 @@ add_executable( ${PROJECT_NAME} ${PROD_SRC_FILES} ${TEST_SRC_FILES} ${CMAKE_CURR
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
 
-if( MSVC )
-    target_link_libraries( ${PROJECT_NAME} debug CppUTest64d optimized CppUTest64 ${LibClang_LIBRARIES} )
+if( DEFINED CppUTest_DEBUG_LIBRARY )
+    target_link_libraries( ${PROJECT_NAME} debug ${CppUTest_DEBUG_LIBRARY} optimized ${CppUTest_LIBRARY} )
+    if( DEFINED CppUTestExt_DEBUG_LIBRARY )
+        target_link_libraries( ${PROJECT_NAME} debug ${CppUTestExt_DEBUG_LIBRARY} optimized ${CppUTestExt_LIBRARY} )
+    endif()
 else()
-    target_link_libraries( ${PROJECT_NAME} debug CppUTest64d debug CppUTestExt64d optimized CppUTest64 optimized CppUTestExt64 ${LibClang_LIBRARIES} gcov pthread )
+    target_link_libraries( ${PROJECT_NAME} ${CppUTest_LIBRARY} )
+    if( DEFINED CppUTestExt_LIBRARY )
+        target_link_libraries( ${PROJECT_NAME} ${CppUTestExt_LIBRARY} )
+    endif()
+endif()
+
+target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARY} )
+
+if( (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0.0") )
+    target_link_libraries( ${PROJECT_NAME} stdc++fs )
 endif()
 
 add_dependencies( build ${PROJECT_NAME} )
-add_dependencies( run_tests ${PROJECT_NAME} )
 
 if( CI_MODE )
     set( TEST_ARGS -ojunit -v )
