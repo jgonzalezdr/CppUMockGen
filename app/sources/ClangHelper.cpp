@@ -11,7 +11,8 @@
 
 std::ostream& operator<<( std::ostream& stream, const CXString& cxstr ) noexcept
 {
-    stream << clang_getCString(cxstr);
+    const char *cstr = clang_getCString(cxstr);
+    stream << cstr;
     clang_disposeString(cxstr);
     return stream;
 }
