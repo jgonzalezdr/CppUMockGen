@@ -23,7 +23,7 @@ $coverage = if ($env:Configuration -eq 'Coverage') {'ON'} else {'OFF'}
 $check_compilation = if ($env:CheckCompilation) {'ON'} else {'OFF'}
 $test = if ($env:Test -eq 'False') {'OFF'} else {'ON'}
 
-$cmake_options = "-Wno-dev -DCI_MODE=ON -DENABLE_TEST=$test"
+$cmake_options = "-DCI_MODE=ON -DENABLE_TEST=$test"
 
 if( $test -eq 'ON')
 {
@@ -37,7 +37,11 @@ if( $env:APPVEYOR_REPO_TAG -eq 'false' )
     $repo_provider = $env:APPVEYOR_REPO_PROVIDER 
     $build_id = "$repo_provider-$commit_id"
     
-    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPROJECT_VERSION_SUFFIX=-$build_id -DINSTALLER_FILE_VERSION=Experimental -DPRERELEASE=ON -DPRIVATE_BUILD_INFO=$build_id"
+    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPROJECT_VERSION_SUFFIX=-$build_id -DPRERELEASE=ON -DPRIVATE_BUILD_INFO=$build_id"
+}
+else
+{
+    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPRERELEASE=OFF  -DPRIVATE_BUILD_INFO=$build_id"
 }
 
 switch -Wildcard ($env:Platform)
@@ -57,6 +61,14 @@ switch -Wildcard ($env:Platform)
 
         Invoke-Command "cmake .. -G '$cmake_generator' $cmake_options" "$build_dir"
         Invoke-Command "msbuild $logger_arg /property:Configuration=$build_config build.vcxproj" "$build_dir"
+    }
+	
+    'LINUX-GCC'
+    {
+        $cmake_options += " -DCMAKE_C_COMPILER=gcc-$env:GccVersion -DCMAKE_CXX_COMPILER=g++-$env:GccVersion"
+        
+        Invoke-Command "cmake .. $cmake_options" "$build_dir"
+        Invoke-Command "make" "$build_dir"
     }
 	
     default

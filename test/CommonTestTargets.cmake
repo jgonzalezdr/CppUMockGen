@@ -10,30 +10,7 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 add_custom_target( run_tests COMMAND ctest -V ${IGNORE_ERROR} DEPENDS build )
 
 #
-# xUnit report merging
-#
-
-if( CI_MODE AND NOT WIN32 )
-
-    find_program( MERGE_XUNIT merge_xunit_results.py )
-    if( NOT EXISTS ${MERGE_XUNIT} )
-        message( FATAL_ERROR "merge_xunit_results.py is not installed" )
-    endif()
-
-    set( XUNIT_OUT_PATH "reports/xunit/" )
-    set( XUNIT_OUT_FILE "xunit.xml" )
-
-    add_custom_target( xunit_report
-                       COMMAND ${CMAKE_COMMAND} -E make_directory ${XUNIT_OUT_PATH}
-                       COMMAND ${MERGE_XUNIT} -o ${XUNIT_OUT_PATH}${XUNIT_OUT_FILE} "cpputest_*.xml"
-                       DEPENDS run_tests )
-
-    add_dependencies( ci xunit_report )
-
-endif()
-
-#
-# LCOV
+# Coverage with GCC/MinGW
 #
 
 if( COVERAGE AND NOT MSVC )
@@ -110,30 +87,15 @@ if( COVERAGE AND NOT MSVC )
                            DEPENDS coverage_combine )
     endif()
 
-    if( CI_MODE AND JENKINS )
+    add_custom_target( coverage_report
+                       COMMAND ${PERL_EXECUTABLE} ${genhtml_EXECUTABLE} ${LCOV_ARGS} -s ${COVDST_DIR}/app_stripped.info -o ${COVDST_DIR} --demangle-cpp --title "Unit Tests" --rc genhtml_charset=cp-1252
+                       DEPENDS coverage_process )
 
-        find_program( LCOV_XML lcov_cobertura.py )
-        if( NOT EXISTS ${LCOV_XML} )
-            message( FATAL_ERROR "lcov_cobertura is not installed" )
-        endif()
+endif()
 
-        set( COVERAGE_FILE coverage.xml )
-
-        add_custom_target( coverage_report
-                           COMMAND ${LCOV_XML} -b ${COVSRC_DIR} -o ${COVDST_DIR}/${COVERAGE_FILE} ${COVDST_DIR}/app_stripped.info
-                           DEPENDS coverage_process )
-
-        add_dependencies( ci coverage_report )
-
-    elseif( NOT CI_MODE )
-
-        add_custom_target( coverage_report
-                           COMMAND ${PERL_EXECUTABLE} ${genhtml_EXECUTABLE} ${LCOV_ARGS} -s ${COVDST_DIR}/app_stripped.info -o ${COVDST_DIR} --demangle-cpp --title "Unit Tests" --rc genhtml_charset=cp-1252
-                           DEPENDS coverage_process )
-
-    endif()
-
-endif( )
+#
+# Coverage with Visual Studio
+#
 
 if( COVERAGE AND MSVC )
 
@@ -172,4 +134,4 @@ if( COVERAGE AND MSVC )
                        COMMAND ${OPENCPPCOVERAGE} ${OPENCPPCOV_ARGS} --export_type ${COV_OUTTYPE}:${COVDST_DIR} --sources ${COVSRC_PATH} -- ${CMAKE_CTEST_COMMAND} ${CTEST_ARGS}
                        DEPENDS build )
 
-endif( )
+endif()

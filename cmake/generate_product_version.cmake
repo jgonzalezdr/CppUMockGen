@@ -88,6 +88,8 @@ function( generate_product_version outfiles )
          SPECIAL_BUILD
          PRERELEASE
          PATCHED
+         HOMEPAGE
+         MAINTAINER
     )
     set( multiValueArgs )
     cmake_parse_arguments( PRODUCT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -204,5 +206,7 @@ function( generate_product_version outfiles )
         set( PRODUCT_SPECIAL_BUILD ${PRODUCT_SPECIAL_BUILD} PARENT_SCOPE )
         set( PRODUCT_PRERELEASE ${PRODUCT_PRERELEASE} PARENT_SCOPE )
         set( PRODUCT_PATCHED ${PRODUCT_PATCHED} PARENT_SCOPE )
+        set( PRODUCT_HOMEPAGE ${PRODUCT_HOMEPAGE} PARENT_SCOPE )
+        set( PRODUCT_MAINTAINER ${PRODUCT_MAINTAINER} PARENT_SCOPE )
     endif()
 endfunction()

@@ -38,14 +38,31 @@ if ($env:GenerateInstaller)
             Remove-PathFolder $mingw_path
         }
 
+        'LINUX-GCC'
+        {
+            Invoke-Command "make package" "$build_dir"
+        }
+
         default
         {
-            throw "Installer generation is only supported for MinGW builds"
+            throw "Installer generation is only supported for MinGW and GCC builds"
         }
     }
 }
 
 if ($env:PublishArtifacts)
 {
-    Get-ChildItem $build_dir\*.exe | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+    switch -regex ($env:Platform)
+    {
+        '(MinGW|TDM-GCC).*'
+        {
+            Get-ChildItem -Path $build_dir/*.exe | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+        }
+        
+        'LINUX-GCC'
+        {
+            Get-ChildItem -Path $build_dir/*.deb | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+            Get-ChildItem -Path $build_dir/*.tar.xz | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+        }
+    }
 }

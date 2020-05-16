@@ -76,6 +76,13 @@ if (!($env:Test -eq 'False'))
             Invoke-Command "msbuild $logger_arg /property:Configuration=$build_config run_tests.vcxproj" "$build_dir\test"
         }
 		
+        'LINUX-GCC'
+        {
+            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
+
+            Invoke-Command "make $build_target" "$build_dir"
+        }
+        
         default
         {
             $mingw_path = Get-MinGWBin
