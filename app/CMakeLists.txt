@@ -18,12 +18,6 @@ link_directories( ${LibClang_LIBRARY_DIR} )
 
 include( CheckFunctionExists )
 
-if( WIN32 )
-    set( PLATFORM_DIR "msw" )
-elseif( UNIX )
-    set( PLATFORM_DIR "linux" )
-endif()
-
 set( SRC_LIST
      sources/main.cpp
      sources/App.cpp
@@ -131,21 +125,29 @@ else()
     message( FATAL_ERROR "Could not determine architecture bitsize (32 or 64)" )
 endif()
 
-string_escape( CPACK_NSIS_MUI_ICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-install.ico" )
-string_escape( CPACK_NSIS_MUI_UNIICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-uninstall.ico" )
-string_escape( CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-metro.bmp" )
-string_escape( CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-grey.bmp" )
-string_escape( CPACK_NSIS_MUI_HEADERIMAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-metro.bmp" )
-string_escape( CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-grey.bmp" )
-set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON" )
-set( CPACK_NSIS_MUI_FINISHPAGE_NOAUTOCLOSE "ON" )
-
 if( WIN32 )
+    string_escape( CPACK_NSIS_MUI_ICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-install.ico" )
+    string_escape( CPACK_NSIS_MUI_UNIICON "\${NSISDIR}\\Contrib\\Graphics\\Icons\\nsis3-uninstall.ico" )
+    string_escape( CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-metro.bmp" )
+    string_escape( CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Wizard\\nsis3-grey.bmp" )
+    string_escape( CPACK_NSIS_MUI_HEADERIMAGE_BITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-metro.bmp" )
+    string_escape( CPACK_NSIS_MUI_HEADERIMAGE_UNBITMAP "\${NSISDIR}\\Contrib\\Graphics\\Header\\nsis3-grey.bmp" )
+    set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON" )
+    set( CPACK_NSIS_MUI_FINISHPAGE_NOAUTOCLOSE "ON" )
+
     if( NOT INSTALLER_FILE_VERSION OR "${INSTALLER_FILE_VERSION}" STREQUAL "" )
         set( INSTALLER_FILE_VERSION "v${PRODUCT_VERSION}" )
     endif()
 
     set( CPACK_PACKAGE_FILE_NAME "Install ${PRODUCT_NAME} ${INSTALLER_FILE_VERSION}" )
+else()
+    set( CPACK_GENERATOR DEB TXZ )
+
+    set( CPACK_DEBIAN_PACKAGE_MAINTAINER "Jesus Gonzalez <jgonzalez@gdr-sistemas.com>" )
+    set( CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/jgonzalezdr/CppUMockGen" )
+    set( CPACK_DEBIAN_FILE_NAME DEB-DEFAULT )
+    set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
+    set( CPACK_DEBIAN_PACKAGE_RELEASE ${PROJECT_VERSION_BUILD} )
 endif()
 
 include( CPack )
