@@ -121,7 +121,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
         if( options.count("version") )
         {
-            m_cout << PRODUCT_NAME " v" PRODUCT_VERSION_STR;
+            m_cout << PRODUCT_NAME " v" PRODUCT_VERSION_STR << std::endl;
             return 0;
         }
 
