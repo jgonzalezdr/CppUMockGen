@@ -57,6 +57,7 @@ if ($env:PublishArtifacts)
         '(MinGW|TDM-GCC).*'
         {
             Get-ChildItem -Path $build_dir/*.exe | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+            Get-ChildItem -Path $build_dir/*.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         }
         
         'LINUX-GCC'

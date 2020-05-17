@@ -1,0 +1,8 @@
+if( CPACK_GENERATOR STREQUAL "NSIS" )
+    if( CPACK_SYSTEM_NAME MATCHES "64" )
+        set( ARCH "x64" )
+    else()
+        set( ARCH "x32" )
+    endif()
+    set( CPACK_PACKAGE_FILE_NAME "Install ${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION} ${ARCH}" )    
+endif()
