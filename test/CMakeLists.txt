@@ -4,23 +4,29 @@ project( CppUMockGen.AllTests )
 
 option( CHECK_COMPILATION "Check that generated code compiles properly" ON )
 
-enable_testing()
+option( COVERAGE_VERBOSE "Coverage analysis is performed in verbose mode" OFF )
 
-include( CommonTestTargets.cmake )
+if( ENABLE_TEST )
 
-if( NOT CHECK_COMPILATION )
-    add_definitions( -DDISABLE_COMPILATION_CHECK )
+    enable_testing()
+
+    include( CommonTestTargets.cmake )
+
+    if( NOT CHECK_COMPILATION )
+        add_definitions( -DDISABLE_COMPILATION_CHECK )
+    endif()
+
+    # Test modules
+
+    add_subdirectory( App )
+    add_subdirectory( ConfigFile )
+    add_subdirectory( Parser )
+    add_subdirectory( Config )
+    add_subdirectory( Function_Mock_CPP )
+    add_subdirectory( Function_Mock_C )
+    add_subdirectory( Function_Expectation_CPP )
+    add_subdirectory( Function_Expectation_C )
+    add_subdirectory( Method_Mock )
+    add_subdirectory( Method_Expectation )
+
 endif()
-
-# Test modules
-
-add_subdirectory( App )
-add_subdirectory( ConfigFile )
-add_subdirectory( Parser )
-add_subdirectory( Config )
-add_subdirectory( Function_Mock_CPP )
-add_subdirectory( Function_Mock_C )
-add_subdirectory( Function_Expectation_CPP )
-add_subdirectory( Function_Expectation_C )
-add_subdirectory( Method_Mock )
-add_subdirectory( Method_Expectation )

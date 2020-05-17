@@ -59,7 +59,30 @@ endif()
 add_custom_target( build )
 
 add_subdirectory( app )
+add_subdirectory( test )
 
-if( ENABLE_TEST )
-    add_subdirectory( test )
+set( CONFIG_MSG "
+--------------------------------------------------------------------------
+                            CONFIGURATION
+--------------------------------------------------------------------------
+
+Build Options:" )
+
+if( DEFINED CMAKE_BUILD_TYPE )
+set( CONFIG_MSG "${CONFIG_MSG}
+    CMAKE_BUILD_TYPE:                   ${CMAKE_BUILD_TYPE}" )
 endif()
+
+set( CONFIG_MSG "${CONFIG_MSG}
+    CI_MODE:                            ${CI_MODE}
+
+Configured Features:
+    ENABLE_TEST:                        ${ENABLE_TEST}
+    COVERAGE:                           ${COVERAGE}
+    COVERAGE_VERBOSE:                   ${COVERAGE_VERBOSE}
+    CHECK_COMPILATION:                  ${CHECK_COMPILATION}
+
+--------------------------------------------------------------------------
+" )
+
+message( STATUS ${CONFIG_MSG} )

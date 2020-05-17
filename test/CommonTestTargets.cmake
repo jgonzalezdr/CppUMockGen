@@ -1,5 +1,3 @@
-option( COVERAGE_VERBOSE "Coverage analysis is performed in verbose mode" OFF )
-
 if( CI_MODE OR MSVC )
     set( IGNORE_ERROR || exit /b 0 )
 endif()
