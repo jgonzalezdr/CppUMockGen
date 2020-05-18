@@ -30,18 +30,20 @@ if( $test -eq 'ON')
     $cmake_options += " -DCOVERAGE=$coverage -DCHECK_COMPILATION=$check_compilation"
 }
 
+$build_num = $env:APPVEYOR_BUILD_NUMBER
+$commit_id = $env:APPVEYOR_REPO_COMMIT.Substring(0,8)
+$repo_provider = $env:APPVEYOR_REPO_PROVIDER 
+$build_id = "$repo_provider-$commit_id"
+
+$cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPRIVATE_BUILD_INFO=$build_id"
+
 if( $env:APPVEYOR_REPO_TAG -eq 'false' )
-{
-    $build_num = $env:APPVEYOR_BUILD_NUMBER
-    $commit_id = $env:APPVEYOR_REPO_COMMIT.Substring(0,8)
-    $repo_provider = $env:APPVEYOR_REPO_PROVIDER 
-    $build_id = "$repo_provider-$commit_id"
-    
-    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPROJECT_VERSION_SUFFIX=-$build_id -DPRERELEASE=ON -DPRIVATE_BUILD_INFO=$build_id"
+{    
+    $cmake_options += " -DPRERELEASE=ON -DPROJECT_VERSION_SUFFIX=-$build_id"
 }
 else
 {
-    $cmake_options += " -DPROJECT_VERSION_BUILD=$build_num -DPRERELEASE=OFF  -DPRIVATE_BUILD_INFO=$build_id"
+    $cmake_options += " -DPRERELEASE=OFF"
 }
 
 switch -Wildcard ($env:Platform)
