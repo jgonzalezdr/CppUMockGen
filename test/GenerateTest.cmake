@@ -22,7 +22,7 @@ if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
 endif()
 
-add_executable( ${PROJECT_NAME} ${PROD_SRC_FILES} ${TEST_SRC_FILES} ${CMAKE_CURRENT_LIST_DIR}/TestMain.cpp )
+add_executable( ${PROJECT_NAME} EXCLUDE_FROM_ALL ${PROD_SRC_FILES} ${TEST_SRC_FILES} ${CMAKE_CURRENT_LIST_DIR}/TestMain.cpp )
 
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
@@ -45,7 +45,7 @@ if( (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSI
     target_link_libraries( ${PROJECT_NAME} stdc++fs )
 endif()
 
-add_dependencies( build ${PROJECT_NAME} )
+add_dependencies( build_tests ${PROJECT_NAME} )
 
 if( CI_MODE )
     set( TEST_ARGS -ojunit -v )

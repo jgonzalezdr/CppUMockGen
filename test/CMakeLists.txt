@@ -10,6 +10,8 @@ if( ENABLE_TEST )
 
     enable_testing()
 
+    add_custom_target( build_tests )
+
     include( CommonTestTargets.cmake )
 
     if( NOT CHECK_COMPILATION )
