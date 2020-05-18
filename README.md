@@ -90,6 +90,16 @@ Eventually, we can use these generated mocks and expectations in an unit test li
 > }
 > ```
 
+## Download Binaries
+
+The last releases for Windows and Linux can be found in [GitHub Releases](https://github.com/jgonzalezdr/CppUMockGen/releases) in different formats:
+  - Installer for Windows (x64).
+  - Portable package for Windows (x64).
+  - Debian package for Linux (x64), tested on Ubuntu 18.04 LTS.
+  - Portable package for Linux (x64)
+
+On Ubuntu systems you can install CppUMockGen from the [CppUMockGen PPA repository](https://launchpad.net/~jgonzalezdr/+archive/ubuntu/cpputest).
+
 ## Getting Started
 
 ###### Basic Command-Line Options
@@ -119,34 +129,35 @@ CppUMockGen deduces the data types to use with CppUMock from the actual function
 
 Since complex mocks will require a lot of override options, and many of them can be reused to generate mocks for other files, you can store options in a text file and load that file using the `-f` / `--config-file` option.
 
-For more information check the [CppUMockGen Usage Manual](MANUAL.md).
+## Usage Manual
 
-## Download Binaries
-
-* [GitHub Releases](https://github.com/jgonzalezdr/CppUMockGen/releases)
-* [Last successful Windows build of the master branch](https://ci.appveyor.com/api/projects/jgonzalezdr/CppUMockGen/artifacts/Install%20CppUMockGen%20Experimental.exe?branch=master&job=Environment:%20Platform=MinGW64,%20PlatformToolset=6.3.0,%20Configuration=Release,%20Test=False,%20PublishArtifacts=True,%20GenerateInstaller=True,%20APPVEYOR_BUILD_WORKER_IMAGE=Visual%20Studio%202015)
+You can find complete information on the usage of CppUMockGen in the [CppUMockGen Usage Manual](MANUAL.md).
 
 ## Building from Source
 
-#### Requirements
+### Requirements
 
-- [cmake](https://cmake.org/) (tested with v3.17.2)
-- [clang](http://releases.llvm.org/download.html) (tested with v10.0.0)
-- A C/C++ compiler, either:
-  - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with [TDM-GCC 9.2.0](https://jmeubank.github.io/tdm-gcc/download/), will not work with MinGW-w64 releases &lt;= 8.1.0)
-  - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2019)
-- [CppUTest](http://cpputest.github.io/) [Optional, not needed if tests are disabled] (requires at least [v3.9.alpha0](https://github.com/jgonzalezdr/cpputest/releases/download/v3.9.alpha0/cpputest-3.9.alpha0.zip))
-- [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using GCC/MinGW] (requires at least [v1.15.alpha0w](https://github.com/jgonzalezdr/lcov/releases/download/v1.15.alpha0w/lcov-v1.15.alpha0w.zip))
-- [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage) [Optional, needed if tests and coverage are enabled using Visual Studio 2019] (tested with v0.9.8.0)
+- [CMake](https://cmake.org/) (>= v3.3)
+- [libClang](http://releases.llvm.org/download.html) (>= v6.0)
+- [CppUTest](http://cpputest.github.io/) [Optional, not needed if tests are disabled] (>= [v3.9.alpha0](https://github.com/jgonzalezdr/cpputest/releases/download/v3.9.alpha0/cpputest-3.9.alpha0.zip))
+- On Windows:
+  - A C/C++ compiler, either:
+    - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with [TDM-GCC v9.2.0](https://jmeubank.github.io/tdm-gcc/download/), will not work with MinGW-w64 releases &lt;= v8.1.0)
+    - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2019)
+  - [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using MinGW] (>= [v1.15.alpha0w](https://github.com/jgonzalezdr/lcov/releases/download/v1.15.alpha0w/lcov-v1.15.alpha0w.zip))
+  - [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage) [Optional, needed if tests and coverage are enabled using Visual Studio 2019] (tested with v0.9.8.0)
+- On Linux:
+  - [GCC](https://gcc.gnu.org/) (>= v8.0.0)
+  - [LCOV](http://ltp.sourceforge.net/coverage/lcov.php) [Optional, needed if tests and coverage are enabled using GCC] (>= v1.14)
 
-#### Build using TDD-GCC in Windows
+### Build using MinGW (Windows)
 
-To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it execute the following commands:
+To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it (top directory) execute the following commands:
 
 ```powershell
 mkdir build_mingw
 cd build_mingw
-cmake .. -G "MinGW Makefiles" -DCPPUTEST_HOME="<Path to your CppUTest home>"
+cmake .. -G "MinGW Makefiles"
 mingw32-make
 ```
 
@@ -156,9 +167,17 @@ To execute the tests execute the following command in the _build_mingw_ director
 mingw32-make run_tests
 ```
 
-#### Build using Visual Studio 2019
+If the Coverage build type is selected, to generate the coverage report execute the following command in the _build_mingw_ directory:
 
-To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it execute the following commands:
+```powershell
+mingw32-make coverage_report
+```
+
+The coverage report will be generated in the _coverage_lcov_ directory under the top directory.
+
+### Build using Visual Studio 2019 (Windows)
+
+To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it (top directory) execute the following commands:
 
 ```powershell
 mkdir build_vs
@@ -166,4 +185,55 @@ cd build_vs
 cmake .. -G "Visual Studio 16 2019" -DCPPUTEST_HOME="<Path to your CppUTest home>"
 ```
 
-Eventually open the _CppUMockGen.Top.sln_ VS solution generated in the _build_vs_ directory, then compile the solution. To execute the tests, compile the _run_tests_ project.
+Eventually open the _CppUMockGen.Top.sln_ VS solution generated in the _build_vs_ directory, then compile the solution.
+
+To execute the tests, compile the _run_tests_ project.
+
+If coverage is enabled, to generate the coverage report compile the _run_coverage_ project, and the report will be generated in the _coverage_msvc_ directory under the top directory.
+
+### Build using GCC (Linux)
+
+To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it (top directory) execute the following commands:
+
+```bash
+mkdir build_gcc
+cd build_gcc
+cmake ..
+make
+```
+
+To execute the tests execute the following command in the _build_gcc_ directory:
+
+```bash
+make run_tests
+```
+
+If the Coverage build type is selected, to generate the coverage report execute the following command in the _build_gcc_ directory:
+
+```bash
+make coverage_report
+```
+
+The coverage report will be generated in the _coverage_lcov_ directory under the top directory.
+
+### Build Options
+
+#### Build Types
+
+The following build types are supported:
+  - **Release**
+  - **Debug**
+  - **RelWithDebInfo** _(Release build with debug information)_
+  - **MinSizeRel** _(Release with executable size minimization)_
+  - **Coverage** _(Only GCC/MinGW)_
+
+When using Visual Studio, the available build types are available as project configurations. Coverage is enabled by default, to disable it pass the option `-DCOVERAGE=OFF` to CMake.
+
+When using GCC/MinGW, the default build type is Release. To select a different build type pass the option `-DCMAKE_BUILD_TYPE=<Build Type>` to CMake.
+
+#### Finding Dependencies
+
+If during configuration CMake cannot find some dependencies, their installation paths can be indicated by passing one of the following options to CMake:
+  - libClang: `-DLibClang_HOME=<Path to LLVM top directory>`
+  - CppUTest: `-DCppUTest_HOME=<Path to CppUTest top directory>`
+  - LCOV: `-Dlcov_HOME=<Path to LCOV top directory>`
