@@ -7,7 +7,7 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 find_package( LibClang REQUIRED )
 
 if( MSVC )
-    include( ${CMAKE_SOURCE_DIR}/cmake/VSHelper.cmake )
+    include( VisualStudioHelper )
 
     generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} sources )
     generate_groups( ${CMAKE_CURRENT_SOURCE_DIR} include )
@@ -50,7 +50,7 @@ if( NOT PROJECT_VERSION_BUILD )
     set( PROJECT_VERSION_BUILD ${PROJECT_VERSION_TWEAK} )
 endif()
 
-include( ${CMAKE_SOURCE_DIR}/cmake/generate_product_version.cmake )
+include( GenerateProductVersion )
 
 generate_product_version(
     PRODUCT_VERSION_FILES

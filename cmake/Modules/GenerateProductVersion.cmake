@@ -1,7 +1,7 @@
 # The MIT License (MIT)
 # 
 # Copyright (c) 2015, by [halex2005](mailto:akharlov@gmail.com)
-# Copyright (c) 2018, by Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
+# Copyright (c) 2018-2020, by Jesus Gonzalez <jgonzalez@gdr-sistemas.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 
 include (CMakeParseArguments)
 
-set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
+set( GenerateProductVersionTemplateDir "${CMAKE_CURRENT_LIST_DIR}/GenerateProductVersion" )
 
 # generate_product_version() function
 #
@@ -172,17 +172,17 @@ function( generate_product_version outfiles )
     set( _VersionResourceHeaderFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.h )
     set( _VersionResourceFile ${CMAKE_CURRENT_BINARY_DIR}/VersionResource.rc )
     configure_file(
-        ${GenerateProductVersionCurrentDir}/VersionInfo.in.h
+        ${GenerateProductVersionTemplateDir}/VersionInfo.in.h
         ${_VersionInfoHeaderFile}
-        @ONLY)
+        @ONLY )
     configure_file(
-        ${GenerateProductVersionCurrentDir}/VersionResource.in.h
+        ${GenerateProductVersionTemplateDir}/VersionResource.in.h
         ${_VersionResourceHeaderFile}
-        @ONLY)
+        @ONLY )
     configure_file(
-        ${GenerateProductVersionCurrentDir}/VersionResource.rc
+        ${GenerateProductVersionTemplateDir}/VersionResource.rc
         ${_VersionResourceFile}
-        COPYONLY)
+        COPYONLY )
     list( APPEND ${outfiles} ${_VersionInfoHeaderFile} ${_VersionResourceHeaderFile} ${_VersionResourceFile} )
     set( ${outfiles} ${${outfiles}} PARENT_SCOPE )
 
