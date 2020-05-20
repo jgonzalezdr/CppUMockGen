@@ -6,7 +6,19 @@ else()
     set( LIBCLANG_LIBNAME "clang" )
 endif()
 
-find_path( LibClang_BASE_DIR include/clang-c/Index.h PATHS ${LibClang_HOME} $ENV{LibClang_HOME} ${LIBCLANG_PATHS} )
+if( DEFINED ENV{LIBCLANG_HOME} )
+    set( LIBCLANG_PATHS "$ENV{LIBCLANG_HOME}" ${LIBCLANG_PATHS} )
+endif()
+
+if( LIBCLANG_HOME )
+    set( LIBCLANG_PATHS "${LIBCLANG_HOME}" ${LIBCLANG_PATHS} )
+endif()
+
+if( LibClang_HOME )
+    set( LIBCLANG_PATHS "${LibClang_HOME}" ${LIBCLANG_PATHS} )
+endif()
+
+find_path( LibClang_BASE_DIR include/clang-c/Index.h PATHS ${LIBCLANG_PATHS} )
 
 if( NOT WIN32 )
     string( REGEX MATCH "-[^-]+$" LIBCLANG_VERSION_SUFFIX ${LibClang_BASE_DIR} )
