@@ -1,0 +1,9 @@
+Mock generator for CppUTest.
+ CppUMockGen generates automatically mocks for member and non-member
+ functions defined in C/C++ header files to avoid the burden of having
+ to write these mocks manually when writing units tests using the
+ CppUTest/CppUMock unit testing framework.
+ .
+ CppUMockGen additionally generates automatically expectation functions
+ to improve and ease the declaration of expectations for functions in 
+ tests, making expectation declarations shorter and less error prone.

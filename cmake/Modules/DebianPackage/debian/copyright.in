@@ -1,0 +1,5 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+@DEBIAN_PACKAGE_COPYRIGHT_HEADER_LINES@
+Files:     *
+Copyright: @DEBIAN_PACKAGE_COPYRIGHT_YEARS@ @DEBIAN_PACKAGE_COPYRIGHT_HOLDER@
+License:   @DEBIAN_PACKAGE_COPYRIGHT_LICENSE@
