@@ -1,22 +1,30 @@
 if( WIN32 )
-    set( LCOV_PATHS "C:/lcov/bin" "C:/Program Files/lcov/bin" )
+    set( LCOV_PATHS "C:/LCOV/bin" "C:/Program Files/LCOV/bin" )
 else()
     set( LCOV_PATHS "/usr/local/bin" "/usr/bin" )
 endif()
 
-find_program( lcov_EXECUTABLE lcov PATHS ${lcov_HOME}/bin $ENV{lcov_HOME}/bin ${LCOV_PATHS} )
+if( DEFINED ENV{LCOV_HOME} )
+    set( LCOV_PATHS "$ENV{LCOV_HOME}/bin" ${LCOV_PATHS} )
+endif()
 
-get_filename_component( LCOV_BASE_DIR ${lcov_EXECUTABLE} DIRECTORY )
+if( LCOV_HOME )
+    set( LCOV_PATHS "${LCOV_HOME}/bin" ${LCOV_PATHS} )
+endif()
 
-find_program( genhtml_EXECUTABLE genhtml PATHS ${LCOV_BASE_DIR} NO_DEFAULT_PATH )
+find_program( LCOV_EXECUTABLE lcov PATHS ${LCOV_PATHS} )
 
-if( lcov_EXECUTABLE )
+get_filename_component( LCOV_BASE_DIR ${LCOV_EXECUTABLE} DIRECTORY )
+
+find_program( GENHTML_EXECUTABLE genhtml PATHS ${LCOV_BASE_DIR} NO_DEFAULT_PATH )
+
+if( LCOV_EXECUTABLE )
     find_package( Perl REQUIRED )
 
     if( DEFINED Perl_FOUND )
         # Get version
         execute_process(
-            COMMAND ${PERL_EXECUTABLE} ${lcov_EXECUTABLE} -v
+            COMMAND ${PERL_EXECUTABLE} ${LCOV_EXECUTABLE} -v
             OUTPUT_VARIABLE LCOV_VERSION_OUTPUT_VARIABLE
             RESULT_VARIABLE LCOV_VERSION_RESULT_VARIABLE
             ERROR_QUIET
@@ -29,11 +37,11 @@ if( lcov_EXECUTABLE )
 endif()
 
 include( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( lcov 
-                                   REQUIRED_VARS lcov_EXECUTABLE genhtml_EXECUTABLE
+find_package_handle_standard_args( LCOV 
+                                   REQUIRED_VARS LCOV_EXECUTABLE GENHTML_EXECUTABLE
                                    VERSION_VAR LCOV_VERSION_STRING )
 
-mark_as_advanced( lcov_EXECUTABLE genhtml_EXECUTABLE )
+mark_as_advanced( LCOV_EXECUTABLE GENHTML_EXECUTABLE )
 
 unset( LCOV_PATHS )
 unset( LCOV_BASE_DIR )
