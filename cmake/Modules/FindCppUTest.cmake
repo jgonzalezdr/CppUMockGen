@@ -16,7 +16,19 @@ else()
     set( CPPUTESTEXT_LIBNAME "CppUTestExt" )
 endif()
 
-find_library( CppUTest_LIB_PATH NAMES ${CPPUTEST_LIBNAME} PATHS ${CppUTest_HOME}/lib $ENV{CppUTest_HOME}/lib ${CPPUTEST_PATHS} )
+if( DEFINED ENV{CPPUTEST_HOME} )
+    set( CPPUTEST_PATHS "$ENV{CPPUTEST_HOME}/lib" ${CPPUTEST_PATHS} )
+endif()
+
+if( CPPUTEST_HOME )
+    set( CPPUTEST_PATHS "${CPPUTEST_HOME}/lib" ${CPPUTEST_PATHS} )
+endif()
+
+if( CppUTest_HOME )
+    set( CPPUTEST_PATHS "${CppUTest_HOME}/lib" ${CPPUTEST_PATHS} )
+endif()
+
+find_library( CppUTest_LIB_PATH NAMES ${CPPUTEST_LIBNAME} PATHS ${CPPUTEST_PATHS} )
 mark_as_advanced( CppUTest_LIB_PATH  )
 
 get_filename_component( CppUTest_LIBRARY_DIR ${CppUTest_LIB_PATH} DIRECTORY )
