@@ -5,18 +5,17 @@ else()
 endif()
 
 if( DEFINED ENV{LCOV_HOME} )
-    set( LCOV_PATHS "$ENV{LCOV_HOME}/bin" ${LCOV_PATHS} )
+    set( LCOV_HINTS "$ENV{LCOV_HOME}/bin" ${LCOV_HINTS} )
 endif()
-
 if( LCOV_HOME )
-    set( LCOV_PATHS "${LCOV_HOME}/bin" ${LCOV_PATHS} )
+    set( LCOV_HINTS "${LCOV_HOME}/bin" ${LCOV_HINTS} )
 endif()
 
-find_program( LCOV_EXECUTABLE lcov PATHS ${LCOV_PATHS} )
+find_program( LCOV_EXECUTABLE lcov PATHS ${LCOV_PATHS} HINTS ${LCOV_HINTS} )
 
 get_filename_component( LCOV_BASE_DIR ${LCOV_EXECUTABLE} DIRECTORY )
 
-find_program( GENHTML_EXECUTABLE genhtml PATHS ${LCOV_BASE_DIR} NO_DEFAULT_PATH )
+find_program( GENHTML_EXECUTABLE genhtml HINTS ${LCOV_BASE_DIR} NO_DEFAULT_PATH )
 
 if( LCOV_EXECUTABLE )
     find_package( Perl REQUIRED )
@@ -29,7 +28,7 @@ if( LCOV_EXECUTABLE )
             RESULT_VARIABLE LCOV_VERSION_RESULT_VARIABLE
             ERROR_QUIET
             OUTPUT_STRIP_TRAILING_WHITESPACE )
-            
+
         if( NOT LCOV_VERSION_RESULT_VARIABLE )
             string( REGEX REPLACE "^[^:]*: LCOV version (.+)$" "\\1" LCOV_VERSION_STRING ${LCOV_VERSION_OUTPUT_VARIABLE} )
         endif()
@@ -37,7 +36,7 @@ if( LCOV_EXECUTABLE )
 endif()
 
 include( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( LCOV 
+find_package_handle_standard_args( LCOV
                                    REQUIRED_VARS LCOV_EXECUTABLE GENHTML_EXECUTABLE
                                    VERSION_VAR LCOV_VERSION_STRING )
 

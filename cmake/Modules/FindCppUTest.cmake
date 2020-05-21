@@ -16,34 +16,33 @@ else()
     set( CPPUTESTEXT_LIBNAME "CppUTestExt" )
 endif()
 
+set( CPPUTEST_HINTS "" )
 if( DEFINED ENV{CPPUTEST_HOME} )
-    set( CPPUTEST_PATHS "$ENV{CPPUTEST_HOME}/lib" ${CPPUTEST_PATHS} )
+    set( CPPUTEST_HINTS "$ENV{CPPUTEST_HOME}/lib" ${CPPUTEST_HINTS} )
 endif()
-
 if( CPPUTEST_HOME )
-    set( CPPUTEST_PATHS "${CPPUTEST_HOME}/lib" ${CPPUTEST_PATHS} )
+    set( CPPUTEST_HINTS "${CPPUTEST_HOME}/lib" ${CPPUTEST_HINTS} )
 endif()
-
 if( CppUTest_HOME )
-    set( CPPUTEST_PATHS "${CppUTest_HOME}/lib" ${CPPUTEST_PATHS} )
+    set( CPPUTEST_HINTS "${CppUTest_HOME}/lib" ${CPPUTEST_HINTS} )
 endif()
 
-find_library( CppUTest_LIB_PATH NAMES ${CPPUTEST_LIBNAME} PATHS ${CPPUTEST_PATHS} )
+find_library( CppUTest_LIB_PATH NAMES ${CPPUTEST_LIBNAME} PATHS ${CPPUTEST_PATHS} HINTS ${CPPUTEST_HINTS} )
 mark_as_advanced( CppUTest_LIB_PATH  )
 
 get_filename_component( CppUTest_LIBRARY_DIR ${CppUTest_LIB_PATH} DIRECTORY )
 
 if( NOT MSVC )
-    find_library( CppUTestExt_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME} PATHS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+    find_library( CppUTestExt_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME} HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
     mark_as_advanced( CppUTestExt_LIB_PATH  )
 endif()
 
 if( WIN32 )
-    find_library( CppUTest_DEBUG_LIB_PATH NAMES ${CPPUTEST_LIBNAME}d PATHS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+    find_library( CppUTest_DEBUG_LIB_PATH NAMES ${CPPUTEST_LIBNAME}d HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
     mark_as_advanced( CppUTest_DEBUG_LIB_PATH  )
 
     if( NOT MSVC )
-        find_library( CppUTestExt_DEBUG_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME}d PATHS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+        find_library( CppUTestExt_DEBUG_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME}d HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
         mark_as_advanced( CppUTestExt_DEBUG_LIB_PATH  )
     endif()
 endif()
