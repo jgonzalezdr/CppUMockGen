@@ -68,7 +68,7 @@ generate_product_version(
     PRERELEASE "${PRERELEASE}"
     PATCHED "${PATCHED_RELEASE}"
     HOMEPAGE "https://github.com/jgonzalezdr/CppUMockGen"
-    MAINTAINER "Jesus Gonzalez <jgonzalez@gdr-sistemas.com>"
+    MAINTAINER "Jesús González <jgonzalez@gdr-sistemas.com>"
     EXPORT_TO_PARENT_SCOPE
 )
 
@@ -181,9 +181,10 @@ if( NOT WIN32 )
     set( DEBIAN_PACKAGE_BUILD_DEPENDS "libclang-9-dev | libclang-8-dev | libclang-7-dev | libclang-6-dev | libclang-dev (>=6)" )
     set( DEBIAN_PACKAGE_CMAKE_OPTIONS "-DENABLE_TEST=OFF" )
     set( DEBIAN_PACKAGE_COPYRIGHT_FILE "${CMAKE_SOURCE_DIR}/debian/copyright" )
+    set( DEBIAN_PACKAGE_DISTRIBUTIONS "bionic" )
 
-    add_debian_package_target()
-    add_dependencies( debian_package build )
+    add_debian_package_targets()
+    add_dependencies( debian_package_binary build )
 endif()
 
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin )
