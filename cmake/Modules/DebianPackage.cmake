@@ -1,6 +1,6 @@
 set( DEBIAN_PACKAGE_TEMPLATE_DIR ${CMAKE_CURRENT_LIST_DIR}/DebianPackage )
 
-function( add_debian_package_target )
+function( add_debian_package_targets )
 
     #
     # Parse input variables
@@ -247,9 +247,12 @@ function( add_debian_package_target )
         endif()
     endif()
 
-    set( DEBIAN_PACKAGE_RULES_CMAKE_OPTIONS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
-    if( DEBIAN_PACKAGE_CMAKE_OPTIONS )
-        string( APPEND DEBIAN_PACKAGE_RULES_CMAKE_OPTIONS " ${DEBIAN_PACKAGE_CMAKE_OPTIONS}" )
+    if( NOT DEBIAN_PACKAGE_BUILD_TYPE )
+        if( CMAKE_BUILD_TYPE )
+            set( DEBIAN_PACKAGE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" )
+        else()
+            set( DEBIAN_PACKAGE_BUILD_TYPE "Release" )
+        endif()
     endif()
 
     if( NOT DEBIAN_PACKAGE_SOURCE_FILENAME )
@@ -260,6 +263,10 @@ function( add_debian_package_target )
 
     string( TIMESTAMP DEBIAN_PACKAGE_DATE "%a, %d %b %Y %H:%M:%S +0000" UTC )
 
+    if( DEBIAN_PACKAGE_SIGN_KEY AND DEBIAN_PACKAGE_NO_SIGN )
+        message( FATAL_ERROR "Cannot activate both DEBIAN_PACKAGE_SIGN_KEY and DEBIAN_PACKAGE_NO_SIGN" )
+    endif()
+
     #
     # Generate target
     #
@@ -268,9 +275,13 @@ function( add_debian_package_target )
 
     configure_file( ${DEBIAN_PACKAGE_TEMPLATE_DIR}/GenerateDebianPackage.in.cmake GenerateDebianPackage.cmake @ONLY )
 
-    add_custom_target( debian_package
+    add_custom_target( debian_package_binary
                        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package_source
-                       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/GenerateDebianPackage.cmake )
+                       COMMAND ${CMAKE_COMMAND} -DDEBIAN_PACKAGE_BINARY=ON -P ${CMAKE_CURRENT_BINARY_DIR}/GenerateDebianPackage.cmake )
+
+    add_custom_target( debian_package_source
+                       COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package_source
+                       COMMAND ${CMAKE_COMMAND} -DDEBIAN_PACKAGE_BINARY=OFF -P ${CMAKE_CURRENT_BINARY_DIR}/GenerateDebianPackage.cmake )
 
 endfunction()
 

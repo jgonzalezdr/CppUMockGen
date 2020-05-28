@@ -68,7 +68,7 @@ generate_product_version(
     PRERELEASE "${PRERELEASE}"
     PATCHED "${PATCHED_RELEASE}"
     HOMEPAGE "https://github.com/jgonzalezdr/CppUMockGen"
-    MAINTAINER "Jesus Gonzalez <jgonzalez@gdr-sistemas.com>"
+    MAINTAINER "Jesús González <jgonzalez@gdr-sistemas.com>"
     EXPORT_TO_PARENT_SCOPE
 )
 
@@ -165,10 +165,10 @@ else()
     set( CPACK_DEBIAN_PACKAGE_MAINTAINER ${PRODUCT_MAINTAINER} )
     set( CPACK_DEBIAN_PACKAGE_HOMEPAGE ${PRODUCT_HOMEPAGE} )
     set( CPACK_DEBIAN_FILE_NAME DEB-DEFAULT )
-    #set( CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION} )
+    set( CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION} )
     set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
     set( CPACK_DEBIAN_PACKAGE_RECOMMENDS "cpputest" )
-    if( NOT PRODUCT_PRERELEASE )
+    if( PRODUCT_PRERELEASE )
         set( CPACK_DEBIAN_PACKAGE_RELEASE ${PRODUCT_VERSION_BUILD} )
     endif()
 endif()
@@ -178,12 +178,12 @@ include( CPack )
 if( NOT WIN32 )
     include( DebianPackage )
 
-    set( DEBIAN_PACKAGE_BUILD_DEPENDS "libclang-9-dev | libclang-8-dev | libclang-7-dev | libclang-6-dev | libclang-dev (>=6)" )
-    set( DEBIAN_PACKAGE_CMAKE_OPTIONS "-DENABLE_TEST=OFF" )
+    set( DEBIAN_PACKAGE_BUILD_DEPENDS "g++-8, libclang-9-dev | libclang-8-dev | libclang-7-dev | libclang-6-dev | libclang-dev (>=6)" )
+    set( DEBIAN_PACKAGE_CMAKE_OPTIONS "-DENABLE_TEST=OFF -DCMAKE_C_COMPILER=gcc-8 -DCMAKE_CXX_COMPILER=g++-8" )
     set( DEBIAN_PACKAGE_COPYRIGHT_FILE "${CMAKE_SOURCE_DIR}/debian/copyright" )
+    set( DEBIAN_PACKAGE_DISTRIBUTIONS "bionic" )
 
-    add_debian_package_target()
-    add_dependencies( debian_package build )
+    add_debian_package_targets()
 endif()
 
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin )
