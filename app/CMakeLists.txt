@@ -67,7 +67,7 @@ generate_product_version(
     PRERELEASE "${PRERELEASE}"
     PATCHED "${PATCHED_RELEASE}"
     HOMEPAGE "https://github.com/jgonzalezdr/CppUMockGen"
-    MAINTAINER "Jesús González <jgonzalez@gdr-sistemas.com>"
+    MAINTAINER "Jesus Gonzalez <jgonzalez@gdr-sistemas.com>"
     EXPORT_TO_PARENT_SCOPE
 )
 
