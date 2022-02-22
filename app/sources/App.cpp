@@ -99,6 +99,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         ( "s,std", "Set language standard", cxxopts::value<std::string>(), "<standard>" )
         ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "<underlying-typedef>" )
         ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
+        ( "B,base-directory", "Base directory path", cxxopts::value<std::string>(), "<path>" )
         ( "t,type-override", "Type override", cxxopts::value<std::vector<std::string>>(), "<expr>" )
         ( "f,config-file", "Config file", cxxopts::value<std::vector<std::string>>(), "<file-path>" )
         ( "v,version", "Print version" )
@@ -135,6 +136,17 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         if( ( options.count( "mock-output" ) + options.count( "expect-output" ) ) <= 0 )
         {
             throw std::runtime_error( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified." );
+        }
+
+        std::filesystem::path baseDirPath;
+        if( options.count( "base-directory" ) > 0 )
+        {
+            baseDirPath = options["base-directory"].as<std::string>();
+            if( !IsDirPath( baseDirPath ) )
+            {
+                std::string errorMsg = "Base directory path '" + baseDirPath.generic_string() + "' is not an existing directory.";
+                throw std::runtime_error( errorMsg );
+            }
         }
 
         std::filesystem::path mockOutputFilePath;
@@ -221,8 +233,14 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         {
             if( !mockOutputFilePath.empty() )
             {
+                std::filesystem::path mockBaseDirPath = baseDirPath;
+                if( mockBaseDirPath.empty() )
+                {
+                    mockBaseDirPath = mockOutputFilePath.parent_path();
+                }
+
                 std::ostringstream output;
-                parser.GenerateMock( genOpts, output );
+                parser.GenerateMock( genOpts, mockBaseDirPath, output );
 
                 if( mockOutputStream.is_open() )
                 {
@@ -241,9 +259,15 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
             if( !expectHeaderOutputFilePath.empty() )
             {
+                std::filesystem::path expectBaseDirPath = baseDirPath;
+                if( expectBaseDirPath.empty() )
+                {
+                    expectBaseDirPath = expectHeaderOutputFilePath.parent_path();
+                }
+
                 std::ostringstream headerOutput;
                 std::ostringstream implOutput;
-                parser.GenerateExpectationHeader( genOpts, headerOutput );
+                parser.GenerateExpectationHeader( genOpts, expectBaseDirPath, headerOutput );
                 parser.GenerateExpectationImpl( genOpts, expectHeaderOutputFilePath, implOutput );
 
                 if( expectHeaderOutputStream.is_open() )

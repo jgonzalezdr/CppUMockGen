@@ -54,14 +54,14 @@ Config* GetMockConfig()
  *===========================================================================*/
 
 static const std::filesystem::path tempDirPath = std::filesystem::temp_directory_path();
-static const std::string tempFilename = "CppUMockGen_Parser.h";
-static const std::string tempFilePath = (tempDirPath / tempFilename).generic_string();
-static const std::string nonexistingFilePath = (tempDirPath / "CppUMockGen_Parser_NotExisting.h").generic_string();
+static const std::string defaultTempFilename = "CppUMockGen_Parser.h";
+static const std::string nonexistingFilePath = ( tempDirPath / "CppUMockGen_Parser_NotExisting.h" ).generic_string();
 
 TEST_GROUP( Parser )
 {
     std::ofstream tempFile;
     std::filesystem::path initialDir;
+    std::string tempFilePath;
 
     TEST_SETUP()
     {
@@ -72,12 +72,26 @@ TEST_GROUP( Parser )
     {
         std::filesystem::current_path( initialDir );
 
-        std::filesystem::remove( tempFilePath );
+        if( !tempFilePath.empty() )
+        {
+            std::filesystem::remove( tempFilePath );
+        }
     }
 
     void SetupTempFile( const SimpleString& contents )
     {
-        tempFile.open( tempFilePath );
+        SetupTempFile( defaultTempFilename, contents );
+    }
+
+    void SetupTempFile( std::string filename, const SimpleString& contents )
+    {
+        auto tempPath = ( tempDirPath / filename );
+        tempFilePath = tempPath.generic_string();
+        
+        std::filesystem::create_directories( tempPath );
+        std::filesystem::remove( tempPath );
+
+        tempFile.open( tempPath );
         tempFile << contents.asCharString();
         tempFile.close();
     }
@@ -92,75 +106,75 @@ TEST_GROUP( Parser )
  */
 TEST( Parser, MockedFunction )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   SimpleString testHeader =
-           "void function1(int a);";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "void function1(int a);";
+    SetupTempFile( testHeader );
 
-   expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
-   // Verify
-   mock().checkExpectations();
-   CHECK_EQUAL( true, result );
-   CHECK_EQUAL( 0, error.tellp() );
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output1;
-   const char* testMock = "###MOCK6768###";
+    // Prepare
+    std::ostringstream output1;
+    const char* testMock = "###MOCK6768###";
 
-   expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
-   // Exercise
-   parser.GenerateMock( "", output1 );
+    // Exercise
+    parser.GenerateMock( "", "", output1 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testMock, output1.str().c_str() );
-   STRCMP_CONTAINS( "extern \"C\"", output1.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "extern \"C\" {\n#include \"CppUMockGen_Parser.h\"\n}\n", output1.str().c_str() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output2;
-   const char* testExpect1 = "###EXPECT3178###";
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpect1 = "###EXPECT3178###";
 
-   expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
 
-   // Exercise
-   parser.GenerateExpectationHeader( "", output2 );
+    // Exercise
+    parser.GenerateExpectationHeader( "", "", output2 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
-   STRCMP_CONTAINS( "extern \"C\"", output2.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "extern \"C\" {\n#include \"CppUMockGen_Parser.h\"\n}\n", output2.str().c_str() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output3;
-   const char* testExpect2 = "###EXPECT3682###";
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpect2 = "###EXPECT3682###";
 
-   expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
 
-   // Exercise
-   parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
-   STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -197,11 +211,12 @@ TEST( Parser, MockedMethod )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -213,11 +228,12 @@ TEST( Parser, MockedMethod )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -234,7 +250,7 @@ TEST( Parser, MockedMethod )
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -272,11 +288,12 @@ TEST( Parser, MockedMethod_Cpp17 )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -288,11 +305,12 @@ TEST( Parser, MockedMethod_Cpp17 )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -309,7 +327,7 @@ TEST( Parser, MockedMethod_Cpp17 )
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -346,11 +364,12 @@ TEST( Parser, MockedMethod_Cpp14 )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -362,11 +381,12 @@ TEST( Parser, MockedMethod_Cpp14 )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -383,7 +403,7 @@ TEST( Parser, MockedMethod_Cpp14 )
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -420,11 +440,12 @@ TEST( Parser, MockedMethod_Gnu98 )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -436,11 +457,12 @@ TEST( Parser, MockedMethod_Gnu98 )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -457,7 +479,7 @@ TEST( Parser, MockedMethod_Gnu98 )
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -500,7 +522,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock[3] );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
@@ -508,6 +530,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     STRCMP_CONTAINS( testMock[1], output1.str().c_str() );
     STRCMP_CONTAINS( testMock[2], output1.str().c_str() );
     STRCMP_CONTAINS( testMock[3], output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -522,7 +545,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1[3] );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
@@ -530,6 +553,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     STRCMP_CONTAINS( testExpect1[1], output2.str().c_str() );
     STRCMP_CONTAINS( testExpect1[2], output2.str().c_str() );
     STRCMP_CONTAINS( testExpect1[3], output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -552,7 +576,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
     STRCMP_CONTAINS( testExpect2[1], output3.str().c_str() );
     STRCMP_CONTAINS( testExpect2[2], output3.str().c_str() );
     STRCMP_CONTAINS( testExpect2[3], output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -560,27 +584,27 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
  */
 TEST( Parser, FunctionNonMockable )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   SimpleString testHeader =
-           "void function1(int a);";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "void function1(int a);";
+    SetupTempFile( testHeader );
 
-   expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
-   expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
-   // Verify
-   CHECK_EQUAL( false, result );
-   STRCMP_CONTAINS( "INPUT ERROR:", error.str().c_str() );
-   STRCMP_CONTAINS( "The input file does not contain any mockable function", error.str().c_str() );
+    // Verify
+    CHECK_EQUAL( false, result );
+    STRCMP_CONTAINS( "INPUT ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( "The input file does not contain any mockable function", error.str().c_str() );
 
-   // Cleanup
+    // Cleanup
 }
 
 /*
@@ -588,30 +612,30 @@ TEST( Parser, FunctionNonMockable )
  */
 TEST( Parser, MethodNonMockable )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   SimpleString testHeader =
-           "class class1 {\n"
-           "public:\n"
-           "    void method1();\n"
-           "};";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "class class1 {\n"
+            "public:\n"
+            "    void method1();\n"
+            "};";
+    SetupTempFile( testHeader );
 
-   expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
-   expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
 
-   // Verify
-   CHECK_EQUAL( false, result );
-   STRCMP_CONTAINS( "INPUT ERROR:", error.str().c_str() );
-   STRCMP_CONTAINS( "The input file does not contain any mockable function", error.str().c_str() );
+    // Verify
+    CHECK_EQUAL( false, result );
+    STRCMP_CONTAINS( "INPUT ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( "The input file does not contain any mockable function", error.str().c_str() );
 
-   // Cleanup
+    // Cleanup
 }
 
 /*
@@ -655,12 +679,13 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     expect::Function$::GenerateMock( IgnoreParameter::YES, testMock[1] );
 
     // Exercise
-    parser.GenerateMock( "", output1 );
+    parser.GenerateMock( "", "", output1 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testMock[0], output1.str().c_str() );
     STRCMP_CONTAINS( testMock[1], output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -673,12 +698,13 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1[1] );
 
     // Exercise
-    parser.GenerateExpectationHeader( "", output2 );
+    parser.GenerateExpectationHeader( "", "", output2 );
 
     // Verify
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect1[0], output2.str().c_str() );
     STRCMP_CONTAINS( testExpect1[1], output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
     // Cleanup
     mock().clear();
@@ -697,7 +723,7 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
     mock().checkExpectations();
     STRCMP_CONTAINS( testExpect2[0], output3.str().c_str() );
     STRCMP_CONTAINS( testExpect2[1], output3.str().c_str() );
-    STRCMP_CONTAINS( "include \"my_header.h\"", output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -705,26 +731,26 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
  */
 TEST( Parser, SyntaxError )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   SimpleString testHeader =
-           "foo function1(int a);";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "foo function1(int a);";
+    SetupTempFile( testHeader );
 
-   expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
-   // Verify
-   CHECK_EQUAL( false, result );
-   STRCMP_CONTAINS( "PARSE ERROR:", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:1: error: unknown type name 'foo'", error.str().c_str() );
+    // Verify
+    CHECK_EQUAL( false, result );
+    STRCMP_CONTAINS( "PARSE ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:1: error: unknown type name 'foo'", error.str().c_str() );
 
-   // Cleanup
+    // Cleanup
 }
 
 /*
@@ -732,73 +758,75 @@ TEST( Parser, SyntaxError )
  */
 TEST( Parser, Warning )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   SimpleString testHeader =
-           "#warning test\n"
-           "void function1(int a);";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "#warning test\n"
+            "void function1(int a);";
+    SetupTempFile( testHeader );
 
-   expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
-   expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
 
-   // Verify
-   mock().checkExpectations();
-   CHECK_EQUAL( true, result );
-   STRCMP_CONTAINS( "PARSE WARNING:", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:2: warning: test [-W#warnings]", error.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    STRCMP_CONTAINS( "PARSE WARNING:", error.str().c_str() );
+    STRCMP_CONTAINS( "CppUMockGen_Parser.h:1:2: warning: test [-W#warnings]", error.str().c_str() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output1;
-   const char* testMock = "###MOCK775434578###";
-   expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+    // Prepare
+    std::ostringstream output1;
+    const char* testMock = "###MOCK775434578###";
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
-   // Exercise
-   parser.GenerateMock( "", output1 );
+    // Exercise
+    parser.GenerateMock( "", "", output1 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output1.str().c_str() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output2;
-   const char* testExpectation1 = "###EXPECT38484578###";
-   expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpectation1 );
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpectation1 = "###EXPECT38484578###";
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpectation1 );
 
-   // Exercise
-   parser.GenerateExpectationHeader( "", output2 );
+    // Exercise
+    parser.GenerateExpectationHeader( "", "", output2 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testExpectation1, output2.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpectation1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_Parser.h\"\n", output2.str().c_str() );
 
-   // Cleanup
-   mock().clear();
+    // Cleanup
+    mock().clear();
 
-   // Prepare
-   std::ostringstream output3;
-   const char* testExpectation2 = "###EXPECT993617###";
-   expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpectation2 );
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpectation2 = "###EXPECT993617###";
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpectation2 );
 
-   // Exercise
-   parser.GenerateExpectationImpl( "", "blabla.h", output3 );
+    // Exercise
+    parser.GenerateExpectationImpl( "", "blabla.h", output3 );
 
-   // Verify
-   mock().checkExpectations();
-   STRCMP_CONTAINS( testExpectation2, output3.str().c_str() );
-   STRCMP_CONTAINS( "include \"blabla.h\"", output3.str().c_str() );
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpectation2, output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"blabla.h\"\n", output3.str().c_str() );
 }
 
 /*
@@ -806,24 +834,24 @@ TEST( Parser, Warning )
  */
 TEST( Parser, NonExistingInputFile )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   std::filesystem::remove( nonexistingFilePath );
+    std::filesystem::remove( nonexistingFilePath );
 
-   expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( nonexistingFilePath, *config, false, "", std::vector<std::string>(), error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( nonexistingFilePath, *config, false, "", std::vector<std::string>(), error );
 
-   // Verify
-   CHECK_EQUAL( false, result );
-   STRCMP_CONTAINS( "INPUT ERROR: Input file '", error.str().c_str() );
-   STRCMP_CONTAINS( "CppUMockGen_Parser_NotExisting.h' does not exist", error.str().c_str() );
+    // Verify
+    CHECK_EQUAL( false, result );
+    STRCMP_CONTAINS( "INPUT ERROR: Input file '", error.str().c_str() );
+    STRCMP_CONTAINS( "CppUMockGen_Parser_NotExisting.h' does not exist", error.str().c_str() );
 
-   // Cleanup
+    // Cleanup
 }
 
 /*
@@ -831,30 +859,30 @@ TEST( Parser, NonExistingInputFile )
  */
 TEST( Parser, IncludePaths )
 {
-   // Prepare
-   Config* config = GetMockConfig();
-   std::ostringstream error;
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
 
-   std::string includePath = (std::filesystem::path(PROD_DIR) / "sources").generic_string();
+    std::string includePath = (std::filesystem::path(PROD_DIR) / "sources").generic_string();
 
-   SimpleString testHeader =
-           "#include \"Config.hpp\"\n"
-           "void method1(Config &c);\n";
-   SetupTempFile( testHeader );
+    SimpleString testHeader =
+            "#include \"Config.hpp\"\n"
+            "void method1(Config &c);\n";
+    SetupTempFile( testHeader );
 
-   std::filesystem::current_path( tempDirPath );
+    std::filesystem::current_path( tempDirPath );
 
-   expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
-   // Exercise
-   Parser parser;
-   bool result = parser.Parse( tempFilename, *config, true, "", std::vector<std::string>{includePath}, error );
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( defaultTempFilename, *config, true, "", std::vector<std::string>{includePath}, error );
 
-   // Verify
-   CHECK_EQUAL( true, result );
-   CHECK_EQUAL( 0, error.tellp() );
+    // Verify
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
 
-   // Cleanup
+    // Cleanup
 }
 
 /*
@@ -862,17 +890,94 @@ TEST( Parser, IncludePaths )
  */
 TEST( Parser, WithRegenOpts )
 {
-   // Prepare
-   std::ostringstream output;
-   const char* testRegenOpts = "####REGEN_OPTS######";
+    // Prepare
+    std::ostringstream output;
+    const char* testRegenOpts = "####REGEN_OPTS######";
 
 
-   // Exercise
-   Parser parser;
-   parser.GenerateMock( testRegenOpts, output );
+    // Exercise
+    Parser parser;
+    parser.GenerateMock( testRegenOpts, "", output );
 
-   // Verify
-   STRCMP_CONTAINS( StringFromFormat( "Generation options: %s", testRegenOpts ).asCharString(), output.str().c_str() );
+    // Verify
+    STRCMP_CONTAINS( StringFromFormat( "Generation options: %s", testRegenOpts ).asCharString(), output.str().c_str() );
 
-   // Cleanup
+    // Cleanup
+}
+
+/*
+ * Check that base directory setting works as expected.
+ */
+TEST( Parser, BaseDirectory )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+    std::ostringstream error;
+    std::string inputFileName = "CppUMockGen_foo/CppUMockGen_bar.h";
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "public:\n"
+            "    void method1();\n"
+            "};";
+    SetupTempFile( inputFileName, testHeader );
+
+    expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
+
+    // Exercise
+    Parser parser;
+    bool result = parser.Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( true, result );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Prepare
+    std::ostringstream output1;
+    const char* testMock = "###MOCK###";
+
+    expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
+
+    // Exercise
+    parser.GenerateMock( "", tempDirPath, output1 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testMock, output1.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_foo/CppUMockGen_bar.h\"\n", output1.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output2;
+    const char* testExpect1 = "###EXPECT87828763###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, true, testExpect1 );
+
+    // Exercise
+    parser.GenerateExpectationHeader( "", tempDirPath, output2 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect1, output2.str().c_str() );
+    STRCMP_CONTAINS( "#include \"CppUMockGen_foo/CppUMockGen_bar.h\"\n", output2.str().c_str() );
+
+    // Cleanup
+    mock().clear();
+
+    // Prepare
+    std::ostringstream output3;
+    const char* testExpect2 = "###EXPECT87362###";
+
+    expect::Function$::GenerateExpectation( IgnoreParameter::YES, false, testExpect2 );
+
+    // Exercise
+    parser.GenerateExpectationImpl( "", "my_header.h", output3 );
+
+    // Verify
+    mock().checkExpectations();
+    STRCMP_CONTAINS( testExpect2, output3.str().c_str() );
+    STRCMP_CONTAINS( "#include \"my_header.h\"\n", output3.str().c_str() );
 }

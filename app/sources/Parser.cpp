@@ -86,7 +86,7 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
 bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &config, bool interpretAsCpp,
                     const std::string &languageStandard, const std::vector<std::string> &includePaths, std::ostream &error )
 {
-    m_inputFilepath = inputFilepath;
+    m_inputFilePath = inputFilepath;
     m_interpretAsCpp = interpretAsCpp;
 
     CXIndex index = clang_createIndex( 0, 0 );
@@ -213,15 +213,34 @@ bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &co
     return (numErrors == 0) && (m_functions.size() > 0);
 }
 
-void Parser::GenerateMock( const std::string &genOpts, std::ostream &output ) const noexcept
+static std::string GetIncludeFilename( const std::filesystem::path &inputFilePath, const std::filesystem::path &baseDirPath )
 {
+    std::string includeFilename;
+
+    auto relativePath = std::filesystem::relative( inputFilePath, baseDirPath );
+    if( relativePath.empty() )
+    {
+        includeFilename = inputFilePath.filename().generic_string();
+    }
+    else
+    {
+        includeFilename = relativePath.generic_string();
+    }
+
+    return includeFilename;
+}
+
+void Parser::GenerateMock( const std::string &genOpts, const std::filesystem::path &baseDirPath, std::ostream &output ) const noexcept
+{
+    std::string includeFilename = GetIncludeFilename( m_inputFilePath, baseDirPath );
+
     GenerateFileHeading( genOpts, output );
 
     if( !m_interpretAsCpp )
     {
         output << "extern \"C\" {" << std::endl;
     }
-    output << "#include \"" <<  m_inputFilepath.filename().generic_string() << "\"" << std::endl;
+    output << "#include \"" << includeFilename << "\"" << std::endl;
     if( !m_interpretAsCpp )
     {
         output << "}" << std::endl;
@@ -237,8 +256,10 @@ void Parser::GenerateMock( const std::string &genOpts, std::ostream &output ) co
     }
 }
 
-void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream &output ) const noexcept
+void Parser::GenerateExpectationHeader( const std::string &genOpts, const std::filesystem::path &baseDirPath, std::ostream &output ) const noexcept
 {
+    std::string includeFilename = GetIncludeFilename( m_inputFilePath, baseDirPath );
+
     GenerateFileHeading( genOpts, output );
 
     output << "#include <CppUMockGen.hpp>" << std::endl;
@@ -248,7 +269,7 @@ void Parser::GenerateExpectationHeader( const std::string &genOpts, std::ostream
     {
         output << "extern \"C\" {" << std::endl;
     }
-    output << "#include \"" <<  m_inputFilepath.filename().generic_string() << "\"" << std::endl;
+    output << "#include \"" <<  includeFilename << "\"" << std::endl;
     if( !m_interpretAsCpp )
     {
         output << "}" << std::endl;

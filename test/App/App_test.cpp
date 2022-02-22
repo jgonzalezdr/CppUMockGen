@@ -259,9 +259,11 @@ TEST( App, MockOutput_OutDir_WithEndingPathSeparator )
     std::vector<std::string> includePaths;
     std::string outputText = "#####TEXT1#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -301,9 +303,11 @@ TEST( App, MockOutput_OutDir_WithoutEndingPathSeparator )
     std::vector<std::string> includePaths;
     std::string outputText = "#####TEXT1#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -347,7 +351,7 @@ TEST( App, MockOutput_CurrentDir )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -385,9 +389,11 @@ TEST( App, MockOutput_OutFile )
     std::vector<std::string> includePaths;
     std::string outputText = "#####TEXT3#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
@@ -424,7 +430,7 @@ TEST( App, MockOutput_ConsoleOutput )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -489,7 +495,7 @@ TEST( App, MockOutput_InterpretAsCpp )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, true, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -523,7 +529,7 @@ TEST( App, MockOutput_LanguageStandard )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "lang-std", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s lang-std", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s lang-std", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -557,7 +563,7 @@ TEST( App, MockOutput_UseUnderlyingTypedefType )
 
     expect::Config$::Config$( true, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -591,7 +597,7 @@ TEST( App, MockOutput_IncludePaths )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -625,7 +631,7 @@ TEST( App, MockOutput_specificTypeOverrideOptions )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t foo#bar=String -t foo@=Int/&$", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -659,7 +665,7 @@ TEST( App, MockOutput_genericTypeOverrideOptions )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\"", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t #foo=String -t \"@const bar=Int/&$\"", "", &outputText );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
@@ -733,9 +739,11 @@ TEST( App, ExpectationOutput_OutDir )
     std::string outputText1 = "#####TEXT1#####";
     std::string outputText2 = "#####TEXT2#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -787,7 +795,7 @@ TEST( App, ExpectationOutput_CurrentDir )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilename1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -831,9 +839,11 @@ TEST( App, ExpectationMockOutput_OutFile_Header )
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -877,9 +887,11 @@ TEST( App, ExpectationMockOutput_OutFile_Impl )
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -925,9 +937,11 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -973,9 +987,11 @@ TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath1.c_str(), &outputText2 );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -1015,7 +1031,7 @@ TEST( App, ExpectationOutput_ConsoleOutput )
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText2 );
 
     // Exercise
@@ -1055,6 +1071,73 @@ TEST( App, ExpectationOutput_CannotOpenFile )
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectation header output file '" + outputDir + expectationHeaderOutputFilename + "' could not be opened").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that base directory is requested properly
+ */
+TEST( App, MockOutput_BaseDirectory )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string baseDirectory = outDirPath.parent_path().generic_string();
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-B", baseDirectory.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####FOO#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", baseDirectory.c_str(), &outputText );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that if the specified base directory does not exist, an error is displayed.
+ */
+TEST( App, MockOutput_BaseDirectory_NotExists )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string baseDirectory = ( outDirPath / "NonExistantDirectory123898876354874" ).generic_string();
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-B", baseDirectory.c_str() };
+
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 1, ret );
+    STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Base directory path '" + baseDirectory + "' is not an existing directory").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
 
     // Cleanup

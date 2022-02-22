@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()" 
+ * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
  */
 
 #include "Parser.hpp"
@@ -15,14 +15,14 @@ bool Parser::Parse(const std::filesystem::path & inputFilepath, const Config & c
     return mock().actualCall("Parser::Parse").onObject(this).withStringParameter("inputFilepath", inputFilepath.generic_string().c_str()).withConstPointerParameter("config", &config).withBoolParameter("interpretAsCpp", interpretAsCpp).withStringParameter("languageStandard", languageStandard.c_str()).withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error).returnBoolValue();
 }
 
-void Parser::GenerateMock(const std::string & genOpts, std::ostream & output) const noexcept
+void Parser::GenerateMock(const std::string & genOpts, const std::filesystem::path & baseDirPath, std::ostream & output) const noexcept
 {
-    mock().actualCall("Parser::GenerateMock").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withOutputParameterOfType("std::ostream", "output", &output);
+    mock().actualCall("Parser::GenerateMock").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withStringParameter("baseDirPath", baseDirPath.generic_string().c_str()).withOutputParameterOfType("std::ostream", "output", &output);
 }
 
-void Parser::GenerateExpectationHeader(const std::string & genOpts, std::ostream & output) const noexcept
+void Parser::GenerateExpectationHeader(const std::string & genOpts, const std::filesystem::path & baseDirPath, std::ostream & output) const noexcept
 {
-    mock().actualCall("Parser::GenerateExpectationHeader").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withOutputParameterOfType("std::ostream", "output", &output);
+    mock().actualCall("Parser::GenerateExpectationHeader").onObject(this).withStringParameter("genOpts", genOpts.c_str()).withStringParameter("baseDirPath", baseDirPath.generic_string().c_str()).withOutputParameterOfType("std::ostream", "output", &output);
 }
 
 void Parser::GenerateExpectationImpl(const std::string & genOpts, const std::filesystem::path & headerFilepath, std::ostream & output) const noexcept
