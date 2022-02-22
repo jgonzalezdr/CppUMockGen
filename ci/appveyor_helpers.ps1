@@ -6,7 +6,25 @@
 function Get-MinGWBin() {
 	if ($env:Platform -like 'MinGW*') 
 	{
-		if ($env:PlatformToolset -eq "6.3.0" ) 
+		if ($env:PlatformToolset -eq "8.1.0" ) 
+		{
+			if ($env:Platform -like '*64') {
+				Write-Output 'C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin'
+			}
+			else {
+				Write-Output 'C:\mingw-w64\i686-8.1.0-posix-dwarf-rt_v6-rev0\mingw64\bin'
+			}
+		}
+		elseif ($env:PlatformToolset -eq "7.3.0" ) 
+		{
+			if ($env:Platform -like '*64') {
+				Write-Output 'C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin'
+			}
+			else {
+				Write-Output 'C:\mingw-w64\i686-7.3.0-posix-dwarf-rt_v5-rev0\mingw64\bin'
+			}
+		}
+		elseif ($env:PlatformToolset -eq "6.3.0" ) 
 		{
 			if ($env:Platform -like '*64') {
 				Write-Output 'C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin'
@@ -25,6 +43,22 @@ function Get-MinGWBin() {
 			Write-Output 'C:\TDM-GCC\bin'
 		}
 	}
+}
+
+function Get-MsBuildCmd()
+{
+    if ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2019")
+    {
+        Write-Output "msbuild"
+    }
+    elseif ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2017")
+    {
+        Write-Output "msbuild /ToolsVersion:15.0"
+    }
+    else
+    {
+        Write-Output "msbuild /ToolsVersion:14.0"
+    }
 }
 
 function Add-PathFolder($folder)

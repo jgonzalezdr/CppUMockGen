@@ -10,31 +10,37 @@ function Publish-TestResults($files)
     $anyFailures = $FALSE
 
     # Upload results to AppVeyor one by one
-    $files | foreach {
-        Write-Host "Analyzing test results file '$_'" 
+    foreach ($file in $files)
+    {
+        Write-Host "Analyzing test results file '$file'" 
     
-        $testsuite = ([xml](get-content $_)).testsuite
+        $testsuite = ([xml](get-content $file)).testsuite
 
-        foreach ($testcase in $testsuite.testcase) {
+        foreach ($testcase in $testsuite.testcase)
+        {
             [double]$testtimef = $testcase.time
             [int]$testtimei = $testtimef * 1000
-            if ($testcase.failure) {
+            if ($testcase.failure)
+            {
                 Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testtimei
                 Add-AppveyorMessage "$($testcase.name) failed" -Category Error
                 $anyFailures = $TRUE
             }
-            elseif ($testcase.skipped) {
+            elseif ($testcase.skipped)
+            {
                 Add-AppveyorTest $testcase.name -Outcome Ignored -Filename $testsuite.name
             }
-            else {
+            else
+            {
                 Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $testtimei
             }
         }
 
-        Remove-Item $_
+        Remove-Item $file
     }
 
-    if ($anyFailures -eq $TRUE){
+    if ($anyFailures -eq $TRUE)
+    {
         Write-Host -ForegroundColor Red "Failing build as there are broken tests"
         $host.SetShouldExit(1)
     }
@@ -73,12 +79,14 @@ if (!($env:Test -eq 'False'))
     {
         'MSVC*'
         {
-            Invoke-Command "msbuild $logger_arg /property:Configuration=$build_config run_tests.vcxproj" "$build_dir\test"
+            $msbuild_cmd = Get-MsBuildCmd
+
+            Invoke-Command "$msbuild_cmd $logger_arg /property:Configuration=$build_config execute_tests.vcxproj" "$build_dir\test"
         }
 		
         'LINUX-GCC'
         {
-            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
+            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'execute_tests'}
 
             Invoke-Command "make $build_target" "$build_dir"
         }
@@ -90,7 +98,7 @@ if (!($env:Test -eq 'False'))
             # Add mingw to the path
             Add-PathFolder $mingw_path
 
-            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'run_tests'}
+            $build_target = if ($env:Configuration -eq 'Coverage') {'coverage_process'} else {'execute_tests'}
 
             Invoke-Command "mingw32-make $build_target" "$build_dir"
 
