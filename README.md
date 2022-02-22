@@ -138,17 +138,17 @@ You can find complete information on the usage of CppUMockGen in the [CppUMockGe
 ### Requirements
 
 - [CMake](https://cmake.org/) (>= v3.3)
-- [libClang](http://releases.llvm.org/download.html) (>= v6.0)
+- [libClang](http://releases.llvm.org/download.html) (>= v6.0, >= v12.0 to avoid incompatibility with Visual Studio 2022)
 - [CppUTest](http://cpputest.github.io/) [Optional, not needed if tests are disabled] (>= [v3.9.alpha0](https://github.com/jgonzalezdr/cpputest/releases/download/v3.9.alpha0/cpputest-3.9.alpha0.zip))
 - On Windows:
   - A C/C++ compiler, either:
-    - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with [TDM-GCC v9.2.0](https://jmeubank.github.io/tdm-gcc/download/), will not work with MinGW-w64 releases &lt;= v8.1.0)
-    - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2019)
-  - [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using MinGW] (>= [v1.15.alpha0w](https://github.com/jgonzalezdr/lcov/releases/download/v1.15.alpha0w/lcov-v1.15.alpha0w.zip))
-  - [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage) [Optional, needed if tests and coverage are enabled using Visual Studio 2019] (tested with v0.9.8.0)
+    - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) (tested with [TDM-GCC v9.2.0](https://jmeubank.github.io/tdm-gcc/download/) and [TDM-GCC v10.3.0](https://jmeubank.github.io/tdm-gcc/download/), will not work with MinGW-w64 releases &lt;= v8.1.0)
+    - [Microsoft Visual Studio](https://www.visualstudio.com/es/downloads/) (tested with Visual Studio Community 2022)
+  - [LCOV for Windows](https://github.com/jgonzalezdr/lcov/releases) [Optional, needed if tests and coverage are enabled using MinGW] (>= [v1.15.alpha1w](https://github.com/jgonzalezdr/lcov/releases/download/v1.15.alpha1w/lcov-v1.15.alpha1w.zip))
+  - [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage) [Optional, needed if tests and coverage are enabled using Visual Studio] (tested with v0.9.8.0)
 - On Linux:
   - [GCC](https://gcc.gnu.org/) (>= v8.0.0)
-  - [LCOV](http://ltp.sourceforge.net/coverage/lcov.php) [Optional, needed if tests and coverage are enabled using GCC] (>= v1.14)
+  - [LCOV](http://ltp.sourceforge.net/coverage/lcov.php) [Optional, needed if tests and coverage are enabled] (>= v1.14)
 
 ### Build using MinGW (Windows)
 
@@ -175,14 +175,14 @@ mingw32-make coverage_report
 
 The coverage report will be generated in the _coverage_lcov_ directory under the top directory.
 
-### Build using Visual Studio 2019 (Windows)
+### Build using Visual Studio (Windows)
 
-To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it (top directory) execute the following commands:
+To build CppUMockGen first clone this repository on your machine, and in the directory where you cloned it (top directory) execute the following commands (where `<Visual Studio XX 20YY>` is a cmake generator for visual studio, e.g., "Visual Studio 16 2019", "Visual Studio 17 2022"):
 
 ```powershell
 mkdir build_vs
 cd build_vs
-cmake .. -G "Visual Studio 16 2019" -DCPPUTEST_HOME="<Path to your CppUTest home>"
+cmake .. -G "<Visual Studio XX 20YY>"
 ```
 
 Eventually open the _CppUMockGen.Top.sln_ VS solution generated in the _build_vs_ directory, then compile the solution.
