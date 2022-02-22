@@ -113,33 +113,33 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
         ProcessConfigFiles( options );
 
-        if( options.count("help") )
+        if( options.count("help") > 0 )
         {
             m_cout << options.help(); // LCOV_EXCL_BR_LINE: False positive
             return 0;
         }
 
-        if( options.count("version") )
+        if( options.count("version") > 0  )
         {
             m_cout << PRODUCT_NAME " v" PRODUCT_VERSION_STR << std::endl;
             return 0;
         }
 
-        if( !options.count( "input" ) )
+        if( options.count( "input" ) <= 0 )
         {
             throw std::runtime_error( "No input file specified." );
         }
 
         std::filesystem::path inputFilePath = options["input"].as<std::string>();
 
-        if( ( options.count( "mock-output" ) + options.count( "expect-output" ) ) == 0 )
+        if( ( options.count( "mock-output" ) + options.count( "expect-output" ) ) <= 0 )
         {
             throw std::runtime_error( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified." );
         }
 
         std::filesystem::path mockOutputFilePath;
         std::ofstream mockOutputStream;
-        if( options.count( "mock-output" ) )
+        if( options.count( "mock-output" ) > 0 )
         {
             mockOutputFilePath = options["mock-output"].as<std::string>();
             if( mockOutputFilePath != "@" )
@@ -162,7 +162,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         std::filesystem::path expectImplOutputFilePath;
         std::ofstream expectHeaderOutputStream;
         std::ofstream expectImplOutputStream;
-        if( options.count( "expect-output" ) )
+        if( options.count( "expect-output" ) > 0 )
         {
             expectHeaderOutputFilePath = options["expect-output"].as<std::string>();
             if( expectHeaderOutputFilePath != "@" )
