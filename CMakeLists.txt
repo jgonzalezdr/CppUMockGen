@@ -2,7 +2,8 @@ cmake_minimum_required( VERSION 3.3 )
 
 project( CppUMockGen.Top )
 
-option( ENABLE_TEST "Enable building tests" ON )
+include( CTest )
+
 option( CI_MODE "Enable continuous integration mode" OFF )
 
 if( WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.2.0") )
@@ -18,9 +19,9 @@ else()
     set( DEFAULT_BUILD_TYPE "Release" )
 
     set( BUILD_TYPES_LIST "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "Coverage" )
-	
-	set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Coverage" )
-	
+
+    set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Coverage" )
+
     string( REPLACE ";" " " BUILD_TYPES_STRLIST "${BUILD_TYPES_LIST}" )
     
     if( NOT CMAKE_BUILD_TYPE )
@@ -52,6 +53,8 @@ else()
     set( CMAKE_EXE_LINKER_FLAGS_COVERAGE ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
 endif()
 
+option( COVERAGE_VERBOSE "Coverage analysis is performed in verbose mode" OFF )
+
 if( WIN32 AND NOT MSVC )
     add_definitions( -DWIN32 )
 endif()
@@ -77,7 +80,7 @@ set( CONFIG_MSG "${CONFIG_MSG}
     CI_MODE:                            ${CI_MODE}
 
 Configured Features:
-    ENABLE_TEST:                        ${ENABLE_TEST}
+    BUILD_TESTING:                      ${BUILD_TESTING}
     COVERAGE:                           ${COVERAGE}
     COVERAGE_VERBOSE:                   ${COVERAGE_VERBOSE}
     CHECK_COMPILATION:                  ${CHECK_COMPILATION}

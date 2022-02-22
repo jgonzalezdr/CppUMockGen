@@ -4,33 +4,28 @@ project( CppUMockGen.Test.App )
 
 # Test configuration
 
-set( PROD_DIR ${CMAKE_SOURCE_DIR}/app )
-
 include_directories(
-    ${PROD_DIR}/sources
+    ${PROD_SOURCE_DIR}/libs/cxxopts/include
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${PROD_DIR}/libs/cxxopts/include
-    ${CMAKE_SOURCE_DIR}/app/include/
-    ${CMAKE_SOURCE_DIR}/test/Expectations/
 )
 
 set( PROD_SRC_FILES
-     ${PROD_DIR}/sources/App.cpp
-     ${PROD_DIR}/sources/FileHelper.cpp
-     ${PROD_DIR}/sources/ConfigFile.cpp
-     ${PROD_DIR}/sources/StringHelper.cpp
+     ${PROD_SOURCE_DIR}/sources/App.cpp
+     ${PROD_SOURCE_DIR}/sources/FileHelper.cpp
+     ${PROD_SOURCE_DIR}/sources/ConfigFile.cpp
+     ${PROD_SOURCE_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES
      App_test.cpp
-     ${CMAKE_SOURCE_DIR}/test/Mocks/Parser_mock.cpp
-     ${CMAKE_SOURCE_DIR}/test/Mocks/ConsoleColorizer_mock.cpp
-     ${CMAKE_SOURCE_DIR}/test/Mocks/Config_mock.cpp
-     ${CMAKE_SOURCE_DIR}/test/Expectations/Parser_expect.cpp
-     ${CMAKE_SOURCE_DIR}/test/Expectations/ConsoleColorizer_expect.cpp
-     ${CMAKE_SOURCE_DIR}/test/Expectations/Config_expect.cpp
+     ${MOCKS_DIR}/Parser_mock.cpp
+     ${EXPECTATIONS_DIR}/Parser_expect.cpp
+     ${MOCKS_DIR}/ConsoleColorizer_mock.cpp
+     ${EXPECTATIONS_DIR}/ConsoleColorizer_expect.cpp
+     ${MOCKS_DIR}/Config_mock.cpp
+     ${EXPECTATIONS_DIR}/Config_expect.cpp
 )
 
 # Generate test target
 
-include( ../GenerateTest.cmake )
+include( ${TEST_BASE_DIR}/GenerateTest.cmake )

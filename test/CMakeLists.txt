@@ -1,18 +1,25 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen.AllTests )
-
 option( CHECK_COMPILATION "Check that generated code compiles properly" ON )
 
-option( COVERAGE_VERBOSE "Coverage analysis is performed in verbose mode" OFF )
-
-if( ENABLE_TEST )
-
-    enable_testing()
-
-    add_custom_target( build_tests )
+if( BUILD_TESTING )
 
     include( CommonTestTargets.cmake )
+
+    set( TEST_BASE_DIR ${CMAKE_CURRENT_LIST_DIR} )
+    set( PROD_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../app )
+    set( PROD_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../app )
+    set( EXPECTATIONS_DIR ${CMAKE_CURRENT_LIST_DIR}/Expectations )
+    set( MOCKS_DIR ${CMAKE_CURRENT_LIST_DIR}/Mocks )
+    set( HELPERS_DIR ${CMAKE_CURRENT_LIST_DIR}/TestHelpers )
+
+    include_directories(
+        ${PROD_SOURCE_DIR}/sources
+        ${PROD_SOURCE_DIR}/include/
+        ${MOCKS_DIR}
+        ${EXPECTATIONS_DIR}
+        ${HELPERS_DIR}
+    )
 
     if( NOT CHECK_COMPILATION )
         add_definitions( -DDISABLE_COMPILATION_CHECK )

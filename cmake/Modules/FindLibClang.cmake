@@ -18,6 +18,7 @@ if( LibClang_HOME )
 endif()
 
 find_path( LibClang_BASE_DIR include/clang-c/Index.h PATHS ${LIBCLANG_PATHS} HINTS ${LIBCLANG_HINTS} )
+mark_as_advanced( LibClang_BASE_DIR )
 
 if( NOT WIN32 )
     string( REGEX MATCH "-[^-]+$" LIBCLANG_VERSION_SUFFIX ${LibClang_BASE_DIR} )
@@ -27,16 +28,22 @@ if( NOT WIN32 )
 endif()
 
 find_library( LibClang_LIB_PATH NAMES ${LIBCLANG_LIBNAME} PATHS ${LibClang_BASE_DIR} )
+mark_as_advanced( LibClang_LIB_PATH )
+
+add_library( LibClang UNKNOWN IMPORTED )
+set_target_properties( LibClang PROPERTIES IMPORTED_LOCATION ${LibClang_LIB_PATH} )
+
+#
+# Export stuff
+#
 
 include( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( LibClang DEFAULT_MSG LibClang_BASE_DIR LibClang_LIB_PATH )
-
-mark_as_advanced( LibClang_BASE_DIR LibClang_LIB_PATH )
 
 unset( LIBCLANG_PATHS )
 unset( LIBCLANG_LIBNAME )
 unset( LIBCLANG_VERSION_SUFFIX )
 
-set( LibClang_INCLUDE_DIR ${LibClang_BASE_DIR}/include )
-set( LibClang_LIBRARY ${LibClang_LIB_PATH} )
-get_filename_component( LibClang_LIBRARY_DIR ${LibClang_LIB_PATH} DIRECTORY )
+target_include_directories( LibClang INTERFACE ${LibClang_BASE_DIR}/include )
+
+set( LibClang_LIBRARIES LibClang )
