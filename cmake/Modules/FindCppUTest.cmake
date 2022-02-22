@@ -1,19 +1,18 @@
+set( CPPUTEST_LIBNAME "CppUTest" )
+set( CPPUTESTEXT_LIBNAME "CppUTestExt" )
+
+if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
+    set( CPPUTEST_LIBNAME "CppUTest64" ${CPPUTEST_LIBNAME} )
+    set( CPPUTESTEXT_LIBNAME "CppUTestExt64" ${CPPUTESTEXT_LIBNAME} )
+elseif( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "4" )
+    set( CPPUTEST_LIBNAME "CppUTest32" ${CPPUTEST_LIBNAME} )
+    set( CPPUTESTEXT_LIBNAME "CppUTestExt32" ${CPPUTESTEXT_LIBNAME} )
+endif()
+
 if( WIN32 )
     set( CPPUTEST_PATHS "C:/Program Files/CppUTest" "C:/CppUTest" )
-
-    if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
-        set( CPPUTEST_LIBNAME "CppUTest64" )
-        set( CPPUTESTEXT_LIBNAME "CppUTestExt64" )
-    elseif( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "4" )
-        set( CPPUTEST_LIBNAME "CppUTest" )
-        set( CPPUTESTEXT_LIBNAME "CppUTestExt" )
-    else()
-        message( FATAL_ERROR "Could not determine architecture bitsize (32 or 64)" )
-    endif()
 else()
     set( CPPUTEST_PATHS "/usr/local" "/usr" )
-    set( CPPUTEST_LIBNAME "CppUTest" )
-    set( CPPUTESTEXT_LIBNAME "CppUTestExt" )
 endif()
 
 set( CPPUTEST_HINTS "" )
@@ -27,43 +26,70 @@ if( CppUTest_HOME )
     set( CPPUTEST_HINTS "${CppUTest_HOME}/lib" ${CPPUTEST_HINTS} )
 endif()
 
+#
+# Find CppUTest library
+#
+
 find_library( CppUTest_LIB_PATH NAMES ${CPPUTEST_LIBNAME} PATHS ${CPPUTEST_PATHS} HINTS ${CPPUTEST_HINTS} )
-mark_as_advanced( CppUTest_LIB_PATH  )
+mark_as_advanced( CppUTest_LIB_PATH )
+
+add_library( CppUTest UNKNOWN IMPORTED )
+set_target_properties( CppUTest PROPERTIES IMPORTED_LOCATION ${CppUTest_LIB_PATH} )
+
+#
+# Find CppUTestExt library
+#
 
 get_filename_component( CppUTest_LIBRARY_DIR ${CppUTest_LIB_PATH} DIRECTORY )
 
-if( NOT MSVC )
-    find_library( CppUTestExt_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME} HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
-    mark_as_advanced( CppUTestExt_LIB_PATH  )
+find_library( CppUTestExt_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME} HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+mark_as_advanced( CppUTestExt_LIB_PATH  )
+
+if( CppUTestExt_LIB_PATH )
+    add_library( CppUTestExt UNKNOWN IMPORTED )
+    set_target_properties( CppUTestExt PROPERTIES IMPORTED_LOCATION ${CppUTestExt_LIB_PATH} )
 endif()
 
-if( WIN32 )
-    find_library( CppUTest_DEBUG_LIB_PATH NAMES ${CPPUTEST_LIBNAME}d HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
-    mark_as_advanced( CppUTest_DEBUG_LIB_PATH  )
+#
+# Find CppUTest debug library
+#
 
-    if( NOT MSVC )
-        find_library( CppUTestExt_DEBUG_LIB_PATH NAMES ${CPPUTESTEXT_LIBNAME}d HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
-        mark_as_advanced( CppUTestExt_DEBUG_LIB_PATH  )
-    endif()
+list( TRANSFORM CPPUTEST_LIBNAME APPEND "d" OUTPUT_VARIABLE CPPUTEST_DBG_LIBNAME )
+find_library( CppUTest_DEBUG_LIB_PATH NAMES ${CPPUTEST_DBG_LIBNAME} HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+mark_as_advanced( CppUTest_DEBUG_LIB_PATH  )
+
+if( CppUTest_DEBUG_LIB_PATH )
+    set_target_properties( CppUTest PROPERTIES IMPORTED_LOCATION_DEBUG ${CppUTest_DEBUG_LIB_PATH} )
 endif()
+
+#
+# Find CppUTestExt debug library
+#
+
+list( TRANSFORM CPPUTESTEXT_LIBNAME APPEND "d" OUTPUT_VARIABLE CPPUTESTEXT_DBG_LIBNAME )
+find_library( CppUTestExt_DEBUG_LIB_PATH NAMES ${CPPUTESTEXT_DBG_LIBNAME} HINTS ${CppUTest_LIBRARY_DIR} NO_DEFAULT_PATH )
+mark_as_advanced( CppUTestExt_DEBUG_LIB_PATH  )
+
+if( CppUTestExt_DEBUG_LIB_PATH )
+    set_target_properties( CppUTestExt PROPERTIES IMPORTED_LOCATION_DEBUG ${CppUTestExt_DEBUG_LIB_PATH} )
+endif()
+
+#
+# Export stuff
+#
 
 include( FindPackageHandleStandardArgs )
-if( MSVC )
-    find_package_handle_standard_args( CppUTest DEFAULT_MSG CppUTest_LIB_PATH )
-else()
-    find_package_handle_standard_args( CppUTest DEFAULT_MSG CppUTest_LIB_PATH CppUTestExt_LIB_PATH )
-endif()
+find_package_handle_standard_args( CppUTest DEFAULT_MSG CppUTest_LIB_PATH CppUTestExt_LIB_PATH )
 
 unset( CPPUTEST_PATHS )
 unset( CPPUTEST_LIBNAME )
 
 get_filename_component( CppUTest_ROOT ${CppUTest_LIBRARY_DIR} DIRECTORY )
-set( CppUTest_INCLUDE_DIR ${CppUTest_ROOT}/include )
-set( CppUTest_LIBRARY ${CppUTest_LIB_PATH} )
-set( CppUTestExt_LIBRARY ${CppUTestExt_LIB_PATH} )
-if( DEFINED CppUTest_DEBUG_LIB_PATH AND (NOT CppUTest_DEBUG_LIB_PATH MATCHES "^.*-NOTFOUND$" ) )
-    set( CppUTest_DEBUG_LIBRARY ${CppUTest_DEBUG_LIB_PATH} )
+target_include_directories( CppUTest INTERFACE ${CppUTest_ROOT}/include )
+
+set( CppUTest_LIBRARIES CppUTest CppUTestExt )
+
+if( WIN32 )
+    target_link_libraries( CppUTest INTERFACE winmm.lib )
 endif()
-if( DEFINED CppUTestExt_DEBUG_LIB_PATH AND (NOT CppUTestExt_DEBUG_LIB_PATH MATCHES "^.*-NOTFOUND$" ) )
-    set( CppUTestExt_DEBUG_LIBRARY ${CppUTestExt_DEBUG_LIB_PATH} )
-endif()
+

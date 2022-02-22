@@ -12,38 +12,33 @@ find_package( LibClang REQUIRED )
 
 find_package( CppUTest REQUIRED )
 
-include_directories( ${CppUTest_INCLUDE_DIR} ${LibClang_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/test/TestHelpers )
-link_directories( ${CppUTest_LIBRARY_DIR} ${LibClang_LIBRARY_DIR} )
-
-add_definitions( -DCPPUTEST_INCLUDE_DIR="${CppUTest_INCLUDE_DIR}" )
-add_definitions( -DCPPUMOCKGEN_INCLUDE_DIR="${CMAKE_SOURCE_DIR}/app/include" )
-
 if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
 endif()
 
 add_executable( ${PROJECT_NAME} EXCLUDE_FROM_ALL ${PROD_SRC_FILES} ${TEST_SRC_FILES} ${CMAKE_CURRENT_LIST_DIR}/TestMain.cpp )
 
-set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
-set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
+target_compile_definitions( ${PROJECT_NAME} PUBLIC _UNITTEST_ )
 
-if( DEFINED CppUTest_DEBUG_LIBRARY )
-    target_link_libraries( ${PROJECT_NAME} debug ${CppUTest_DEBUG_LIBRARY} optimized ${CppUTest_LIBRARY} )
-    if( DEFINED CppUTestExt_DEBUG_LIBRARY )
-        target_link_libraries( ${PROJECT_NAME} debug ${CppUTestExt_DEBUG_LIBRARY} optimized ${CppUTestExt_LIBRARY} )
-    endif()
-else()
-    target_link_libraries( ${PROJECT_NAME} ${CppUTest_LIBRARY} )
-    if( DEFINED CppUTestExt_LIBRARY )
-        target_link_libraries( ${PROJECT_NAME} ${CppUTestExt_LIBRARY} )
-    endif()
-endif()
+get_target_property( CPPUTEST_INCLUDE_DIR CppUTest INTERFACE_INCLUDE_DIRECTORIES )
+target_compile_definitions( ${PROJECT_NAME} PUBLIC CPPUTEST_INCLUDE_DIR="${CPPUTEST_INCLUDE_DIR}" )
 
-target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARY} )
+target_compile_definitions( ${PROJECT_NAME} PUBLIC CPPUMOCKGEN_INCLUDE_DIR="${PROD_SOURCE_DIR}/include" )
+
+target_link_libraries( ${PROJECT_NAME} ${CppUTest_LIBRARIES} )
+
+target_link_libraries( ${PROJECT_NAME} ${LibClang_LIBRARIES} )
 
 if( (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0.0") )
     target_link_libraries( ${PROJECT_NAME} stdc++fs )
 endif()
+
+#
+# C++ standard
+#
+
+set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
+set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED 1 )
 
 add_dependencies( build_tests ${PROJECT_NAME} )
 

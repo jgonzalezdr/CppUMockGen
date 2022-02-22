@@ -4,15 +4,9 @@ project( CppUMockGen.Test.Config )
 
 # Test configuration
 
-set( PROD_DIR ${CMAKE_SOURCE_DIR}/app )
-
-include_directories(
-    ${PROD_DIR}/sources
-)
-
 set( PROD_SRC_FILES
-     ${PROD_DIR}/sources/Config.cpp
-     ${PROD_DIR}/sources/StringHelper.cpp
+     ${PROD_SOURCE_DIR}/sources/Config.cpp
+     ${PROD_SOURCE_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES
@@ -21,4 +15,4 @@ set( TEST_SRC_FILES
 
 # Generate test target
 
-include( ../GenerateTest.cmake )
+include( ${TEST_BASE_DIR}/GenerateTest.cmake )
