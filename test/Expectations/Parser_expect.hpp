@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()" 
+ * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
  */
 
 #include <CppUMockGen.hpp>
@@ -18,13 +18,13 @@ MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const 
 } }
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& GenerateMock(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output);
-MockExpectedCall& GenerateMock(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output);
+MockExpectedCall& GenerateMock(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output);
+MockExpectedCall& GenerateMock(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output);
 } }
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& GenerateExpectationHeader(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output);
-MockExpectedCall& GenerateExpectationHeader(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output);
+MockExpectedCall& GenerateExpectationHeader(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output);
+MockExpectedCall& GenerateExpectationHeader(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output);
 } }
 
 namespace expect { namespace Parser$ {

@@ -48,17 +48,19 @@ public:
      * Generates mocked functions for the C/C++ header parsed previously.
      *
      * @param genOpts [in] String containing the generation options
+     * @param baseDirPath [in] Base directory to reference input file in include directives
      * @param output [out] Stream where the generated mocks will be written
      */
-    void GenerateMock( const std::string &genOpts, std::ostream &output ) const noexcept;
+    void GenerateMock( const std::string &genOpts, const std::filesystem::path &baseDirPath, std::ostream &output ) const noexcept;
 
     /**
      * Generates expectation functions header for the C/C++ header parsed previously.
      *
      * @param genOpts [in] String containing the generation options
+     * @param baseDirPath [in] Base directory to reference input file in include directives
      * @param output [out] Stream where the generated expectations header will be written
      */
-    void GenerateExpectationHeader( const std::string &genOpts, std::ostream &output ) const noexcept;
+    void GenerateExpectationHeader( const std::string &genOpts, const std::filesystem::path &baseDirPath, std::ostream &output ) const noexcept;
 
     /**
      * Generates expectation functions implementation for the C/C++ header parsed previously.
@@ -73,7 +75,7 @@ private:
     void GenerateFileHeading( const std::string &genOpts, std::ostream &output ) const noexcept;
 
     std::vector<std::unique_ptr<const Function>> m_functions;
-    std::filesystem::path m_inputFilepath;
+    std::filesystem::path m_inputFilePath;
     bool m_interpretAsCpp;
 };
 

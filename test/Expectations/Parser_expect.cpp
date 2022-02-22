@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()" 
+ * Generation options: -s c++17 -t Parser::Parse#error=Pointer~&$ -t "#const std::string &=String~$.c_str()" -t "#const Config &=ConstPointer~&$" -t "#std::ostream &=OutputOfType:std::ostream<std::string~&$" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
  */
 
 #include "Parser_expect.hpp"
@@ -42,22 +42,24 @@ MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const 
 } }
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& GenerateMock(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output)
+MockExpectedCall& GenerateMock(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectOneCall("Parser::GenerateMock");
     if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Parser*>(__object__.getValue())); }
     if(genOpts.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("genOpts", genOpts.getValue()); }
+    if(baseDirPath.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("baseDirPath", baseDirPath.getValue()); }
     __expectedCall__.withOutputParameterOfTypeReturning("std::ostream", "output", output);
     if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
     return __expectedCall__;
 }
-MockExpectedCall& GenerateMock(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output)
+MockExpectedCall& GenerateMock(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Parser::GenerateMock");
     if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Parser*>(__object__.getValue())); }
     if(genOpts.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("genOpts", genOpts.getValue()); }
+    if(baseDirPath.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("baseDirPath", baseDirPath.getValue()); }
     __expectedCall__.withOutputParameterOfTypeReturning("std::ostream", "output", output);
     if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
     return __expectedCall__;
@@ -65,22 +67,24 @@ MockExpectedCall& GenerateMock(unsigned int __numCalls__, CppUMockGen::Parameter
 } }
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& GenerateExpectationHeader(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output)
+MockExpectedCall& GenerateExpectationHeader(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectOneCall("Parser::GenerateExpectationHeader");
     if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Parser*>(__object__.getValue())); }
     if(genOpts.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("genOpts", genOpts.getValue()); }
+    if(baseDirPath.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("baseDirPath", baseDirPath.getValue()); }
     __expectedCall__.withOutputParameterOfTypeReturning("std::ostream", "output", output);
     if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
     return __expectedCall__;
 }
-MockExpectedCall& GenerateExpectationHeader(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, const std::string* output)
+MockExpectedCall& GenerateExpectationHeader(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> genOpts, CppUMockGen::Parameter<const char*> baseDirPath, const std::string* output)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Parser::GenerateExpectationHeader");
     if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Parser*>(__object__.getValue())); }
     if(genOpts.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("genOpts", genOpts.getValue()); }
+    if(baseDirPath.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("baseDirPath", baseDirPath.getValue()); }
     __expectedCall__.withOutputParameterOfTypeReturning("std::ostream", "output", output);
     if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
     return __expectedCall__;
