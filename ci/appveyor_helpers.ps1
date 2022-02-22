@@ -47,7 +47,11 @@ function Get-MinGWBin() {
 
 function Get-MsBuildCmd()
 {
-    if ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2019")
+    if ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2022")
+    {
+        Write-Output "msbuild"
+    }
+    elseif ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2019")
     {
         Write-Output "msbuild"
     }
