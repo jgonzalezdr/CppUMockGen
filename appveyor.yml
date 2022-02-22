@@ -15,9 +15,11 @@ environment:
     PublishArtifacts: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
   - Platform: MSVC64
-    PlatformToolset: v142
     Configuration: Debug
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - Platform: MSVC64
+    Configuration: Debug
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
   - Platform: LINUX-GCC
     GccVersion: 8
     Configuration: Release
@@ -25,17 +27,24 @@ environment:
   - Platform: TDM-GCC-64
     PlatformToolset: 9.2.0
     Configuration: Coverage
-    #CheckCompilation: True
+    CheckCompilation: True
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - Platform: LINUX-GCC
+    GccVersion: 9
+    CheckCompilation: True
+    Configuration: Coverage
+    APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
 
 for:
   -
     matrix:
       only:
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     environment:
       CPPUTEST_HOME: C:\cpputest
       LCOV_HOME: C:\lcov
+      CODECOV_FLAG: --flag
     cache:
       - C:\cpputest -> appveyor.yml
       - C:\Strawberry
@@ -55,13 +64,17 @@ for:
     environment:
       CPPUTEST_HOME: /home/appveyor/cpputest
       LCOV_HOME: /home/appveyor/lcov
+      CODECOV_HOME: /home/appveyor/codecov
+      CODECOV_FLAG: -F
     cache:
       - /home/appveyor/cpputest -> appveyor.yml
       - /home/appveyor/lcov -> appveyor.yml
     install:
       - sh: sudo apt-get install libclang-9-dev
       - ps: if (!($env:Test -eq 'False') -and !(Test-Path -Path "$env:CPPUTEST_HOME")) { ci/appveyor_ci_install_cpputest_linux.ps1 }
-      - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "$env:LCOV_HOME")) { ci/appveyor_ci_install_lcov.ps1 }
+      - ps: if ($env:Configuration -eq 'Coverage' -and !(Test-Path -Path "$env:LCOV_HOME")) { ci/appveyor_ci_install_lcov_linux.ps1 }
+      - ps: if ($env:Configuration -eq 'Coverage') { bash ci/appveyor_ci_install_codecov_linux.sh }
+      - export PATH=$CODECOV_HOME:$PATH
 
 before_build:
   - git submodule update --init --recursive
@@ -74,4 +87,4 @@ test_script:
 
 after_test:
   - ps: ci/appveyor_ci_after_test.ps1
-  - ps: if ($env:Configuration -eq 'Coverage') { codecov -f build\test\reports\coverage\app_stripped.info }
+  - ps: if ($env:Configuration -eq 'Coverage') { codecov -f build/test/reports/coverage/app_stripped.info $env:CODECOV_FLAG $env:Platform }

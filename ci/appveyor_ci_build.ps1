@@ -59,7 +59,11 @@ switch -Wildcard ($env:Platform)
             $logger_arg = ''
         }
 
-        if ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2019")
+        if ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2022")
+        {
+            $cmake_generator = "Visual Studio 17 2022"
+        }
+        elseif ($env:APPVEYOR_BUILD_WORKER_IMAGE -like "*2019")
         {
             $cmake_generator = "Visual Studio 16 2019"
         }
