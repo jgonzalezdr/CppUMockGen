@@ -1,0 +1,18 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: Debug
+      buildType: Debug
+    release:
+      short: Release
+      buildType: Release
+    relWithDebInfo:
+      short: RelWithDebInfo
+      buildType: RelWithDebInfo
+    minSizeRel:
+      short: MinSizeRel
+      buildType: MinSizeRel
+    coverage:
+      short: Coverage
+      buildType: Coverage
