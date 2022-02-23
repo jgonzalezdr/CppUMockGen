@@ -123,3 +123,9 @@ include( InstallersSetup.cmake )
 
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin )
 install( DIRECTORY include/ DESTINATION include )
+
+get_target_property( LibClang_TYPE LibClang TYPE )
+if( LibClang_TYPE STREQUAL "SHARED_LIBRARY" )
+    get_target_property( LibClang_DLL_PATH LibClang IMPORTED_LOCATION )
+    install( FILES ${LibClang_DLL_PATH} DESTINATION bin )
+endif()

@@ -30,8 +30,18 @@ endif()
 find_library( LibClang_LIB_PATH NAMES ${LIBCLANG_LIBNAME} PATHS ${LibClang_BASE_DIR} )
 mark_as_advanced( LibClang_LIB_PATH )
 
-add_library( LibClang UNKNOWN IMPORTED )
-set_target_properties( LibClang PROPERTIES IMPORTED_LOCATION ${LibClang_LIB_PATH} )
+if( WIN32 )
+    find_file( LibClang_DLL_PATH ${LIBCLANG_LIBNAME}.dll PATHS ${LibClang_BASE_DIR} )
+endif()
+
+if( LibClang_DLL_PATH )
+    add_library( LibClang SHARED IMPORTED )
+    set_target_properties( LibClang PROPERTIES IMPORTED_IMPLIB ${LibClang_LIB_PATH} )
+    set_target_properties( LibClang PROPERTIES IMPORTED_LOCATION ${LibClang_DLL_PATH} )
+else()
+    add_library( LibClang UNKNOWN IMPORTED )
+    set_target_properties( LibClang PROPERTIES IMPORTED_LOCATION ${LibClang_LIB_PATH} )
+endif()
 
 #
 # Export stuff
