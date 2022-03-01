@@ -16,7 +16,16 @@ if( MSVC )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
 endif()
 
+if( WIN32 AND ( LibClang_TYPE STREQUAL "SHARED_LIBRARY" ) )
+    get_target_property( LibClang_DLL_PATH LibClang IMPORTED_LOCATION )
+endif()
+
 add_executable( ${PROJECT_NAME} EXCLUDE_FROM_ALL ${PROD_SRC_FILES} ${TEST_SRC_FILES} ${CMAKE_CURRENT_LIST_DIR}/TestMain.cpp )
+
+if( LibClang_DLL_PATH )
+    add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LibClang_DLL_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}> )
+endif()
 
 target_compile_definitions( ${PROJECT_NAME} PUBLIC _UNITTEST_ )
 

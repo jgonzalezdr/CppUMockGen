@@ -27,11 +27,11 @@ if( NOT WIN32 )
     endif()
 endif()
 
-find_library( LibClang_LIB_PATH NAMES ${LIBCLANG_LIBNAME} PATHS ${LibClang_BASE_DIR} )
+find_library( LibClang_LIB_PATH NAMES ${LIBCLANG_LIBNAME} PATHS ${LibClang_BASE_DIR} ${LibClang_BASE_DIR}/lib )
 mark_as_advanced( LibClang_LIB_PATH )
 
 if( WIN32 )
-    find_file( LibClang_DLL_PATH ${LIBCLANG_LIBNAME}.dll PATHS ${LibClang_BASE_DIR} )
+    find_file( LibClang_DLL_PATH ${LIBCLANG_LIBNAME}.dll PATHS ${LibClang_BASE_DIR}/bin )
 endif()
 
 if( LibClang_DLL_PATH )

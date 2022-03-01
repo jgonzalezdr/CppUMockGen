@@ -71,6 +71,10 @@ generate_product_version(
     EXPORT_TO_PARENT_SCOPE
 )
 
+if( WIN32 AND ( LibClang_TYPE STREQUAL "SHARED_LIBRARY" ) )
+    get_target_property( LibClang_DLL_PATH LibClang IMPORTED_LOCATION )
+endif()
+
 #
 # Executable definition
 #
@@ -80,6 +84,11 @@ if( MSVC )
 endif()
 
 add_executable( ${PROJECT_NAME} ${SRC_LIST} ${INC_LIST} ${PRODUCT_VERSION_FILES} )
+
+if( LibClang_DLL_PATH )
+    add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LibClang_DLL_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}> )
+endif()
 
 target_include_directories( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -125,7 +134,6 @@ install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin )
 install( DIRECTORY include/ DESTINATION include )
 
 get_target_property( LibClang_TYPE LibClang TYPE )
-if( LibClang_TYPE STREQUAL "SHARED_LIBRARY" )
-    get_target_property( LibClang_DLL_PATH LibClang IMPORTED_LOCATION )
+if( LibClang_DLL_PATH )
     install( FILES ${LibClang_DLL_PATH} DESTINATION bin )
 endif()
