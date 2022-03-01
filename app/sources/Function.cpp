@@ -54,6 +54,8 @@ public:
 
     virtual std::string GetExpectationSignature() const noexcept = 0;
 
+    virtual std::string GetExpectationCallArgument() const noexcept = 0;
+
     virtual std::string GetExpectationBody() const noexcept = 0;
 
 protected:
@@ -76,6 +78,11 @@ public:
     }
 
     virtual std::string GetExpectationSignature() const noexcept override
+    {
+        return "";
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
     {
         return "";
     }
@@ -120,6 +127,11 @@ public:
     virtual std::string GetMockBodyBack() const noexcept override
     {
         return "." + GetMockCall() + "()" + m_mockRetExprBack;
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
+    {
+        return RETURN_ARG_NAME;
     }
 
     virtual std::string GetExpectationSignature() const noexcept override
@@ -700,6 +712,8 @@ public:
 
     virtual std::string GetExpectationSignature() const noexcept = 0;
 
+    virtual std::string GetExpectationCallArgument() const noexcept = 0;
+
     virtual std::string GetExpectationBody( bool argumentsSkipped ) const noexcept = 0;
 
     virtual bool CanBeIgnored() const noexcept = 0;
@@ -727,6 +741,11 @@ public:
     }
 
     virtual std::string GetMockBody() const noexcept override
+    {
+        return "";
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
     {
         return "";
     }
@@ -789,6 +808,11 @@ public:
     virtual std::string GetMockBody() const noexcept override
     {
         return "." + GetMockBodyCall();
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
+    {
+        return m_name;
     }
 
     virtual std::string GetExpectationBody( bool argumentsSkipped ) const noexcept override
@@ -1068,6 +1092,16 @@ public:
         if( !m_calculateSizeFromType )
         {
             ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
+        }
+        return ret;
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
+    {
+        std::string ret = ArgumentStandard::GetExpectationCallArgument();
+        if( !m_calculateSizeFromType )
+        {
+            ret += ", " SIZEOF_VAR_PREFIX + m_name;
         }
         return ret;
     }
@@ -1792,6 +1826,8 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     bool argumentsSkipped = HasSkippedArguments();
     bool checkIgnoredArguments = !argumentsSkipped && HasIgnorableArguments();
 
+    // Generate function signature initial part (name, number of calls paramater, and object paramater)
+
     std::string ret = "MockExpectedCall& " + functionName + "(";
 
     if( !oneCall )
@@ -1811,32 +1847,43 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
         addSignatureSeparator = true;
     }
 
+    // Generate function body initial part (name, number of calls paramater, and object paramater)
+
     std::string body;
     if( !proto )
     {
-        if( checkIgnoredArguments )
-        {
-            body += INDENT "bool " IGNORE_OTHERS_VAR_NAME " = false;\n";
-        }
-
         if( oneCall )
         {
-            body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectOneCall(\"" + m_functionName + "\");\n";
+            body += INDENT "return " + functionName + "(1";
+
+            if( m_isNonStaticMethod )
+            {
+                body += ", " OBJECT_ARG_NAME;
+            }
         }
         else
         {
-            body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectNCalls(" NUM_CALLS_ARG_NAME ", \"" + m_functionName + "\");\n";
-        }
+            if( checkIgnoredArguments )
+            {
+                body += INDENT "bool " IGNORE_OTHERS_VAR_NAME " = false;\n";
+            }
 
-        if( m_isNonStaticMethod )
-        {
-            body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<" +
-                    m_className + "*>(" OBJECT_ARG_NAME ".getValue())); }\n";
+            body += INDENT "MockExpectedCall& " EXPECTED_CALL_VAR_NAME " = mock().expectNCalls(" NUM_CALLS_ARG_NAME ", \"" + m_functionName + "\");\n";
+
+            if( m_isNonStaticMethod )
+            {
+                body += INDENT "if(!" OBJECT_ARG_NAME ".isIgnored()) { " EXPECTED_CALL_VAR_NAME ".onObject(const_cast<" +
+                        m_className + "*>(" OBJECT_ARG_NAME ".getValue())); }\n";
+            }
         }
     }
 
+    // Generate function signature and body arguments part
+
     for( size_t i = 0; i < m_arguments.size(); i++ )
     {
+        // Generate function signature argument part
+
         std::string argumentSignature = m_arguments[i]->GetExpectationSignature();
 
         if( !argumentSignature.empty() )
@@ -1850,11 +1897,26 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
             addSignatureSeparator = true;
         }
 
+        // Generate function body argument part
+
         if( !proto )
         {
-            body += m_arguments[i]->GetExpectationBody( argumentsSkipped );
+            if( oneCall )
+            {
+                std::string callArgument = m_arguments[i]->GetExpectationCallArgument();
+                if( !callArgument.empty() )
+                {
+                    body += ", " + callArgument;
+                }
+            }
+            else
+            {
+                body += m_arguments[i]->GetExpectationBody( argumentsSkipped );
+            }
         }
     }
+
+    // Generate function signature and body return part
 
     std::string returnSignature = m_return->GetExpectationSignature();
 
@@ -1874,17 +1936,30 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     }
     else
     {
-        body += m_return->GetExpectationBody();
+        if( oneCall )
+        {
+            std::string returnArgument = m_return->GetExpectationCallArgument();
+            if( !returnArgument.empty() )
+            {
+                body += ", " + returnArgument;
+            }
 
-        if( argumentsSkipped )
-        {
-            body += INDENT EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters();\n";
+            body += ");";
         }
-        else if( checkIgnoredArguments )
+        else
         {
-            body += INDENT "if(" IGNORE_OTHERS_VAR_NAME ") { " EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters(); }\n";
+            body += m_return->GetExpectationBody();
+
+            if( argumentsSkipped )
+            {
+                body += INDENT EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters();\n";
+            }
+            else if( checkIgnoredArguments )
+            {
+                body += INDENT "if(" IGNORE_OTHERS_VAR_NAME ") { " EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters(); }\n";
+            }
+            body += INDENT "return " EXPECTED_CALL_VAR_NAME ";";
         }
-        body += INDENT "return " EXPECTED_CALL_VAR_NAME ";";
 
         ret += ")\n{\n" + body + "\n}\n";
     }
