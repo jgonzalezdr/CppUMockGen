@@ -86,14 +86,15 @@ TEST_GROUP( Parser )
     void SetupTempFile( std::string filename, const SimpleString& contents )
     {
         auto tempPath = ( tempDirPath / filename );
-        tempFilePath = tempPath.generic_string();
         
-        std::filesystem::create_directories( tempPath );
+        std::filesystem::create_directories( tempPath.parent_path() );
         std::filesystem::remove( tempPath );
 
         tempFile.open( tempPath );
         tempFile << contents.asCharString();
         tempFile.close();
+        
+        tempFilePath = tempPath.generic_string();
     }
 };
 
