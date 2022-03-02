@@ -42,7 +42,7 @@ void App::PrintError( const char *msg ) noexcept
 
 static std::string QuotifyOption( const std::string &option ) noexcept
 {
-    if( option.find(' ') != std::string::npos )
+    if( option.find_first_of(" \t=&|,;^%@$!#*?(){}[]<>\\") != std::string::npos )
     {
         return "\"" + option + "\"";
     }
