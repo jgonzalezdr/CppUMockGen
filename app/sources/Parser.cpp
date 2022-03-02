@@ -20,6 +20,8 @@
 #include "Config.hpp"
 #include "Function.hpp"
 #include "Method.hpp"
+#include "Constructor.hpp"
+#include "Destructor.hpp"
 #include "ClangHelper.hpp"
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
@@ -67,6 +69,32 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
                     else
                     {
                         delete method; // LCOV_EXCL_BR_LINE: False positive
+                    }
+                    return CXChildVisit_Continue;
+                }
+                else if( cursorKind == CXCursor_Constructor )
+                {
+                    Constructor *constructor = new Constructor;
+                    if( constructor->Parse( cursor, parseData->config ) )
+                    {
+                        parseData->functions.push_back( std::unique_ptr<const Function>(constructor) );
+                    }
+                    else
+                    {
+                        delete constructor; // LCOV_EXCL_BR_LINE: False positive
+                    }
+                    return CXChildVisit_Continue;
+                }
+                else if( cursorKind == CXCursor_Destructor )
+                {
+                    Destructor *destructor = new Destructor;
+                    if( destructor->Parse( cursor, parseData->config ) )
+                    {
+                        parseData->functions.push_back( std::unique_ptr<const Function>(destructor) );
+                    }
+                    else
+                    {
+                        delete destructor; // LCOV_EXCL_BR_LINE: False positive
                     }
                     return CXChildVisit_Continue;
                 }

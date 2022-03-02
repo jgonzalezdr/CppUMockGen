@@ -19,6 +19,11 @@ set( TEST_SRC_FILES
      ${MOCKS_DIR}/Function_mock.cpp
      ${EXPECTATIONS_DIR}/Function_expect.cpp
      ${MOCKS_DIR}/Method_mock.cpp
+     ${EXPECTATIONS_DIR}/Method_expect.cpp
+     ${MOCKS_DIR}/Constructor_mock.cpp
+     ${EXPECTATIONS_DIR}/Constructor_expect.cpp
+     ${MOCKS_DIR}/Destructor_mock.cpp
+     ${EXPECTATIONS_DIR}/Destructor_expect.cpp
      ${MOCKS_DIR}/ConsoleColorizer_mock.cpp
      ${EXPECTATIONS_DIR}/ConsoleColorizer_expect.cpp
 )

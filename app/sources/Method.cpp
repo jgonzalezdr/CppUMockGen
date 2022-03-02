@@ -18,13 +18,13 @@ Method::Method() noexcept
 
 bool Method::IsMockable( const CXCursor &cursor ) const noexcept
 {
-    // Only public methods should be mocked
-    bool isPublic = isMethodPublic( cursor );
+    // Public methods should be mocked
+    bool isPublic = isMemberPublic( cursor );
 
-    // Pure virtual methods should not be mocked
+    // Virtual methods should be mocked
     bool isVirtual = clang_CXXMethod_isVirtual( cursor );
 
-    // Pure virtual methods should not be mocked
+    // Pure virtual methods should never be mocked
     bool isPureVirtual = clang_CXXMethod_isPureVirtual( cursor );
 
     // TODO: Print warning if not mockable

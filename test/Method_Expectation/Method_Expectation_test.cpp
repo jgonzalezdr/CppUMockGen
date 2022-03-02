@@ -102,9 +102,6 @@ TEST( Method_Expectation, ProtectedVirtualWithDefinitionInsideClass )
     SimpleString testHeader =
             "class class1 {\n"
             "protected:\n"
-            "    class1();\n"
-            "    ~class1();\n"
-            "protected:\n"
             "    virtual bool method1() const { return true; }\n"
             "};";
 
@@ -226,9 +223,9 @@ TEST( Method_Expectation, PureVirtualMethod )
 }
 
 /*
- * Check that a public method in a private class does not generate expectation helper function.
+ * Check that a method in a private class does not generate expectation helper function.
  */
-TEST( Method_Expectation, PublicMethodInPrivateClass )
+TEST( Method_Expectation, MethodInPrivateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -237,7 +234,7 @@ TEST( Method_Expectation, PublicMethodInPrivateClass )
             "class class1 {\n"
             "private:\n"
             "    class class2 {\n"
-            "        public:\n"
+            "    public:\n"
             "        void method1();\n"
             "    };\n"
             "};";
@@ -255,9 +252,9 @@ TEST( Method_Expectation, PublicMethodInPrivateClass )
 }
 
 /*
- * Check that a public method in a protected class does not generate expectation helper function.
+ * Check that a method in a protected class does not generate expectation helper function.
  */
-TEST( Method_Expectation, PublicMethodInProtectedClass )
+TEST( Method_Expectation, MethodInProtectedClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -266,7 +263,7 @@ TEST( Method_Expectation, PublicMethodInProtectedClass )
             "class class1 {\n"
             "protected:\n"
             "    class class2 {\n"
-            "        public:\n"
+            "    public:\n"
             "        void method1();\n"
             "    };\n"
             "};";
@@ -404,7 +401,7 @@ TEST( Method_Expectation, VirtualPrivateMethod )
 }
 
 /*
- * Check that a virtual private method generates a expectation helper function.
+ * Check that a virtual protected method generates a expectation helper function.
  */
 TEST( Method_Expectation, VirtualProtectedMethod )
 {

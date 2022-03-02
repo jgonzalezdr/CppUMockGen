@@ -20,6 +20,8 @@ set( SRC_LIST
      sources/ClangHelper.cpp
      sources/Function.cpp
      sources/Method.cpp
+     sources/Constructor.cpp
+     sources/Destructor.cpp
      sources/ConsoleColorizer.cpp
      sources/Config.cpp
      sources/FileHelper.cpp
@@ -33,6 +35,8 @@ set( INC_LIST
      sources/ClangHelper.hpp
      sources/Function.hpp
      sources/Method.hpp
+     sources/Constructor.hpp
+     sources/Destructor.hpp
      sources/ConsoleColorizer.hpp
      sources/Config.hpp
      sources/FileHelper.hpp

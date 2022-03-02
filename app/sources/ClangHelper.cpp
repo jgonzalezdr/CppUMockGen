@@ -102,7 +102,7 @@ std::string getBareTypeSpelling( const CXType &type ) noexcept
     return className;
 }
 
-std::string getMethodClassName( const CXCursor &cursor ) noexcept
+std::string getMemberClassName( const CXCursor &cursor ) noexcept
 {
     std::string ret;
 
@@ -116,7 +116,7 @@ std::string getMethodClassName( const CXCursor &cursor ) noexcept
     return ret;
 }
 
-bool isMethodPublic( const CXCursor &cursor ) noexcept
+bool isMemberPublic( const CXCursor &cursor ) noexcept
 {
     CXCursorKind cursorKind = clang_getCursorKind( cursor );
     CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
@@ -141,6 +141,40 @@ bool isMethodPublic( const CXCursor &cursor ) noexcept
     }
     else
     {
-        return isMethodPublic( clang_getCursorSemanticParent( cursor ) );
+        return isMemberInPublicClass( cursor );
     }
+}
+
+bool isMemberNonPrivate( const CXCursor &cursor ) noexcept
+{
+    CXCursorKind cursorKind = clang_getCursorKind( cursor );
+    CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
+
+    // LCOV_EXCL_START: Defensive
+    if( cursorKind == CXCursor_TranslationUnit )
+    {
+        return true;
+    }
+    else if( clang_Cursor_isNull( cursor ) )
+    {
+        return false;
+    }
+    // LCOV_EXCL_STOP
+    else if( accessSpecifier == CX_CXXInvalidAccessSpecifier )
+    {
+        return true;
+    }
+    else if( accessSpecifier == CX_CXXPrivate )
+    {
+        return false;
+    }
+    else
+    {
+        return isMemberInPublicClass( cursor );
+    }
+}
+
+bool isMemberInPublicClass( const CXCursor &cursor ) noexcept
+{
+    return isMemberPublic( clang_getCursorSemanticParent( cursor ) );
 }

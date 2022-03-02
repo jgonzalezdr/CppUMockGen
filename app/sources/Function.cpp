@@ -1615,13 +1615,24 @@ bool Function::IsMockable( const CXCursor &cursor ) const noexcept
     return isCanonical && hasNoDefinition;
 }
 
+std::string Function::GetExpectationFunctionName( const std::string &functionName ) const noexcept
+{
+    return functionName;
+}
+
 static Function::EExceptionSpec ParseClangExceptionSpec( const CXCursor &cursor )
 {
     int exceptionSpec = clang_getCursorExceptionSpecificationType( cursor );
 
+    if( exceptionSpec < 0 )
+    {
+        return Function::EExceptionSpec::Any;
+    }
+
     switch( exceptionSpec ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case CXCursor_ExceptionSpecificationKind_None:
+        case CXCursor_ExceptionSpecificationKind_Unevaluated:
             return Function::EExceptionSpec::Any; // No spec means any exception can be thrown
 
         case CXCursor_ExceptionSpecificationKind_DynamicNone:
@@ -1654,19 +1665,16 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
         // Get function name
         m_functionName = getQualifiedName( cursor );
 
-        if( clang_getCursorKind( cursor ) == CXCursor_CXXMethod )
+        auto cursorKind = clang_getCursorKind( cursor );
+
+        bool isMethod = ( cursorKind == CXCursor_CXXMethod );
+        bool isConstructor = ( cursorKind == CXCursor_Constructor );
+        bool isDestructor = ( cursorKind == CXCursor_Destructor );
+
+        if( isMethod || isConstructor || isDestructor )
         {
-            // Get method staticness
-            m_isNonStaticMethod = !clang_CXXMethod_isStatic( cursor );
-
-            // Get method constantness
-            m_isConstMethod = clang_CXXMethod_isConst(cursor);
-
             // Get method class
-            m_className = getMethodClassName(cursor);
-
-            // Get exception specification
-            m_exceptionSpec = ParseClangExceptionSpec(cursor);
+            m_className = getMemberClassName(cursor);
 
             // LCOV_EXCL_START
             if( m_className.empty() )
@@ -1676,9 +1684,29 @@ bool Function::Parse( const CXCursor &cursor, const Config &config )
             // LCOV_EXCL_STOP
         }
 
-        // Get & process function return type
-        const CXType returnType = clang_getCursorResultType( cursor );
-        m_return = std::unique_ptr<Return>( returnParser.Process( m_functionName, returnType ) );
+        if( isMethod )
+        {
+            // Get method staticness
+            m_isNonStaticMethod = !clang_CXXMethod_isStatic( cursor );
+
+            // Get method constantness
+            m_isConstMethod = clang_CXXMethod_isConst(cursor);
+        }
+
+        if( isDestructor )
+        {
+            m_isNonStaticMethod = true;
+        }
+
+        // Get exception specification
+        m_exceptionSpec = ParseClangExceptionSpec(cursor);
+
+        if( !isConstructor && !isDestructor )
+        {
+            // Get & process function return type
+            const CXType returnType = clang_getCursorResultType( cursor );
+            m_return = std::unique_ptr<Return>( returnParser.Process( m_functionName, returnType ) );
+        }
 
         // Process arguments
         int numArgs = clang_Cursor_getNumArguments( cursor );
@@ -1726,9 +1754,17 @@ std::string Function::GenerateMock() const noexcept
     }
 // LCOV_EXCL_STOP
 
-    std::string signature = m_return->GetMockSignature() + " " + m_functionName + "(";
+    std::string signature;
+    std::string body;
 
-    std::string body = m_return->GetMockBodyFront() + "mock().actualCall(\"" + m_functionName + "\")";
+    if( m_return )
+    {
+        signature = m_return->GetMockSignature() + " ";
+        body = m_return->GetMockBodyFront();
+    }
+
+    signature += m_functionName + "(";
+    body += "mock().actualCall(\"" + m_functionName + "\")";
 
     if( m_isNonStaticMethod )
     {
@@ -1756,7 +1792,10 @@ std::string Function::GenerateMock() const noexcept
 
     signature += ExceptionSpecToString( m_exceptionSpec );
 
-    body += m_return->GetMockBodyBack();
+    if( m_return )
+    {
+        body += m_return->GetMockBodyBack();
+    }
 
     return signature + "\n{\n    " + body + ";\n}\n";
 }
@@ -1806,9 +1845,11 @@ std::string Function::GenerateExpectation( bool proto ) const noexcept
     }
     ret += "\n";
 
+    std::string functionName = GetExpectationFunctionName( namespaces[namespaces.size()-1] );
+
     // Function processing
-    ret += GenerateExpectation( proto, namespaces[namespaces.size()-1], true );
-    ret += GenerateExpectation( proto, namespaces[namespaces.size()-1], false );
+    ret += GenerateExpectation( proto, functionName, true );
+    ret += GenerateExpectation( proto, functionName, false );
 
     // Namespace closing
     for( size_t i = 0; i < (namespaces.size() - 1); i++ )
@@ -1820,7 +1861,7 @@ std::string Function::GenerateExpectation( bool proto ) const noexcept
     return ret;
 }
 
-std::string Function::GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const noexcept
+std::string Function::GenerateExpectation( bool proto, const std::string &functionName, bool oneCall ) const noexcept
 {
     bool addSignatureSeparator = false;
     bool argumentsSkipped = HasSkippedArguments();
@@ -1844,6 +1885,13 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
         }
 
         ret += "CppUMockGen::Parameter<const " + m_className + "*> " OBJECT_ARG_NAME;
+
+        if( !m_return && proto )
+        {
+            // Destructor => Add default value
+            ret += " = ::CppUMockGen::IgnoreParameter::YES";
+        }
+
         addSignatureSeparator = true;
     }
 
@@ -1918,17 +1966,42 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
 
     // Generate function signature and body return part
 
-    std::string returnSignature = m_return->GetExpectationSignature();
-
-    if( !returnSignature.empty() )
+    if( m_return )
     {
-        if( addSignatureSeparator )
+        // Generate function signature return part
+
+        std::string returnSignature = m_return->GetExpectationSignature();
+
+        if( !returnSignature.empty() )
         {
-            ret += ", ";
+            if( addSignatureSeparator )
+            {
+                ret += ", ";
+            }
+
+            ret += returnSignature;
         }
 
-        ret += returnSignature;
+        // Generate function body return part
+
+        if( !proto )
+        {
+            if( oneCall )
+            {
+                std::string returnArgument = m_return->GetExpectationCallArgument();
+                if( !returnArgument.empty() )
+                {
+                    body += ", " + returnArgument;
+                }
+            }
+            else
+            {
+                body += m_return->GetExpectationBody();
+            }
+        }
     }
+
+    // Generate function signature and body final part
 
     if( proto )
     {
@@ -1938,18 +2011,10 @@ std::string Function::GenerateExpectation( bool proto, std::string functionName,
     {
         if( oneCall )
         {
-            std::string returnArgument = m_return->GetExpectationCallArgument();
-            if( !returnArgument.empty() )
-            {
-                body += ", " + returnArgument;
-            }
-
             body += ");";
         }
         else
         {
-            body += m_return->GetExpectationBody();
-
             if( argumentsSkipped )
             {
                 body += INDENT EXPECTED_CALL_VAR_NAME ".ignoreOtherParameters();\n";

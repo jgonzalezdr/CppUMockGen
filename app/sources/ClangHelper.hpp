@@ -75,19 +75,35 @@ std::string getQualifiedName( const CXCursor &cursor ) noexcept;
 std::string getBareTypeSpelling( const CXType &type ) noexcept;
 
 /**
- * Returns the name of the class to which a method belongs.
+ * Returns the name of the class to which a member belongs.
  *
- * @param cursor [in] A cursor to a method
- * @return A string with name of the class to which belongs the method of the cursor
+ * @param cursor [in] A cursor to a member
+ * @return A string with name of the class to which the member of the cursor belongs
  */
-std::string getMethodClassName( const CXCursor &cursor ) noexcept;
+std::string getMemberClassName( const CXCursor &cursor ) noexcept;
 
 /**
- * Checks if a method and its containing classes have public scope.
+ * Checks if a member and its containing classes have public scope.
  *
- * @param cursor [in] A cursor to a method
- * @return @c true if the method and its containing classes are public, or @c false otherwise
+ * @param cursor [in] A cursor to a member
+ * @return @c true if the member and its containing classes are public, or @c false otherwise
  */
-bool isMethodPublic( const CXCursor &cursor ) noexcept;
+bool isMemberPublic( const CXCursor &cursor ) noexcept;
+
+/**
+ * Checks if a member has non-private scope and its containing classes have public scope.
+ *
+ * @param cursor [in] A cursor to a member
+ * @return @c true if the member is non-private and its containing classes are public, or @c false otherwise
+ */
+bool isMemberNonPrivate( const CXCursor &cursor ) noexcept;
+
+/**
+ * Checks if a member's containing classes have public scope.
+ *
+ * @param cursor [in] A cursor to a member
+ * @return @c true if the member's containing classes are public, or @c false otherwise
+ */
+bool isMemberInPublicClass( const CXCursor &cursor ) noexcept;
 
 #endif // header guard

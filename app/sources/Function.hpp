@@ -73,7 +73,9 @@ protected:
      */
     virtual bool IsMockable( const CXCursor &cursor ) const noexcept;
 
-    std::string GenerateExpectation( bool proto, std::string functionName, bool oneCall ) const noexcept;
+    virtual std::string GetExpectationFunctionName( const std::string &functionName ) const noexcept;
+
+    std::string GenerateExpectation( bool proto, const std::string &functionName, bool oneCall ) const noexcept;
 
     bool HasIgnorableArguments() const noexcept;
     bool HasSkippedArguments() const noexcept;

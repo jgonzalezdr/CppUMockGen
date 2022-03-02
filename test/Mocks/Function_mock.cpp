@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -t "#const CXCursor &=ConstPointer~&$" -t "#const Config &=ConstPointer~&$" -t @std::string=String
+ * Generation options: -t "#const CXCursor &=ConstPointer~&$" -t "#const Config &=ConstPointer~&$" -t "@std::string=String" -t "#const std::string &=String~$.c_str()"
  */
 
 #include "Function.hpp"
@@ -17,11 +17,14 @@ class Function::Return
 {};
 
 Function::Function() noexcept
-: m_isConstMethod( false ), m_isNonStaticMethod( false ), m_exceptionSpec( Function::EExceptionSpec::Any )
-{}
+{
+    mock().actualCall("Function::Function");
+}
 
 Function::~Function() noexcept
-{}
+{
+    mock().actualCall("Function::~Function").onObject(this);
+}
 
 bool Function::Parse(const CXCursor & cursor, const Config & config)
 {
@@ -41,5 +44,10 @@ std::string Function::GenerateExpectation(bool proto) const noexcept
 bool Function::IsMockable(const CXCursor & cursor) const noexcept
 {
     return mock().actualCall("Function::IsMockable").onObject(this).withConstPointerParameter("cursor", &cursor).returnBoolValue();
+}
+
+std::string Function::GetExpectationFunctionName(const std::string & functionName) const noexcept
+{
+    return mock().actualCall("Function::GetExpectationFunctionName").onObject(this).withStringParameter("functionName", functionName.c_str()).returnStringValue();
 }
 

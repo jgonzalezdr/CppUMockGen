@@ -38,7 +38,10 @@ void ClangParseHelper::ParseHeader( const std::string &code, const std::function
         if( clang_Location_isFromMainFile( clang_getCursorLocation( cursor ) ) != 0 )
         {
             CXCursorKind cursorKind = clang_getCursorKind( cursor );
-            if( ( cursorKind == CXCursor_FunctionDecl ) || ( cursorKind == CXCursor_CXXMethod ) )
+            if( ( cursorKind == CXCursor_FunctionDecl ) || 
+                ( cursorKind == CXCursor_CXXMethod ) ||
+                ( cursorKind == CXCursor_Constructor ) ||
+                ( cursorKind == CXCursor_Destructor ) )
             {
                 ( * ( std::function<void( CXCursor )>* ) client_data )( cursor );
                 return CXChildVisit_Continue;

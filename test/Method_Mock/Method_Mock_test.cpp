@@ -64,9 +64,9 @@ TEST_GROUP( Method_Mock )
  *===========================================================================*/
 
 /*
- * Check that a public method with definition inside the class declaration is not mocked.
+ * Check that a non-virtual method with definition inside the class declaration is not mocked.
  */
-TEST( Method_Mock, PublicNonVirtualWithDefinitionInsideClass )
+TEST( Method_Mock, NonVirtualWithDefinitionInsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -89,19 +89,16 @@ TEST( Method_Mock, PublicNonVirtualWithDefinitionInsideClass )
 }
 
 /*
- * Check that a non-virtual protected method with definition inside the class declaration is not mocked.
+ * Check that a virtual method with definition inside the class declaration is not mocked.
  */
-TEST( Method_Mock, ProtectedVirtualWithDefinitionInsideClass )
+TEST( Method_Mock, VirtualWithDefinitionInsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
 
     SimpleString testHeader =
             "class class1 {\n"
-            "protected:\n"
-            "    class1();\n"
-            "    ~class1();\n"
-            "protected:\n"
+            "public:\n"
             "    virtual bool method1() const { return true; }\n"
             "};";
 
@@ -117,9 +114,9 @@ TEST( Method_Mock, ProtectedVirtualWithDefinitionInsideClass )
 }
 
 /*
- * Check that a method with definition outside the class declaration is not mocked.
+ * Check that a non-virtual method with definition outside the class declaration is not mocked.
  */
-TEST( Method_Mock, WithDefinitionOutsideClass )
+TEST( Method_Mock, NonVirtualWithDefinitionOutsideClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -128,6 +125,32 @@ TEST( Method_Mock, WithDefinitionOutsideClass )
             "class class1 {\n"
             "public:\n"
             "    void method1();\n"
+            "};\n"
+            "void class1::method1() {}";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int methodCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    CHECK_EQUAL( 2, methodCount );
+    CHECK_EQUAL( 0, results.size() );
+
+    // Cleanup
+}
+
+/*
+ * Check that a virtual method with definition outside the class declaration is not mocked.
+ */
+TEST( Method_Mock, VirtualWithDefinitionOutsideClass )
+{
+    // Prepare
+    Config* config = GetMockConfig();
+
+    SimpleString testHeader =
+            "class class1 {\n"
+            "public:\n"
+            "    virtual void method1();\n"
             "};\n"
             "void class1::method1() {}";
 
@@ -218,9 +241,9 @@ TEST( Method_Mock, PureVirtualMethod )
 }
 
 /*
- * Check that a public method in a private class is not mocked.
+ * Check that a method in a private class is not mocked.
  */
-TEST( Method_Mock, PublicMethodInPrivateClass )
+TEST( Method_Mock, MethodInPrivateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -229,7 +252,7 @@ TEST( Method_Mock, PublicMethodInPrivateClass )
             "class class1 {\n"
             "private:\n"
             "    class class2 {\n"
-            "        public:\n"
+            "    public:\n"
             "        void method1();\n"
             "    };\n"
             "};";
@@ -246,9 +269,9 @@ TEST( Method_Mock, PublicMethodInPrivateClass )
 }
 
 /*
- * Check that a public method in a protected class is not mocked.
+ * Check that a method in a protected class is not mocked.
  */
-TEST( Method_Mock, PublicMethodInProtectedClass )
+TEST( Method_Mock, MethodInProtectedClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -257,7 +280,7 @@ TEST( Method_Mock, PublicMethodInProtectedClass )
             "class class1 {\n"
             "protected:\n"
             "    class class2 {\n"
-            "        public:\n"
+            "    public:\n"
             "        void method1();\n"
             "    };\n"
             "};";
@@ -414,9 +437,9 @@ TEST( Method_Mock, PublicConstMethod )
 }
 
 /*
- * Check that a public method with exception specifiers is mocked properly.
+ * Check that a method with exception specifiers is mocked properly.
  */
-TEST( Method_Mock, PublicExceptionSpecifiersMethod )
+TEST( Method_Mock, ExceptionSpecifiersMethod )
 {
     const std::vector< std::pair< std::string, std::string > > exceptionSpecifiers =
     {
@@ -456,9 +479,9 @@ TEST( Method_Mock, PublicExceptionSpecifiersMethod )
 }
 
 /*
- * Check that a public const method with exception specifiers is mocked properly.
+ * Check that a const method with exception specifiers is mocked properly.
  */
-TEST( Method_Mock, PublicExceptionSpecifiersConstMethod )
+TEST( Method_Mock, ExceptionSpecifiersConstMethod )
 {
     const std::vector< std::pair< std::string, std::string > > exceptionSpecifiers =
     {
