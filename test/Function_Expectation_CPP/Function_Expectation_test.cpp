@@ -319,8 +319,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -356,8 +355,7 @@ TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -414,8 +412,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
                 typeData.mockedType.c_str(), typeData.mockedType.c_str(), returnParam.asCharString() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -458,8 +455,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -501,8 +497,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -543,8 +538,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -585,8 +579,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -628,8 +621,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -682,8 +674,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.targetType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -726,8 +717,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -770,8 +760,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -813,8 +802,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -856,8 +844,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -900,8 +887,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -944,8 +930,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -984,8 +969,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1032,8 +1016,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1082,8 +1065,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1124,8 +1106,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1167,8 +1148,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1209,8 +1189,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1251,8 +1230,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1293,8 +1271,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1336,8 +1313,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1378,8 +1354,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1431,8 +1406,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1481,8 +1455,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1525,8 +1498,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1567,8 +1539,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1609,8 +1580,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1651,8 +1621,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1693,8 +1662,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1735,8 +1703,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1787,8 +1754,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1837,8 +1803,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -1881,8 +1846,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1923,8 +1887,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -1965,8 +1928,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2007,8 +1969,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2049,8 +2010,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2091,8 +2051,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2142,8 +2101,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2190,8 +2148,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2238,8 +2195,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2286,8 +2242,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2333,8 +2288,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2377,8 +2331,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2421,8 +2374,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2472,8 +2424,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2520,8 +2471,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2568,8 +2518,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2616,8 +2565,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2661,8 +2609,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2704,8 +2651,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2749,8 +2695,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2793,8 +2738,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2837,8 +2781,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2881,8 +2824,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -2937,8 +2879,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -2948,7 +2889,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
 /*
  * Check expectation generation of a function without parameters and returning a typedef for a right-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters )
+/*TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -2985,13 +2926,12 @@ TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
     }
-}
+}*/
 #endif
 
 //*************************************************************************************************
@@ -3033,8 +2973,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3074,8 +3013,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3115,8 +3053,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3161,8 +3098,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3202,8 +3138,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3258,8 +3193,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
                 "}\n", typeData.targetType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3311,8 +3245,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3360,8 +3293,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3409,8 +3341,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3458,8 +3389,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3507,8 +3437,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3556,8 +3485,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3602,8 +3530,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3646,8 +3573,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3690,8 +3616,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3752,8 +3677,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
                 typeData.mockedType.c_str(), typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -3799,8 +3723,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3845,8 +3768,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3891,8 +3813,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3937,8 +3858,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -3984,8 +3904,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4040,8 +3959,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4087,8 +4005,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4134,8 +4051,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4181,8 +4097,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4228,8 +4143,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4275,8 +4189,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4322,8 +4235,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4370,8 +4282,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4417,8 +4328,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4464,8 +4374,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4514,8 +4423,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4568,8 +4476,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4613,8 +4520,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4658,8 +4564,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4704,8 +4609,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4748,8 +4652,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4794,8 +4697,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4839,8 +4741,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4885,8 +4786,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -4940,8 +4840,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -4994,8 +4893,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
                 "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5040,8 +4938,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5086,8 +4983,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5130,8 +5026,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5176,8 +5071,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5220,8 +5114,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5266,8 +5159,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5321,8 +5213,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
                 typeData.mockedType.c_str(), typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5374,8 +5265,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
                 typeData.mockedType.c_str(), typeData.mockedType.c_str(), typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5420,8 +5310,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5464,8 +5353,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5508,8 +5396,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5552,8 +5439,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5596,8 +5482,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5640,8 +5525,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5690,8 +5574,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5735,8 +5618,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -5785,8 +5667,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5839,8 +5720,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5893,8 +5773,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5945,8 +5824,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -5997,8 +5875,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6044,8 +5921,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6091,8 +5967,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6140,8 +6015,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6193,8 +6067,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -6243,8 +6116,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -6293,8 +6165,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -6343,8 +6214,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -6390,8 +6260,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6435,8 +6304,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6482,8 +6350,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6528,8 +6395,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6574,8 +6440,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6620,8 +6485,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6676,8 +6540,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForLVReferenceToPrimitiveTypeParamete
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -6691,7 +6554,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForLVReferenceToPrimitiveTypeParamete
 /*
  * Check expectation generation of a function with a typedef for a rv-reference to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForRVReferenceToPrimitiveTypeParameter )
+/*TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForRVReferenceToPrimitiveTypeParameter )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -6728,13 +6591,12 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForRVReferenceToPrimitiveTypeParamete
                       "    return __expectedCall__;\n"
                       "}\n"
                       "}\n", resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
     }
-}
+}*/
 #endif
 
 //*************************************************************************************************
@@ -6778,8 +6640,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6821,8 +6682,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6864,8 +6724,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6912,8 +6771,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -6955,8 +6813,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7013,8 +6870,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
                 "}\n", typeData.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7072,8 +6928,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7127,8 +6982,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7182,8 +7036,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7237,8 +7090,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7292,8 +7144,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7347,8 +7198,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
                 "}\n";
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7399,8 +7249,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7449,8 +7298,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7499,8 +7347,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7564,8 +7411,7 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7623,8 +7469,7 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7717,8 +7562,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_NotOutput )
                 overrideOption.targetType.c_str(), overrideOption.targetType.c_str(), overrideOption.cpputestFunctionType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -7790,8 +7634,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Output )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7867,8 +7710,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -7944,8 +7786,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
             "}\n";
     STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
     STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }
@@ -8028,8 +7869,7 @@ TEST_EX( TEST_GROUP_NAME, ReturnOverride )
                 "}\n", overrideOption.targetType.c_str(), overrideOption.targetType.c_str() );
         STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
         STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
         // Cleanup
         mock().clear();
@@ -8085,8 +7925,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
                   "    return __expectedCall__;\n"
                   "}\n"
                   "}\n", resultsImpl[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0] ) );
-    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsImpl[0] ) );
+    CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
 }

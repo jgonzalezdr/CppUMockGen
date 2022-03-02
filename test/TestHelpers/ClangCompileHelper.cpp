@@ -11,7 +11,7 @@
 #include "ClangHelper.hpp"
 #include <iostream>
 
-bool ClangCompileHelper::CheckMockCompilation( const std::string &testedHeader, const std::string &testedSource )
+bool ClangCompileHelper::CheckMockCompilation( const std::string &inputHeader, const std::string &testedSource )
 {
 #ifdef DISABLE_COMPILATION_CHECK
     return true;
@@ -26,7 +26,7 @@ bool ClangCompileHelper::CheckMockCompilation( const std::string &testedHeader, 
 #ifdef INTERPRET_C
     compiledCode += "extern \"C\" {\n";
 #endif
-    compiledCode += testedHeader + "\n";
+    compiledCode += inputHeader + "\n";
 #ifdef INTERPRET_C
     compiledCode += "}\n";
 #endif
@@ -68,7 +68,7 @@ bool ClangCompileHelper::CheckMockCompilation( const std::string &testedHeader, 
 #endif
 }
 
-bool ClangCompileHelper::CheckExpectationCompilation( const std::string &testedHeader, const std::string &testedSource )
+bool ClangCompileHelper::CheckExpectationCompilation( const std::string &inputHeader, const std::string &testedHeader, const std::string &testedSource )
 {
 #ifdef DISABLE_COMPILATION_CHECK
     return true;
@@ -84,10 +84,11 @@ bool ClangCompileHelper::CheckExpectationCompilation( const std::string &testedH
 #ifdef INTERPRET_C
     compiledCode += "extern \"C\" {\n";
 #endif
-    compiledCode += testedHeader + "\n";
+    compiledCode += inputHeader + "\n";
 #ifdef INTERPRET_C
     compiledCode += "}\n";
 #endif
+    compiledCode += testedHeader + "\n";
     compiledCode += testedSource;
 
     CXUnsavedFile unsavedFiles[] = { { "test_expect.cpp", compiledCode.c_str(), (unsigned long) compiledCode.length() }  };
