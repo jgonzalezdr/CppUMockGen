@@ -19,7 +19,7 @@ Constructor::Constructor() noexcept
 bool Constructor::IsMockable( const CXCursor &cursor ) const noexcept
 {
     // Public and protected constructors should be mocked
-    bool isNotPrivate = isMemberNonPrivate( cursor );
+    bool isNotPrivate = isCursorNonPrivate( cursor );
 
     // TODO: Print warning if not mockable
 

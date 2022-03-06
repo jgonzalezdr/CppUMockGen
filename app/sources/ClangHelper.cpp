@@ -116,7 +116,7 @@ std::string getMemberClassName( const CXCursor &cursor ) noexcept
     return ret;
 }
 
-bool isMemberPublic( const CXCursor &cursor ) noexcept
+bool isCursorPublic( const CXCursor &cursor ) noexcept
 {
     CXCursorKind cursorKind = clang_getCursorKind( cursor );
     CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
@@ -133,6 +133,7 @@ bool isMemberPublic( const CXCursor &cursor ) noexcept
     // LCOV_EXCL_STOP
     else if( accessSpecifier == CX_CXXInvalidAccessSpecifier )
     {
+        // Declarations at global or namespace scope are considered public
         return true;
     }
     else if( accessSpecifier != CX_CXXPublic )
@@ -141,11 +142,11 @@ bool isMemberPublic( const CXCursor &cursor ) noexcept
     }
     else
     {
-        return isMemberInPublicClass( cursor );
+        return isCursorInPublicClass( cursor );
     }
 }
 
-bool isMemberNonPrivate( const CXCursor &cursor ) noexcept
+bool isCursorNonPrivate( const CXCursor &cursor ) noexcept
 {
     CXCursorKind cursorKind = clang_getCursorKind( cursor );
     CX_CXXAccessSpecifier accessSpecifier = clang_getCXXAccessSpecifier( cursor );
@@ -160,21 +161,24 @@ bool isMemberNonPrivate( const CXCursor &cursor ) noexcept
         return false;
     }
     // LCOV_EXCL_STOP
+    // LCOV_EXCL_START: Added for completion
     else if( accessSpecifier == CX_CXXInvalidAccessSpecifier )
     {
+        // Declarations at global or namespace scope are considered public
         return true;
     }
+    // LCOV_EXCL_STOP
     else if( accessSpecifier == CX_CXXPrivate )
     {
         return false;
     }
     else
     {
-        return isMemberInPublicClass( cursor );
+        return isCursorInPublicClass( cursor );
     }
 }
 
-bool isMemberInPublicClass( const CXCursor &cursor ) noexcept
+bool isCursorInPublicClass( const CXCursor &cursor ) noexcept
 {
-    return isMemberPublic( clang_getCursorSemanticParent( cursor ) );
+    return isCursorPublic( clang_getCursorSemanticParent( cursor ) );
 }

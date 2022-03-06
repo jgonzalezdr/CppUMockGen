@@ -88,7 +88,7 @@ std::string getMemberClassName( const CXCursor &cursor ) noexcept;
  * @param cursor [in] A cursor to a member
  * @return @c true if the member and its containing classes are public, or @c false otherwise
  */
-bool isMemberPublic( const CXCursor &cursor ) noexcept;
+bool isCursorPublic( const CXCursor &cursor ) noexcept;
 
 /**
  * Checks if a member has non-private scope and its containing classes have public scope.
@@ -96,7 +96,7 @@ bool isMemberPublic( const CXCursor &cursor ) noexcept;
  * @param cursor [in] A cursor to a member
  * @return @c true if the member is non-private and its containing classes are public, or @c false otherwise
  */
-bool isMemberNonPrivate( const CXCursor &cursor ) noexcept;
+bool isCursorNonPrivate( const CXCursor &cursor ) noexcept;
 
 /**
  * Checks if a member's containing classes have public scope.
@@ -104,6 +104,6 @@ bool isMemberNonPrivate( const CXCursor &cursor ) noexcept;
  * @param cursor [in] A cursor to a member
  * @return @c true if the member's containing classes are public, or @c false otherwise
  */
-bool isMemberInPublicClass( const CXCursor &cursor ) noexcept;
+bool isCursorInPublicClass( const CXCursor &cursor ) noexcept;
 
 #endif // header guard

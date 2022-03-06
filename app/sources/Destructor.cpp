@@ -19,7 +19,7 @@ Destructor::Destructor() noexcept
 bool Destructor::IsMockable( const CXCursor &cursor ) const noexcept
 {
     // Only destructors in public classes should be mocked
-    bool isClassPublic = isMemberInPublicClass( cursor );
+    bool isClassPublic = isCursorInPublicClass( cursor );
 
     // TODO: Print warning if not mockable
 
