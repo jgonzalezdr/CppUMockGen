@@ -34,7 +34,7 @@ CppUMockGen can automatically generate for each mockable function its mocked imp
 
 #### Generating Mocks
 
-To generate a mock from a header file containing the functions that you want to mock, just pass the path to the header file as input in the first non-option argument or explicitly with the `-i` / `--input` option, and the path where you want the file with the mocked functions to be generated as output using the `-m` / `--mock-output` option. If the output option argument is the path to an existing directory (or ends with a path separator) then the output file name will be deduced from the input file name by replacing its extension with *"_mock.cpp"* and will be generated in that directory. If the output option argument is empty it is equivalent to passing the current directory. If the output option argument is **'@'**, the mock is printed to the console. In other cases the output option argument is considered the output file name.
+To generate mocks from a header file containing the functions that you want to mock, just use the `-m` / `--mock-output` option and pass the path to the header file as input in the first non-option argument (or explicitly with the `-i` / `--input` option).
 
 CppUMockGen deduces the data types to use with CppUMock from the actual function parameters and return types (see [Mocked Parameter and Return Types](#mocked-parameter-and-return-types)). If the API that you are mocking is well designed (e.g. pointers to non-const values are not used for input parameters), CppUMockGen will guess properly in most cases the correct types. Nevertheless, mocked data types can be overridden by using `-t` / `--type-override` options to indicate the type of function parameters or function returns (see [Overriding Mocked Parameter and Return Types](#overriding-mocked-parameter-and-return-types) below).
 
@@ -182,7 +182,7 @@ To declare an expectation for a mocked function the user just has to call the ex
 
 #### Generating Expectations
 
-To generate expectations, pass the path where you want the files with the expectations to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option). If the output option argument is the path to an existing directory (or ends with a path separator) then the output file names will be deduced from the input file name by replacing its extension by *"_expect.cpp"* / *"_expect.hpp"* and will be generated in that directory. If the output option argument is empty it is equivalent to passing the current directory. If the output option argument is **'@'**, the expectation is printed to the console. In other cases the output file names will be deduced from the output option argument by replacing its extension by *".cpp"* / *".hpp"*.
+To generate expectations just use the `-e` / `--expect-output` option (additionally to or instead of the `-m` / `--mock-output` option) and pass the path to the mocked header file as input in the first non-option argument (or explicitly with the `-i` / `--input` option).
 
 #### Using Expectations
 
@@ -196,21 +196,63 @@ To use the expectations, you must:
 
 `CppUMockGen [OPTION...] [<input>]`
 
-| OPTION                                | Description                                   |
-| -                                     | -                                             |
-| `-i, --input <input> `                | Input file path                               |
-| `-m, --mock-output <mock-output>`     | Mock output directory or file path            |
-| `-e, --expect-output <expect-output>` | Expectation output directory or file path     |
-| `-x, --cpp`                           | Force interpretation of the input file as C++ |
-| `-s, --std`                           | Set language standard (c\+\+14, c\+\+17, etc.)|
-| `-I, --include-path <path>`           | Include path                                  |
-| `-B, --base-directory <path>`         | Base directory path                           |
-| `-t, --type-override <expr>`          | Override generic type                         |
-| `-f, --config-file <file>`            | Configuration file to be parsed for options   |
-| `-v, --version`                       | Print version                                 |
-| `-h, --help`                          | Print help                                    |
+| OPTION                                  | Description                                   |
+| -                                       | -                                             |
+| `-i, --input <input> `                  | Input file path                               |
+| `-m, --mock-output [<mock-output>]`     | Mock output directory or file path            |
+| `-e, --expect-output [<expect-output>]` | Expectation output directory or file path     |
+| `-x, --cpp`                             | Force interpretation of the input file as C++ |
+| `-s, --std`                             | Set language standard (c\+\+14, c\+\+17, etc.)|
+| `-I, --include-path <path>`             | Include path                                  |
+| `-B, --base-directory <path>`           | Base directory path                           |
+| `-t, --type-override <expr>`            | Override generic type                         |
+| `-f, --config-file <file>`              | Configuration file to be parsed for options   |
+| `-v, --version`                         | Print version                                 |
+| `-h, --help`                            | Print help                                    |
+
+## Mocks and Expections Generation
+
+#### Generating Mocks
+
+To generate mocks use the `-m` / `--mock-output` option.
+
+This mock output option accepts an optional argument to indicate the path where you want the file with the mocked functions to be generated as output.
+ - When the output option argument is the path to an existing directory (or ends with a path separator), the output file name is derived from the input file name by replacing its extension with *"_mock.cpp"*, and it is generated in that directory.
+ - When the output option argument is not specified, it is equivalent to passing the current directory.
+ - When the output option argument is **'@'**, the mock is printed to the console.
+ - In other cases the output option argument is considered the output file name (eventually adding the extension *".cpp"*).
+
+#### Generating Expectations
+
+To generate expectations use the `-e` / `--expect-output` option.
+
+This expectation output option accepts an optional argument to indicate the path where you want the files with the expectation functions to be generated as output.
+ - When the output option argument is the path to an existing directory (or ends with a path separator), the output file names are derived from the input file name by replacing its extension with *"_expect.cpp"* / *"_expect.hpp"*, and they are generated in that directory.
+ - When an output option argument is not specified, it is equivalent to passing the current directory.
+ - When the output option argument is **'@'**, the output is printed to the console.
+ - In other cases the output file names are derived from the output option argument by adding or replacing the extensions *".cpp"* / *".hpp"*.
+
+#### Generating Both Mocks and Expectations
+
+Mocks and expectations can be generated at the same time by using both the `-m` / `--mock-output` option and the `-e` / `--expect-output` option.
+
+If only a single output option argument is specified (e.g., `-m -e <output_dir>`), then the output file name(s) for the non-specified output option are derived from the specified one.
+ - When the specified output option argument is the path to an existing directory (or ends with a path separator), it is equivalent to passing that path to both output options.
+ - When the output option argument is **'@'**, both outputs are printed to the console.
+ - In other cases it is equivalent to adding "_mock" or "_expect" to the specified filename and passing it to the other option.
+
+> **Example:** `CppUMockGen -m -e <output_dir> -i MyClass.hpp` will generate the files "_&lt;output\_dir&gt;_/MyClass\_mock.cpp", "_&lt;output\_dir&gt;_/MyClass\_expect.cpp" and "_&lt;output\_dir&gt;_/MyClass\_expect.hpp".
+
+> **Example:** `CppUMockGen -m MyClassMock.cpp -e -i MyClass.hpp` will generate the files "MyClassMock.cpp", "MyClassMock\_expect.cpp" and "MyClassMock\_expect.hpp".
+
 
 ## Input Files Processing
+
+#### Input File
+
+A single input file must be specified as the first non-option argument, or explicitly using the `-i` / `--input` option.
+
+This input file must be a C or C++ header file containing the declarations of functions and/or methods.
 
 #### C or C++?
 
@@ -696,7 +738,7 @@ CppUMockGen <InputFilename> -m -e -t "#std::ostream &=OutputOfType:std::ostream<
 
 Now the expectation functions get a C string instead of a reference to an output stream.
 
-Assuming that the tested function should call `function8` once, passing an output stream in `p1`, then the mocked function should write "foo" on the stream, and finally the tested function should return `true`, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function8` once, passing an output stream in `p1`, then the mocked function should write "foo" on the stream, and finally the tested function should return `true`, we can use the generated mock and expectations in an unit test like this:
 
 
 ```cpp
