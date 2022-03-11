@@ -48,82 +48,112 @@ To use the generated mocks, you just need to setup your test generation scripts 
 
 CppUTest/CppUMock offers a very powerful mechanism to declare function call expectations in unit tests, however, defining and maintaining these expectation declarations has the same problems than defining and maintaining mocks: the user has to keep the symbolic ("stringified") name of the functions and its parameters in sync with the actual C/C\++ signature and also with the actual names used in mock definitions.
 
-CppUMockGen can automatically generate for each mockable function its corresponding expectation functions (simply called expectations) that encapsulates the expectation cumbersome details into functions with a signature that closely resembles the mocked function's signature.
+CppUMockGen can automatically generate for each mockable function (and also for mockable class constructors and destructors) its corresponding expectation functions (simply called expectations) that encapsulates the expectation cumbersome details into functions with a signature that closely resembles the mocked function's signature.
 
-For each mockable function two expectation functions are declared, one for expecting a single call to the mocked function and another for expecting multiple calls.
+Expectation functions for member and non-member functions are named exactly as the expected function (e.g., the method `bar()` of class `foo` can be expected with `::expect::foo$::bar()`).
 
 These expectations functions take as parameters an object (only for non-static methods), one parameter for each parameter in the mocked function, one additional parameter to pass the length of the data to copy for each non-typed output parameter, and finally one parameter to pass the return value (only for non-void return functions).
+
+For each mockable function two expectation functions are declared, one for expecting a single call to the mocked function and another for expecting multiple calls (that additionally takes a first parameter to indicate the number of expected calls).
+
+Expectation functions are declared inside root namespace `expect`, using the same namespace hierarchy than the mocked function but appending character **'$'** to each original namespace to avoid name clashes.
+
+Additionally, for member functions (and also constructors and destructors), an innermost namespace hierarchy is declared according to the function class nesting hierarchy, also appending **'$'** to class names (e.g., expectations for member functions of class `foo` inside namespace `bar ` are declared inside namespace `expect::bar$::foo$`).
+
+Expectation functions for constructors are named appending **'$ctor'** to class names (e.g., a constructor of class `foo` can be expected with `expect::foo$::foo$ctor()`). Expectation functions for constructors, like expectations for functions, take parameters for each parameter in the constructor, but don't take an object as parameter and do not have a parameter for a return value.
+
+Expectation functions for destructors are named appending **'$dtor'** to class names (e.g., a destructor of class `foo` can be expected with `expect::foo$::foo$dtor()`). Expectation functions for destructors take an object as optional parameter.
 
 Let's consider the signatures of expectations generated for different mocked function types:
 
 - Non-member function with void return type
 > ```cpp
-> void function( p1, ..., pN );
+> void function( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::function( p1, ..., pN );
-> void expect::function( numCalls, p1, ..., pN );
+> void expect::function( T1 p1, ..., TN pN );
+> void expect::function( unsigned int numCalls, T1 p1, ..., TN pN );
 > ```
 
 - Non-member function with non-void return type
 > ```cpp
-> ret functionWithReturn( p1, ..., pN );
+> TR functionWithReturn( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::functionWithReturn( p1, ..., pN, returnValue );
-> void expect::functionWithReturn( numCalls, p1, ..., pN, returnValue );
+> void expect::functionWithReturn( T1 p1, ..., TN pN, TR returnValue );
+> void expect::functionWithReturn( unsigned int numCalls, T1 p1, ..., TN pN, TR returnValue );
 > ```
 
 - Static method with void return type
 > ```cpp
-> void className::staticMethod( p1, ..., pN );
+> void className::staticMethod( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::className$::staticMethod( p1, ..., pN );
-> void expect::className$::staticMethod( numCalls, p1, ..., pN );
+> void expect::className$::staticMethod( T1 p1, ..., TN pN );
+> void expect::className$::staticMethod( unsigned int numCalls, T1 p1, ..., TN pN );
 > ```
 
 - Static method with non-void return type
 > ```cpp
-> ret className::staticMethodWithReturn( p1, ..., pN );
+> TR className::staticMethodWithReturn( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::className$::staticMethodWithReturn( p1, ..., pN, returnValue );
-> void expect::className$::staticMethodWithReturn( numCalls, p1, ..., pN, returnValue );
+> void expect::className$::staticMethodWithReturn( T1 p1, ..., TN, pN, TR returnValue );
+> void expect::className$::staticMethodWithReturn( unsigned int numCalls, T1 p1, ..., TN pN, TR returnValue );
 > ```
 
 - Non-static method with void return type
 > ```cpp
-> void className::method( p1, ..., pN );
+> void className::method( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::className$::method( object, p1, ..., pN );
-> void expect::className$::method( numCalls, object, p1, ..., pN );
+> void expect::className$::method( className object, T1 p1, ..., TN pN );
+> void expect::className$::method( unsigned int numCalls, className object, T1 p1, ..., TN pN );
 > ```
 
 - Non-static method with non-void return type
 > ```cpp
-> ret className::methodWithReturn( p1, ..., pN );
+> TR className::methodWithReturn( T1 p1, ..., TN pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::className$::methodWithReturn( object, p1, ..., pN, returnValue );
-> void expect::className$::methodWithReturn( numCalls, object, p1, ..., pN, returnValue );
+> void expect::className$::methodWithReturn( className object, T1 p1, ..., TN pN, TR returnValue );
+> void expect::className$::methodWithReturn( unsigned int numCalls, className object, T1 p1, ..., TN pN, TR returnValue );
 > ```
 
 - Function with non-typed output parameters
 > ```cpp
-> void functionWithOutputParams( *p1, ..., &pN );
+> void functionWithOutputParams( T1 *p1, ..., TN &pN );
 > ```
 > &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
 > ```cpp
-> void expect::functionWithOutputParams( *p1, __sizeof_p1, ..., *pN, __sizeof_pN );
-> void expect::functionWithOutputParams( numCalls, *p1, __sizeof_p1, ..., *pN, __sizeof_pN );
+> void expect::functionWithOutputParams( T1 *p1, size_t_ __sizeof_p1, ..., TN *pN, __sizeof_pN );
+> void expect::functionWithOutputParams( numCalls, T1 *p1, size_t_ __sizeof_p1, ..., TN *pN, size_t_ __sizeof_pN );
+> ```
+
+- Class constructor
+> ```cpp
+> className::className( T1 p1, ..., TN pN );
+> ```
+> &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
+> ```cpp
+> void expect::className$::className$ctor( T1 p1, ..., TN pN );
+> void expect::className$::className$ctor( unsigned int numCalls, T1 p1, ..., TN pN );
+> ```
+
+- Class destructor
+> ```cpp
+> className::~className();
+> ```
+> &emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;&emsp;&#8659;
+> ```cpp
+> void expect::className$::className$dtor( className object );
+> void expect::className$::className$dtor( unsigned int numCalls, className object );
 > ```
 
 To declare an expectation for a mocked function the user just has to call the expectation function (before calling the tested function) passing a pointer to the expected object on which a method is called (only for non-static methods), the expected parameters input and/or output values (or an indication to ignore an input parameter and accept any value), and the value to be returned by the mock when the expectation is fulfilled (if it has non-void return type).
@@ -134,6 +164,7 @@ To declare an expectation for a mocked function the user just has to call the ex
 >
 > TEST( TestSuite, Test )
 > {
+>    // Prepare
 >    expect::functionWithReturn( 0xDEADBEEF, /* integer input parameter */
 >                                "foo",      /* string input parameter */
 >                                true );     /* return value */
@@ -141,8 +172,10 @@ To declare an expectation for a mocked function the user just has to call the ex
 >                                IgnoreParameter::YES, /* object */
 >                                "foo" );              /* string input parameter */
 >
+>    // Exercise
 >    testedFunction();
 >
+>    // Verify
 >    mock().checkExpectations();
 > }
 > ```
@@ -151,14 +184,12 @@ To declare an expectation for a mocked function the user just has to call the ex
 
 To generate expectations, pass the path where you want the files with the expectations to be generated as output using the `-e` / `--expect-output` option (additionally to or instead of the `-m` option). If the output option argument is the path to an existing directory (or ends with a path separator) then the output file names will be deduced from the input file name by replacing its extension by *"_expect.cpp"* / *"_expect.hpp"* and will be generated in that directory. If the output option argument is empty it is equivalent to passing the current directory. If the output option argument is **'@'**, the expectation is printed to the console. In other cases the output file names will be deduced from the output option argument by replacing its extension by *".cpp"* / *".hpp"*.
 
-Expectation functions are declared inside root namespace `expect`, using the same namespace hierarchy than the mocked function but appending character **'$'** to each original namespace to avoid name clashes. Additionally, for member functions an innermost namespace hierarchy is declared according to the function class nesting hierarchy, also appending **'$'** to class names (e.g., expectations for member functions of class `foo` inside namespace `bar ` are declared inside namespace `expect::bar$::foo$`).
-
 #### Using Expectations
 
 To use the expectations, you must:
 - In your test source file, include the generated expectation header files (e.g., <i>*_expect.hpp</i>).
 - In your tests, call the expectation functions with the expected parameters and return values before calling the tested function.
-- Setup your test generation scripts to find the header file _CppUMockGen.hpp_ (provided with CppUMockGen), i.e, add -I _&lt;cppumockgen_home>_/include to compiler options, or copy the header file to your project.
+- Setup your test generation scripts to find the header file _CppUMockGen.hpp_ (provided with CppUMockGen), i.e, add `-I <cppumockgen_home>/include` to compiler options, or copy the header file to your project.
 - Setup your test generation scripts to compile and link the generated expectation implementation files (e.g., <i>*_expect.cpp</i>) when generating the test executable.
 
 ## Command-Line Options
@@ -341,7 +372,7 @@ Assuming that we want to mock the following class:
 ```cpp
 namespace namespace1
 {
-    int function1( int p1, const char* p2, int *p3 );
+    int Function1( int p1, const char* p2, int *p3 );
 }
 ```
 
@@ -351,17 +382,18 @@ To generate the mock and expectations we can use the following command:
 CppUMockGen -i <InputFilename> -m -e
 ```
 
-Assuming that the tested function should call `function1` only once, passing 25 in `p1`, the C-string "foo" in `p2`, and then the mocked function should fill `p3` with an array of 3 integers and return 3, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function1` only once, passing 25 in `p1`, the C-string "foo" in `p2`, and then the mocked function should fill `p3` with an array of 3 integers and return `true`, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test1 )
 {
     // Prepare
+    SomeClass* object = new SomeClass( 42 );
     int output[] = { 5, 25, 42 };
-    expect::namespace1$::function1( 25, "foo", output, sizeof(output), 3 );
+    expect::namespace1$::Function1( 25, "foo", output, sizeof(output), 3 );
 
     // Exercise
-    bool ret = functionToTest1( object );
+    bool ret = FunctionToTest1( object );
 
     // Verify
     CHECK_TRUE( ret );
@@ -380,10 +412,10 @@ Assuming that we want to mock the following class, which has method which gets a
 ```cpp
 namespace namespace1
 {
-    class class2
+    class Class2
     {
     public:
-        int method1( std::string &p1 );
+        int Method1( std::string &p1 );
     };
 }
 ```
@@ -393,21 +425,21 @@ CppUMockGen will determine that `p1` is an output parameter, since by default pa
 Fortunately, we can override parameter `p1` to be used as an input string using the following command:
 
 ```powershell
-CppUMockGen <InputFilename> -m -e -t namespace1::class2::method1#p1=String~$.c_str()
+CppUMockGen <InputFilename> -m -e -t "namespace1::Class2::Method1#p1=String~$.c_str()"
 ```
 
-Assuming that the tested function should call `class2::method1` only once on the same object that was passed to it, passing a string with value "foo" in `p1`, and then the mocked method should return 0, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Class2::Method1` only once on the same object that was passed to it, passing a string with value "foo" in `p1`, and then the mocked method should return 0, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test2 )
 {
     // Prepare
-    class2 *object = new class2();
+    Class2 *object = new Class2();
     const char* expectedText = "foo";
-    expect::namespace1$::class2$::method1( object, expectedText, 0 );
+    expect::namespace1$::Class2$::Method1( object, expectedText, 0 );
 
     // Exercise
-    functionToTest2( object );
+    FunctionToTest2( object );
 
     // Verify
     mock().checkExpectations();
@@ -423,7 +455,7 @@ TEST( TestSuite, Test2 )
 Assuming that we want to mock the following function:
 
 ```cpp
-char* function3( const char *p1 );
+char* Function3( const char *p1 );
 ```
 
 CppUMockGen will determine that `p1` is an input string, since by default parameters which types are pointers to _const_ characters are considered input strings.
@@ -431,10 +463,10 @@ CppUMockGen will determine that `p1` is an input string, since by default parame
 If we are not interested in the contents of the string passed in `p1` and rather we want to verify the actual value of the pointer, and also want to override the return type because the real function is ill-designed and really just returns pointers to unmutable strings, we can use the following command:
 
 ```powershell
-CppUMockGen <InputFilename> -m -e -t function3#p1=ConstPointer -t "function3@=String~const_cast<char*>($)"
+CppUMockGen <InputFilename> -m -e -t "Function3#p1=ConstPointer" -t "Function3@=String~const_cast<char*>($)"
 ```
 
-Assuming that the tested function should call `function3` 4 times with the same pointer in `p1` that was passed to the tested function, and then the mocked function should return "OK" the first time and "NOK" the other times, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function3` 4 times with the same pointer in `p1` that was passed to the tested function, and then the mocked function should return "OK" the first time and "NOK" the other times, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test3 )
@@ -443,16 +475,14 @@ TEST( TestSuite, Test3 )
     const char* param = "foo";
     const char* returnValue1 = "OK";
     const char* returnValue2 = "NOK";
-    expect::function3( param, returnValue1 );
-    expect::function3( 3, param, returnValue2 );
+    expect::Function3( param, returnValue1 );
+    expect::Function3( 3, param, returnValue2 );
 
     // Exercise
-    functionToTest3( param );
+    FunctionToTest3( param );
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -462,20 +492,20 @@ TEST( TestSuite, Test3 )
 Assuming that we want to mock the following functions:
 
 ```cpp
-std::string function4A( const std::string &p1A );
-std::string function4B( const std::string &p1B, unsigned int p2B );
+std::string Function4A( const std::string &p1A );
+std::string Function4B( const std::string &p1B, unsigned int p2B );
 ```
 
 We can avoid having to install a comparator for `std::string` and simplify handling `std::string` return types by overriding all parameters of type `const std::string&` and `std::string` return types to be used as simple C strings, using the following command:
 
 ```powershell
-CppUMockGen <InputFilename> -m -e -t "#const std::string &=String~$.c_str()" -t @std::string=String
+CppUMockGen <InputFilename> -m -e -t "#const std::string &=String~$.c_str()" -t "@std::string=String"
 ```
 
 Assuming that the tested function should:
 
-1. Call `function4A` once, passing the C string "foo" in `p1A`, and then the mocked function should return "foo-bar".
-2. Call `function4B` once, passing the C string "foo-bar" in `p1B` and 0 in `p2B`, and then the mocked function should return "foo-bar-moo".
+1. Call `Function4A` once, passing the C string "foo" in `p1A`, and then the mocked function should return "foo-bar".
+2. Call `Function4B` once, passing the C string "foo-bar" in `p1B` and 0 in `p2B`, and then the mocked function should return "foo-bar-moo".
 
 We can use the generated mock and expectations in an unit test like this:
 
@@ -486,17 +516,15 @@ TEST( TestSuite, Test4 )
     const char* param1 = "foo";
     const char* ret1 = "foo-bar";
     const char* ret2 = "foo-bar-moo";
-    expect::function4A( param1, ret1 );
-    expect::function4B( ret1, 0, ret2 );
+    expect::Function4A( param1, ret1 );
+    expect::Function4B( ret1, 0, ret2 );
 
     // Exercise
-    int ret = functionToTest4( param1 );
+    int ret = FunctionToTest4( param1 );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -506,31 +534,29 @@ TEST( TestSuite, Test4 )
 Assuming that we want to mock the following function:
 
 ```cpp
-void function5( const char *p1, char *p2, int p3 );
+void Function5( const char *p1, char *p2, int p3 );
 ```
 
 If we want to always ignore parameter `p2`, we can use the following command:
 
 ```powershell
-CppUMockGen <InputFilename> -m -e -t function5#p2=Skip
+CppUMockGen <InputFilename> -m -e -t "Function5#p2=Skip"
 ```
 
-Assuming that the tested function should call `function5` once, passing "foo" in `p1` and 10 in `p3`, and ignoring the value in `p2`, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function5` once, passing "foo" in `p1` and 10 in `p3`, and ignoring the value in `p2`, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test5 )
 {
     // Prepare
     const char* param = "foo";
-    expect::function5( param, 10 );
+    expect::Function5( param, 10 );
 
     // Exercise
-    functionToTest5();
+    FunctionToTest5();
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -542,10 +568,10 @@ Assuming that we want to mock the following class:
 ```cpp
 namespace namespace1
 {
-    class class6
+    class Class6
     {
     public:
-        void method1( const char* p1, int p2 );
+        void Method1( const char* p1, int p2 );
     };
 }
 ```
@@ -556,7 +582,7 @@ To generate the mock and expectations we can use the following command:
 CppUMockGen <InputFilename> -m -e
 ```
 
-Assuming that the tested function should call `class6::method1` twice, on any object (it is created by the tested function, so we don't know it), passing a string with value "foo" in `p1`, and ignoring the value of `p2` (so it can take any value), we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Class6::Method1` twice, on any object (it is created by the tested function, so we don't know it), passing a string with value "foo" in `p1`, and ignoring the value of `p2` (so it can take any value), we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 using CppUMockGen::IgnoreParameter;
@@ -564,16 +590,13 @@ using CppUMockGen::IgnoreParameter;
 TEST( TestSuite, Test6 )
 {
     // Prepare
-    expect::namespace1$::class6$::method1( 2, IgnoreParameter::YES, "foo", IgnoreParameter::YES );
+    expect::namespace1$::Class6$::Method1( 2, IgnoreParameter::YES, "foo", IgnoreParameter::YES );
 
     // Exercise
-    functionToTest6();
+    FunctionToTest6();
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
-    delete object;
 }
 ```
 
@@ -583,7 +606,7 @@ TEST( TestSuite, Test6 )
 Assuming that we want to mock the following function:
 
 ```cpp
-void function7( const std::vector<std::string> &p1 );
+void Function7( const std::vector<std::string> &p1 );
 ```
 
 To generate the mock and expectations we can use the following command:
@@ -631,15 +654,13 @@ TEST( TestSuite, Test7 )
 
     std::vector<std::string> expectedParam = { "foo", "bar" };
 
-    expect::function7( expectedParam );
+    expect::Function7( expectedParam );
 
     // Exercise
-    functionToTest7();
+    FunctionToTest7();
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -649,10 +670,10 @@ TEST( TestSuite, Test7 )
 Assuming that we want to mock the following function:
 
 ```cpp
-void function8( std::ostream &p1 );
+void Function8( std::ostream &p1 );
 ```
 
-Function `function8` should write something into the passed output stream. Therefore, since the passed object is modified, `p1` is considered as an output parameter.
+Function `Function8` should write something into the passed output stream. Therefore, since the passed object is modified, `p1` is considered as an output parameter.
 
 As it is cumbersome (if not even impossible) to copy an output stream into another, a symmetrical copier (where both copier parameters are of the same type) is not feasible. In this case we can define an asymmetrical CppUMock copier (where copier parameters are of different types) that writes a string into the output stream:
 
@@ -686,16 +707,14 @@ TEST( TestSuite, Test8 )
     // Prepare
     mock().installCopier( "std::ostream", stdOstreamCopier );
 
-    expect::function8( "foo" );
+    expect::Function8( "foo" );
 
     // Exercise
-    bool ret = functionToTest8();
+    bool ret = FunctionToTest8();
 
     // Verify
     CHECK_EQUAL( true, ret );
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -705,40 +724,38 @@ TEST( TestSuite, Test8 )
 Assuming that we want to mock the following function:
 
 ```cpp
-struct struct9
+struct Struct9
 {
     int a;
     int b;
 };
 
-void function9( struct9 *p1 );
+void Function9( Struct9 *p1 );
 ```
 
-CppUMockGen will determine that `p1` is a typed output parameter, since by default parameters which types are pointers or references to _non-const_ class or struct types are considered typed output parameters. This means that we need a copier to be installed in order to copy `struct9` objects.
+CppUMockGen will determine that `p1` is a typed output parameter, since by default parameters which types are pointers or references to _non-const_ class or struct types are considered typed output parameters. This means that we need a copier to be installed in order to copy `Struct9` objects.
 
-However, taking in account that `struct9` is a simple data type (also known as _POD_ or _Plain Old Data_ type) that can be copied just by copying memory, we can indicate to CppUMockGen to override `p1` as a non-typed output using the following command:
+However, taking in account that `Struct9` is a simple data type (also known as _POD_ or _Plain Old Data_ type) that can be copied just by copying memory, we can indicate to CppUMockGen to override `p1` as a non-typed output using the following command:
 
 ```powershell
-CppUMockGen -i <InputFilename> -m -e -t function9#p1=Output
+CppUMockGen -i <InputFilename> -m -e -t "Function9#p1=Output"
 ```
 
-Assuming that the tested function should call `function9` once, passing a pointer to a `struct9` struct in `p1`, and then the mocked function should initialize that struct, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function9` once, passing a pointer to a `Struct9` struct in `p1`, and then the mocked function should initialize that struct, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test9 )
 {
     // Prepare
-    struct9 output = { 2344, 4324 };
+    Struct9 output = { 2344, 4324 };
 
-    expect::function9( output, sizeof(output) );
+    expect::Function9( output, sizeof(output) );
 
     // Exercise
-    functionToTest9();
+    FunctionToTest9();
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -748,7 +765,7 @@ TEST( TestSuite, Test9 )
 Assuming that we want to mock the following function:
 
 ```cpp
-void function10( char *str, int maxStrSize );
+void Function10( char *str, int maxStrSize );
 ```
 
 To generate the mock and expectations we can use the following command:
@@ -759,7 +776,7 @@ CppUMockGen -i <InputFilename> -m -e
 
 CppUMockGen will determine that `str` is an non-typed output parameter, since by default parameters which types are pointers or references to _non-const_ primitive types are considered non-typed output parameters.
 
-Assuming that the tested function should call `function10` once, passing a buffer to receive a string in `str`, and the size of that buffer in `maxStrSize` set to 100, and then the mocked function should write "foo" on the passed buffer, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function10` once, passing a buffer to receive a string in `str`, and the size of that buffer in `maxStrSize` set to 100, and then the mocked function should write "foo" on the passed buffer, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test10 )
@@ -767,15 +784,13 @@ TEST( TestSuite, Test10 )
     // Prepare
     const char output[] = "foo";
 
-    expect::function10( output, sizeof(output), 100 );
+    expect::Function10( output, sizeof(output), 100 );
 
     // Exercise
-    functionToTest10();
+    FunctionToTest10();
 
     // Verify
     mock().checkExpectations();
-
-    // Cleanup
 }
 ```
 
@@ -785,7 +800,7 @@ TEST( TestSuite, Test10 )
 Assuming that we want to mock the following function, that gets an array and its number of elements as parameters:
 
 ```cpp
-void function11( int *array, unsigned int arrayLen );
+void Function11( int *array, unsigned int arrayLen );
 ```
 
 To generate the mock and expectations we can use the following command:
@@ -796,7 +811,7 @@ CppUMockGen -i <InputFilename> -m -e
 
 CppUMockGen will determine that `array` is an non-typed output parameter, since by default parameters which types are pointers or references to _non-const_ primitive types are considered non-typed output parameters.
 
-Assuming that the tested function should call `function11` once, passing the array to be initialized in `array`, and the number of elements of that array in `arrayLen` set to 5, and then the mocked function should initialize the array, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function11` once, passing the array to be initialized in `array`, and the number of elements of that array in `arrayLen` set to 5, and then the mocked function should initialize the array, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 TEST( TestSuite, Test11 )
@@ -804,10 +819,10 @@ TEST( TestSuite, Test11 )
     // Prepare
     const int output[] = { 1, 2, 3, 4, -1 };
 
-    expect::function11( output, sizeof(output), 5 );
+    expect::Function11( output, sizeof(output), 5 );
 
     // Exercise
-    functionToTest11();
+    FunctionToTest11();
 
     // Verify
     mock().checkExpectations();

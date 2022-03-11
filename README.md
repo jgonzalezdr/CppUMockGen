@@ -66,7 +66,7 @@ Additionally, with CppUMockGen we can generate the following expectation:
 > }
 > ```
 
-Eventually, we can use these generated mocks and expectations in an unit test like this, which checks that the tested function calls the mocked function once, with the string "ABC" passed as the first parameter, ignoring the value of the second parameter, then gets the string "123" as the result of the call, and finally returns `true`:
+Eventually, we can use these generated mocks and expectations in an unit test like the following example, which checks that the tested function calls the mocked function once, with the string "ABC" passed as the first parameter, ignoring the value of the second parameter, then gets the string "123" as the result of the call, and finally returns `true`:
 
 > _FunctionToTest_test.cpp_
 > ```cpp
@@ -85,8 +85,6 @@ Eventually, we can use these generated mocks and expectations in an unit test li
 >     // Verify
 >     CHECK_EQUAL( true, ret );
 >     mock().checkExpectations();
->
->     // Cleanup
 > }
 > ```
 
