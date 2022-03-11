@@ -85,6 +85,19 @@ static const std::string expectationHeaderOutputFilePath = (outDirPath / expecta
 static const std::string expectationImplOutputFilename = "foo_expect.cpp";
 static const std::string expectationImplOutputFilePath = (outDirPath / expectationImplOutputFilename).generic_string();
 
+static void CheckFileContains( const std::string &filepath, const std::string &contents )
+{
+    std::ifstream file( filepath );
+    if( !file.is_open() )
+    {
+        FAIL( "File cannot be opened" );
+    }
+    std::stringstream strStream;
+    strStream << file.rdbuf();
+
+    STRCMP_EQUAL( contents.c_str(), strStream.str().c_str() );
+}
+
 /*===========================================================================
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
@@ -117,19 +130,6 @@ TEST_GROUP( App )
         {
             std::filesystem::remove( outputFilepath3 );
         }
-    }
-
-    bool CheckFileContains( const std::string &filepath, const std::string &contents )
-    {
-        std::ifstream file( filepath );
-        if( !file.is_open() )
-        {
-            return false;
-        }
-        std::stringstream strStream;
-        strStream << file.rdbuf();
-
-        return strStream.str() == contents;
     }
 };
 
@@ -274,7 +274,7 @@ TEST( App, MockOutput_OutDir_WithEndingPathSeparator )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText ) );
+    CheckFileContains( outputFilepath1, outputText );
 
     // Cleanup
 }
@@ -318,7 +318,7 @@ TEST( App, MockOutput_OutDir_WithoutEndingPathSeparator )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ( "Mock generated into '" + outputFilepath1 + "'" ).c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText ) );
+    CheckFileContains( outputFilepath1, outputText );
 
     // Cleanup
 }
@@ -326,7 +326,7 @@ TEST( App, MockOutput_OutDir_WithoutEndingPathSeparator )
 /*
  * Check that mock generation is requested properly and saved to the current directory (output filename deduced from input filename)
  */
-TEST( App, MockOutput_CurrentDir )
+TEST( App, MockOutput_NoOutFile )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -362,7 +362,7 @@ TEST( App, MockOutput_CurrentDir )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilename + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText ) );
+    CheckFileContains( outputFilepath1, outputText );
 
     // Cleanup
 }
@@ -370,7 +370,7 @@ TEST( App, MockOutput_CurrentDir )
 /*
  * Check that mock generation is requested properly and saved to a named output file
  */
-TEST( App, MockOutput_OutFile )
+TEST( App, MockOutput_OutFile_CppExtension )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -380,7 +380,7 @@ TEST( App, MockOutput_OutFile )
     std::ostringstream error;
     App app( output, error );
 
-    outputFilepath1 = (outDirPath / "mymock.cpp" ).generic_string();
+    outputFilepath1 = (outDirPath / "my_mock.cpp" ).generic_string();
     std::filesystem::remove( outputFilepath1 );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
@@ -404,7 +404,137 @@ TEST( App, MockOutput_OutFile )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText ) );
+    CheckFileContains( outputFilepath1, outputText );
+
+    // Cleanup
+}
+
+/*
+ * Check that mock generation is requested properly and saved to a named output file
+ */
+TEST( App, MockOutput_OutFile_CcExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = (outDirPath / "my_mock.cc" ).generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####TEXT3#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText );
+
+    // Cleanup
+}
+
+/*
+ * Check that mock generation is requested properly and saved to a named output file
+ */
+TEST( App, MockOutput_OutFile_OtherExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my_mock.hpp").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.hpp.cpp" ).generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####TEXT3#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText );
+
+    // Cleanup
+}
+
+/*
+ * Check that mock generation is requested properly and saved to a named output file
+ */
+TEST( App, MockOutput_OutFile_NoExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my_mock").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp" ).generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText = "#####TEXT3#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText );
 
     // Cleanup
 }
@@ -755,8 +885,8 @@ TEST( App, ExpectationOutput_OutDir )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -764,7 +894,7 @@ TEST( App, ExpectationOutput_OutDir )
 /*
  * Check that expectation functions generation is requested properly and saved to the current directory (output filename deduced from input filename)
  */
-TEST( App, ExpectationOutput_CurrentDir )
+TEST( App, ExpectationOutput_NoOutFile )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -807,8 +937,8 @@ TEST( App, ExpectationOutput_CurrentDir )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilename1 + "' and '" + outputFilename2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -816,7 +946,7 @@ TEST( App, ExpectationOutput_CurrentDir )
 /*
  * Check that expectation functions generation is requested properly and saved to a named output file
  */
-TEST( App, ExpectationMockOutput_OutFile_Header )
+TEST( App, ExpectationOutput_OutFile_HppExtension )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -855,8 +985,8 @@ TEST( App, ExpectationMockOutput_OutFile_Header )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -864,7 +994,7 @@ TEST( App, ExpectationMockOutput_OutFile_Header )
 /*
  * Check that expectation functions generation is requested properly and saved to a named output file
  */
-TEST( App, ExpectationMockOutput_OutFile_Impl )
+TEST( App, ExpectationOutput_OutFile_CppExtension )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -903,8 +1033,8 @@ TEST( App, ExpectationMockOutput_OutFile_Impl )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -912,7 +1042,7 @@ TEST( App, ExpectationMockOutput_OutFile_Impl )
 /*
  * Check that expectation functions generation is requested properly and saved to a named output file
  */
-TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
+TEST( App, ExpectationOutput_OutFile_OtherExtension )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -922,12 +1052,12 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
-    std::string outputFilepathOther = (outDirPath / "my_expect.blablabla").generic_string();
+    std::string outputFilepathOther = (outDirPath / "my_expect.foo").generic_string();
 
-    outputFilepath1 = (outDirPath / "my_expect.hpp").generic_string();
+    outputFilepath1 = (outDirPath / "my_expect.foo.hpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
-    outputFilepath2 = (outDirPath / "my_expect.cpp").generic_string();
+    outputFilepath2 = (outDirPath / "my_expect.foo.cpp").generic_string();
     std::filesystem::remove( outputFilepath2 );
 
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
@@ -953,8 +1083,8 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -962,7 +1092,7 @@ TEST( App, ExpectationMockOutput_OutFile_OtherExtension )
 /*
  * Check that expectation functions generation is requested properly and saved to a named output file
  */
-TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
+TEST( App, ExpectationOutput_OutFile_NoExtension )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -1003,8 +1133,8 @@ TEST( App, ExpectationMockOutput_OutFile_OtherNoExtension )
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
     CHECK_EQUAL( 0, output.tellp() );
-    CHECK( CheckFileContains( outputFilepath1, outputText1 ) );
-    CHECK( CheckFileContains( outputFilepath2, outputText2 ) );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
 
     // Cleanup
 }
@@ -1077,6 +1207,651 @@ TEST( App, ExpectationOutput_CannotOpenFile )
 }
 
 /*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Both )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathMock = (outDirPath / "my_mock").generic_string();
+    std::string outputFilepathExpect = (outDirPath / "my_expect").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-e", outputFilepathExpect.c_str(), "-m", outputFilepathMock.c_str(), "-i", inputFilename.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT0943#####";
+    std::string outputText2 = "#####TEXT2083#####";
+    std::string outputText3 = "#####TEXT7818#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to an output directory 
+ * (output filename deduced from input filename)
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutDir )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    outputFilepath1 = mockOutputFilePath;
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = expectationHeaderOutputFilePath;
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = expectationImplOutputFilePath;
+    std::filesystem::remove( outputFilepath3 );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outDirPathStr = outDirPath.generic_string();
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outDirPathStr.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT1#####";
+    std::string outputText2 = "#####TEXT2#####";
+    std::string outputText3 = "#####TEXT3#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to the current directory
+ * (output filename deduced from input filename)
+ */
+TEST( App, CombinedMockAndExpectationOutput_NoOutFile )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    const char* inputFilename = "bar";
+    const std::string outputFilename1 = "bar_mock.cpp";
+    const std::string outputFilename2 = "bar_expect.hpp";
+    const std::string outputFilename3 = "bar_expect.cpp";
+
+    outputFilepath1 = (outDirPath / outputFilename1).generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / outputFilename2).generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / outputFilename3).generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename, "-e", "-m" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT22#####";
+    std::string outputText2 = "#####TEXT33#####";
+    std::string outputText3 = "#####TEXT44#####";
+
+    std::filesystem::current_path( tempDirPath );
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilename2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilename1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilename2 + "' and '" + outputFilename3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_CppExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_mock_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_mock_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", outputFilepath1.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT343#####";
+    std::string outputText2 = "#####TEXT283#####";
+    std::string outputText3 = "#####TEXT863#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_HppExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = (outDirPath / "my_expect_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath2.c_str(), "-m" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT843#####";
+    std::string outputText2 = "#####TEXT683#####";
+    std::string outputText3 = "#####TEXT463#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_CppExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    outputFilepath1 = (outDirPath / "my_expect_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outputFilepath3.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT443#####";
+    std::string outputText2 = "#####TEXT383#####";
+    std::string outputText3 = "#####TEXT193#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_OtherExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my.foo").generic_string();
+
+    outputFilepath1 = (outDirPath / "my.foo.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my.foo_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my.foo_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", outputFilepathOther.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT743#####";
+    std::string outputText2 = "#####TEXT783#####";
+    std::string outputText3 = "#####TEXT713#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_NoExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my").generic_string();
+
+    outputFilepath1 = (outDirPath / "my.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-e", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT043#####";
+    std::string outputText2 = "#####TEXT283#####";
+    std::string outputText3 = "#####TEXT718#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_OtherExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my.foo").generic_string();
+
+    outputFilepath1 = (outDirPath / "my.foo_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my.foo.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my.foo.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outputFilepathOther.c_str() };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT743A#####";
+    std::string outputText2 = "#####TEXT783M#####";
+    std::string outputText3 = "#####TEXT713C#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that combined mock and expectation functions generation is requested properly and saved to a named output file
+ */
+TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_NoExtension )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::string outputFilepathOther = (outDirPath / "my").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str(), "-m" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT043#####";
+    std::string outputText2 = "#####TEXT283#####";
+    std::string outputText3 = "#####TEXT718#####";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    CHECK_EQUAL( 0, output.tellp() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and printed to console
+ */
+TEST( App, CombinedMockAndExpectationOutput_Mock_ConsoleOutput )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", "@" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT44553#####";
+    std::string outputText2 = "#####TEXT56424#####";
+    std::string outputText3 = "#####TEXT12345#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that expectation functions generation is requested properly and printed to console
+ */
+TEST( App, CombinedMockAndExpectationOutput_Expect_ConsoleOutput )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "@", "-m" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT453#####";
+    std::string outputText2 = "#####TEXT524#####";
+    std::string outputText3 = "#####TEXT125#####";
+
+    expect::Config$::Config$( false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
+
+    // Exercise
+    int ret = app.Execute( (int) args.size(), args.data() );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
+    CHECK_EQUAL( 0, error.tellp() );
+
+    // Cleanup
+}
+
+/*
  * Check that base directory is requested properly
  */
 TEST( App, MockOutput_BaseDirectory )
@@ -1091,22 +1866,26 @@ TEST( App, MockOutput_BaseDirectory )
 
     std::string baseDirectory = outDirPath.parent_path().generic_string();
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-B", baseDirectory.c_str() };
+    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", "@", "-B", baseDirectory.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
-    std::string outputText = "#####FOO#####";
+    std::string outputText1 = "#####FOO1#####";
+    std::string outputText2 = "#####FOO2#####";
+    std::string outputText3 = "#####FOO3#####";
 
     expect::Config$::Config$( false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", baseDirectory.c_str(), &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", baseDirectory.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", baseDirectory.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
 
     // Exercise
     int ret = app.Execute( (int) args.size(), args.data() );
 
     // Verify
     CHECK_EQUAL( 0, ret );
-    STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
+    STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
     CHECK_EQUAL( 0, error.tellp() );
 
     // Cleanup

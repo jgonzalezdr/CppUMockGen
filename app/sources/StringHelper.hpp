@@ -16,4 +16,6 @@ std::string TrimString( const std::string &str );
 
 size_t StringCount( const std::string &str, char c );
 
+std::string ToLower( const std::string &str );
+
 #endif // header guard

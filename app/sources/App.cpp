@@ -25,7 +25,10 @@
 
 #include "VersionInfo.h"
 
-const std::set<std::string> cppExtensions = { ".hpp", ".hxx", ".hh" };
+#define MOCK_FILE_SUFFIX "_mock"
+#define EXPECTATION_FILE_SUFFIX "_expect"
+#define IMPL_FILE_EXTENSION ".cpp"
+#define HEADER_FILE_EXTENSION ".hpp"
 
 App::App( std::ostream &cout, std::ostream &cerr ) noexcept
 : m_cout(cout), m_cerr(cerr)
@@ -80,6 +83,30 @@ static std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
     if( !ret.empty() )
     {
         ret.pop_back();
+    }
+
+    return ret;
+}
+
+static std::filesystem::path CombinePath( const std::filesystem::path &path, const char* fileSuffix )
+{
+    std::filesystem::path ret;
+
+    if( IsDirPath( path ) || ( path == "@" ) )
+    {
+        ret = path;
+    }
+    else
+    {
+        if( HasCppExtension( path ) )
+        {
+            ret = path.parent_path() / path.stem();
+        }
+        else
+        {
+            ret = path;
+        }
+        ret += fileSuffix;
     }
 
     return ret;
@@ -149,18 +176,51 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             }
         }
 
+        bool generateMock = false;
         std::filesystem::path mockOutputFilePath;
-        std::ofstream mockOutputStream;
         if( options.count( "mock-output" ) > 0 )
         {
             mockOutputFilePath = options["mock-output"].as<std::string>();
+            generateMock = true;
+        }
+
+        bool generateExpectation = false;
+        std::filesystem::path expectationHeaderOutputFilePath;
+        if( options.count( "expect-output" ) > 0 )
+        {
+            expectationHeaderOutputFilePath = options["expect-output"].as<std::string>();
+            generateExpectation = true;
+        }
+
+        if( generateMock && generateExpectation )
+        {
+            // Use common mock/expection generation path if one is passed explicitly but not the other.
+            if( mockOutputFilePath.empty() && !expectationHeaderOutputFilePath.empty() )
+            {
+                mockOutputFilePath = CombinePath( expectationHeaderOutputFilePath, MOCK_FILE_SUFFIX );
+            }
+            else if( expectationHeaderOutputFilePath.empty() && !mockOutputFilePath.empty() )
+            {
+                expectationHeaderOutputFilePath = CombinePath( mockOutputFilePath, EXPECTATION_FILE_SUFFIX );
+            }
+        }
+
+        std::ofstream mockOutputStream;
+        if( generateMock )
+        {
             if( mockOutputFilePath != "@" )
             {
                 if( mockOutputFilePath.empty() || IsDirPath(mockOutputFilePath) )
                 {
                     ConvertToDirPath( mockOutputFilePath );
-                    mockOutputFilePath += inputFilePath.filename().stem().generic_string() + "_mock.cpp";
+                    mockOutputFilePath /= inputFilePath.filename().stem();
+                    mockOutputFilePath += MOCK_FILE_SUFFIX IMPL_FILE_EXTENSION;
                 }
+                else if( !HasCppImplExtension( mockOutputFilePath ) )
+                {
+                    mockOutputFilePath += IMPL_FILE_EXTENSION;
+                }
+
                 mockOutputStream.open( mockOutputFilePath );
                 if( !mockOutputStream.is_open() )
                 {
@@ -170,44 +230,45 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             }
         }
 
-        std::filesystem::path expectHeaderOutputFilePath;
-        std::filesystem::path expectImplOutputFilePath;
-        std::ofstream expectHeaderOutputStream;
-        std::ofstream expectImplOutputStream;
-        if( options.count( "expect-output" ) > 0 )
+        std::filesystem::path expectationImplOutputFilePath;
+        std::ofstream expectationHeaderOutputStream;
+        std::ofstream expectationImplOutputStream;
+        if( generateExpectation )
         {
-            expectHeaderOutputFilePath = options["expect-output"].as<std::string>();
-            if( expectHeaderOutputFilePath != "@" )
+            if( expectationHeaderOutputFilePath != "@" )
             {
-                if( expectHeaderOutputFilePath.empty() || IsDirPath(expectHeaderOutputFilePath) )
+                if( expectationHeaderOutputFilePath.empty() || IsDirPath(expectationHeaderOutputFilePath) )
                 {
-                    ConvertToDirPath( expectHeaderOutputFilePath );
-                    std::string baseFilename = inputFilePath.stem().generic_string();
-                    expectImplOutputFilePath = expectHeaderOutputFilePath;
-                    expectImplOutputFilePath += baseFilename + "_expect.cpp";
-                    expectHeaderOutputFilePath += baseFilename + "_expect.hpp";
+                    ConvertToDirPath( expectationHeaderOutputFilePath );
+                    expectationHeaderOutputFilePath /= inputFilePath.stem();
+                    expectationImplOutputFilePath = expectationHeaderOutputFilePath;
+                    expectationHeaderOutputFilePath += EXPECTATION_FILE_SUFFIX HEADER_FILE_EXTENSION;
+                    expectationImplOutputFilePath += EXPECTATION_FILE_SUFFIX IMPL_FILE_EXTENSION;
                 }
                 else
                 {
-                    std::string baseFilename = expectHeaderOutputFilePath.stem().generic_string();
-                    expectHeaderOutputFilePath = expectHeaderOutputFilePath.parent_path();
-                    expectImplOutputFilePath = expectHeaderOutputFilePath;
-                    expectImplOutputFilePath /= baseFilename + ".cpp";
-                    expectHeaderOutputFilePath /= baseFilename + ".hpp";
+                    if( HasCppExtension( expectationHeaderOutputFilePath ) )
+                    {
+                        expectationHeaderOutputFilePath = expectationHeaderOutputFilePath.parent_path() / expectationHeaderOutputFilePath.stem();
+                    }
+
+                    expectationImplOutputFilePath = expectationHeaderOutputFilePath;
+                    expectationHeaderOutputFilePath += HEADER_FILE_EXTENSION;
+                    expectationImplOutputFilePath += IMPL_FILE_EXTENSION;
                 }
 
-                expectHeaderOutputStream.open( expectHeaderOutputFilePath );
-                if( !expectHeaderOutputStream.is_open() )
+                expectationHeaderOutputStream.open( expectationHeaderOutputFilePath );
+                if( !expectationHeaderOutputStream.is_open() )
                 {
-                    std::string errorMsg = "Expectation header output file '" + expectHeaderOutputFilePath.generic_string() + "' could not be opened.";
+                    std::string errorMsg = "Expectation header output file '" + expectationHeaderOutputFilePath.generic_string() + "' could not be opened.";
                     throw std::runtime_error( errorMsg );
                 }
 
-                expectImplOutputStream.open( expectImplOutputFilePath );
+                expectationImplOutputStream.open( expectationImplOutputFilePath );
                 // LCOV_EXCL_START: Defensive
-                if( !expectImplOutputStream.is_open() )
+                if( !expectationImplOutputStream.is_open() )
                 {
-                    std::string errorMsg = "Expectation implementation output file '" + expectImplOutputFilePath.generic_string() + "' could not be opened.";
+                    std::string errorMsg = "Expectation implementation output file '" + expectationImplOutputFilePath.generic_string() + "' could not be opened.";
                     throw std::runtime_error( errorMsg );
                 }
                 // LCOV_EXCL_STOP
@@ -217,9 +278,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         bool interpretAsCpp = options[ "cpp" ].as<bool>();
         if( !interpretAsCpp )
         {
-            std::string fileExtension = inputFilePath.extension().generic_string();
-
-            interpretAsCpp = ( cppExtensions.count( fileExtension ) > 0 );
+            interpretAsCpp = HasCppHeaderExtension( inputFilePath );
         }
 
         Config config( options["underlying-typedef"].as<bool>(),
@@ -231,7 +290,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 
         if( parser.Parse( inputFilePath, config, interpretAsCpp, options["std"].as<std::string>(), options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
         {
-            if( !mockOutputFilePath.empty() )
+            if( generateMock )
             {
                 std::filesystem::path mockBaseDirPath = baseDirPath;
                 if( mockBaseDirPath.empty() )
@@ -257,29 +316,29 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 }
             }
 
-            if( !expectHeaderOutputFilePath.empty() )
+            if( generateExpectation )
             {
                 std::filesystem::path expectBaseDirPath = baseDirPath;
                 if( expectBaseDirPath.empty() )
                 {
-                    expectBaseDirPath = expectHeaderOutputFilePath.parent_path();
+                    expectBaseDirPath = expectationHeaderOutputFilePath.parent_path();
                 }
 
                 std::ostringstream headerOutput;
                 std::ostringstream implOutput;
                 parser.GenerateExpectationHeader( genOpts, expectBaseDirPath, headerOutput );
-                parser.GenerateExpectationImpl( genOpts, expectHeaderOutputFilePath, implOutput );
+                parser.GenerateExpectationImpl( genOpts, expectationHeaderOutputFilePath, implOutput );
 
-                if( expectHeaderOutputStream.is_open() )
+                if( expectationHeaderOutputStream.is_open() )
                 {
-                    expectHeaderOutputStream << headerOutput.str();
-                    expectImplOutputStream << implOutput.str();
+                    expectationHeaderOutputStream << headerOutput.str();
+                    expectationImplOutputStream << implOutput.str();
 
                     cerrColorizer.SetColor( ConsoleColorizer::Color::LIGHT_GREEN );
                     m_cerr << "SUCCESS: ";
                     cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
-                    m_cerr << "Expectations generated into '" << expectHeaderOutputFilePath.generic_string() << 
-                              "' and '" << expectImplOutputFilePath.generic_string() << "'" << std::endl;
+                    m_cerr << "Expectations generated into '" << expectationHeaderOutputFilePath.generic_string() << 
+                              "' and '" << expectationImplOutputFilePath.generic_string() << "'" << std::endl;
                 }
                 else
                 {

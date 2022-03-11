@@ -9,6 +9,8 @@
 
 #include "StringHelper.hpp"
 
+#include <algorithm>
+
 std::string TrimString( const std::string &str )
 {
     size_t first = str.find_first_not_of( ' ' );
@@ -35,4 +37,11 @@ size_t StringCount( const std::string &str, char c )
     }
 
     return count;
+}
+
+std::string ToLower( const std::string &str )
+{
+    std::string ret = str;
+    std::transform( ret.begin(), ret.end(), ret.begin(), [](unsigned char c){ return std::tolower(c); } );
+    return ret;
 }

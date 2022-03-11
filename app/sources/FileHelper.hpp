@@ -17,4 +17,8 @@ bool IsDirPath( const std::filesystem::path &path ) noexcept;
 
 void ConvertToDirPath( std::filesystem::path &path ) noexcept;
 
+bool HasCppExtension( const std::filesystem::path &path ) noexcept;
+bool HasCppImplExtension( const std::filesystem::path &path ) noexcept;
+bool HasCppHeaderExtension( const std::filesystem::path &path ) noexcept;
+
 #endif // header guard

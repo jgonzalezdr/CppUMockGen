@@ -12,6 +12,7 @@ set( PROD_SRC_FILES
      ${PROD_SOURCE_DIR}/sources/Parser.cpp
      ${PROD_SOURCE_DIR}/sources/ClangHelper.cpp
      ${PROD_SOURCE_DIR}/sources/FileHelper.cpp
+     ${PROD_SOURCE_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES
