@@ -49,11 +49,10 @@ public:
          *
          * @param value [in] Override specification, consisting in a element identifier optionally followed
          *                   by the '=' character and an argument / return expression modifier
-         * @param option [in] Full override option text
          * @param isReturn [in] Indicates that the option is for return type if @c true, or for parameter
          *                      type otherwise
          */
-        OverrideSpec( const std::string &value, const std::string &option, bool isReturn );
+        OverrideSpec( const std::string &value, bool isReturn );
 
         /**
          * Returns the type identifier.
