@@ -13,8 +13,8 @@
 #include <CppUTestExt/MockSupport.h>
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& Parse(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__);
-MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__);
+MockExpectedCall& Parse(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__);
+MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__);
 } }
 
 namespace expect { namespace Parser$ {

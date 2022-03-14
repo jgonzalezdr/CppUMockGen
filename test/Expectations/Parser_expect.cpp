@@ -9,11 +9,11 @@
 #include "Parser_expect.hpp"
 
 namespace expect { namespace Parser$ {
-MockExpectedCall& Parse(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__)
+MockExpectedCall& Parse(CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__)
 {
-    return Parse(1, __object__, inputFilepath, config, interpretAsCpp, languageStandard, includePaths, error, __return__);
+    return Parse(1, __object__, inputFilepath, config, interpretAsCpp, includePaths, error, __return__);
 }
-MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__)
+MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const Parser*> __object__, CppUMockGen::Parameter<const char*> inputFilepath, CppUMockGen::Parameter<const void*> config, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const std::vector<std::string> &> includePaths, CppUMockGen::Parameter<void*> error, bool __return__)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Parser::Parse");
@@ -21,7 +21,6 @@ MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const 
     if(inputFilepath.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("inputFilepath", inputFilepath.getValue()); }
     if(config.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter("config", config.getValue()); }
     if(interpretAsCpp.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withBoolParameter("interpretAsCpp", interpretAsCpp.getValue()); }
-    if(languageStandard.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("languageStandard", languageStandard.getValue()); }
     if(includePaths.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType("std::vector<std::string>", "includePaths", &includePaths.getValue()); }
     if(error.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withPointerParameter("error", error.getValue()); }
     __expectedCall__.andReturnValue(__return__);

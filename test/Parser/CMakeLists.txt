@@ -17,6 +17,8 @@ set( PROD_SRC_FILES
 
 set( TEST_SRC_FILES
      Parser_test.cpp
+     ${MOCKS_DIR}/Config_mock.cpp
+     ${EXPECTATIONS_DIR}/Config_expect.cpp
      ${MOCKS_DIR}/Function_mock.cpp
      ${EXPECTATIONS_DIR}/Function_expect.cpp
      ${MOCKS_DIR}/Method_mock.cpp

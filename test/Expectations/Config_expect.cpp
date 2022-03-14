@@ -137,17 +137,47 @@ MockExpectedCall& GetExpectationArgTypeName(unsigned int __numCalls__, CppUMockG
 } } }
 
 namespace expect { namespace Config$ {
-MockExpectedCall& Config$ctor(CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions)
+MockExpectedCall& Config$ctor(CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions)
 {
-    return Config$ctor(1, useUnderlyingTypedefType, typeOverrideOptions);
+    return Config$ctor(1, interpretAsCpp, languageStandard, useUnderlyingTypedefType, typeOverrideOptions);
 }
-MockExpectedCall& Config$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions)
+MockExpectedCall& Config$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions)
 {
     bool __ignoreOtherParams__ = false;
     MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Config::Config");
+    if(interpretAsCpp.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withBoolParameter("interpretAsCpp", interpretAsCpp.getValue()); }
+    if(languageStandard.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withStringParameter("languageStandard", languageStandard.getValue()); }
     if(useUnderlyingTypedefType.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withBoolParameter("useUnderlyingTypedefType", useUnderlyingTypedefType.getValue()); }
     if(typeOverrideOptions.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions.getValue()); }
     if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }
+    return __expectedCall__;
+}
+} }
+
+namespace expect { namespace Config$ {
+MockExpectedCall& InterpretAsCpp(CppUMockGen::Parameter<const Config*> __object__, bool __return__)
+{
+    return InterpretAsCpp(1, __object__, __return__);
+}
+MockExpectedCall& InterpretAsCpp(unsigned int __numCalls__, CppUMockGen::Parameter<const Config*> __object__, bool __return__)
+{
+    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Config::InterpretAsCpp");
+    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Config*>(__object__.getValue())); }
+    __expectedCall__.andReturnValue(__return__);
+    return __expectedCall__;
+}
+} }
+
+namespace expect { namespace Config$ {
+MockExpectedCall& GetLanguageStandard(CppUMockGen::Parameter<const Config*> __object__, const std::string & __return__)
+{
+    return GetLanguageStandard(1, __object__, __return__);
+}
+MockExpectedCall& GetLanguageStandard(unsigned int __numCalls__, CppUMockGen::Parameter<const Config*> __object__, const std::string & __return__)
+{
+    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, "Config::GetLanguageStandard");
+    if(!__object__.isIgnored()) { __expectedCall__.onObject(const_cast<Config*>(__object__.getValue())); }
+    __expectedCall__.andReturnValue(static_cast<const void*>(&__return__));
     return __expectedCall__;
 }
 } }

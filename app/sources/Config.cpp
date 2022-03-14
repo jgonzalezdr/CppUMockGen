@@ -19,9 +19,22 @@ static const char EXPR_MOD_SEPARATOR = '~';
 static const char EXPR_CURRENT_ARG_PLACEHOLDER = '$';
 static const char EXPECTATION_ARG_TYPE_SEPARATOR = '<';
 
-Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions )
-: m_useUnderlyingTypedefType( useUnderlyingTypedefType ), m_typeOverrideMap( typeOverrideOptions )
-{}
+Config::Config( bool interpretAsCpp, const std::string &languageStandard, bool useUnderlyingTypedefType,
+                const std::vector<std::string> &typeOverrideOptions )
+: m_interpretAsCpp( interpretAsCpp ), m_languageStandard( languageStandard ), m_useUnderlyingTypedefType( useUnderlyingTypedefType ),
+  m_typeOverrideMap( typeOverrideOptions )
+{
+}
+
+bool Config::InterpretAsCpp() const noexcept
+{
+    return m_interpretAsCpp;
+}
+
+const std::string& Config::GetLanguageStandard() const noexcept
+{
+    return m_languageStandard;
+}
 
 bool Config::UseUnderlyingTypedefType() const noexcept
 {

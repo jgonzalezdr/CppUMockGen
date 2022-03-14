@@ -43,13 +43,45 @@ TEST_GROUP( Config )
  *===========================================================================*/
 
 /*
+ * Check that InterpretAsCpp is handled properly.
+ */
+TEST( Config, InterpretAsCpp )
+{
+    // Prepare
+    Config testConfigTrue( true, "", false, std::vector<std::string>() );
+    Config testConfigFalse( false, "", false, std::vector<std::string>() );
+
+    // Exercise & Verify
+    CHECK_TRUE( testConfigTrue.InterpretAsCpp() );
+    CHECK_FALSE( testConfigFalse.InterpretAsCpp() );
+
+    // Cleanup
+}
+
+/*
+ * Check that LanguageStandard is handled properly.
+ */
+TEST( Config, LanguageStandard )
+{
+    // Prepare
+    Config testConfigEmpty( false, "", false, std::vector<std::string>() );
+    Config testConfigNonEmpty( false, "std-xxx", false, std::vector<std::string>() );
+
+    // Exercise & Verify
+    CHECK( testConfigEmpty.GetLanguageStandard().empty() );
+    STRCMP_EQUAL( "std-xxx", testConfigNonEmpty.GetLanguageStandard().c_str() );
+
+    // Cleanup
+}
+
+/*
  * Check that UseUnderlyingTypedefType is handled properly.
  */
 TEST( Config, UseUnderlyingTypedefType )
 {
     // Prepare
-    Config testConfigTrue( true, std::vector<std::string>() );
-    Config testConfigFalse( false, std::vector<std::string>() );
+    Config testConfigTrue( false, "", true, std::vector<std::string>() );
+    Config testConfigFalse( false, "", false, std::vector<std::string>() );
 
     // Exercise & Verify
     CHECK_TRUE( testConfigTrue.UseUnderlyingTypedefType() );
@@ -64,7 +96,7 @@ TEST( Config, UseUnderlyingTypedefType )
 TEST( Config, OverrideOptions_Empty )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string>() );
+    Config testConfig( false, "", false, std::vector<std::string>() );
 
     // Exercise & Verify
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
@@ -82,7 +114,7 @@ TEST( Config, OverrideOptions_Empty )
 TEST( Config, SpecificTypeOverrideOptions_Simple )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string> { "function1#p=Int", "ns1::function2@=ConstPointer" } );
+    Config testConfig( false, "", false, std::vector<std::string> { "function1#p=Int", "ns1::function2@=ConstPointer" } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("function1#p");
@@ -121,7 +153,7 @@ TEST( Config, SpecificTypeOverrideOptions_Simple )
 TEST( Config, GenericTypeOverrideOptions_Simple )
 {
     // Prepare
-    Config testConfig( false, std::vector<std::string> { "#class1=Int", "@class2 *=ConstPointer" } );
+    Config testConfig( false, "", false, std::vector<std::string> { "#class1=Int", "@class2 *=ConstPointer" } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#class1");
@@ -160,7 +192,7 @@ TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
     // Prepare
 
     // Exercise
-    Config testConfig( false, std::vector<std::string>
+    Config testConfig( false, "", false, std::vector<std::string>
     {
         "function1#p1=Int",
         "function1#p2=UnsignedInt",
@@ -213,7 +245,7 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
     // Prepare
 
     // Exercise
-    Config testConfig( false, std::vector<std::string>
+    Config testConfig( false, "", false, std::vector<std::string>
     {
         "#type1=Int",
         "#type2=UnsignedInt",
@@ -264,7 +296,7 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
 TEST( Config, SpecificTypeOverrideOptions_WithExpressions )
 {
     // Prepare
-    Config testConfig( false,
+    Config testConfig( false, "", false,
                        std::vector<std::string> { "function1#p=Int~($)",
                                                   "ns1::function1@=ConstPointer~&$",
                                                   "func2#p=InputOfType:TypeZ~$->getZ()",
@@ -414,7 +446,7 @@ TEST( Config, SpecificTypeOverrideOptions_WithExpressions )
 TEST( Config, GenericTypeOverrideOptions_WithExpressions )
 {
     // Prepare
-    Config testConfig( false,
+    Config testConfig( false, "", false,
                        std::vector<std::string> { "#const int *=Int~(*$)",
                                                   "@const int *=LongInt~&$",
                                                   "#typeX=InputOfType:TypeY~&($.getY())",
@@ -525,19 +557,19 @@ TEST( Config, Exception_TypeOverride_OverallBadFormat )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p" } ) );
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1@" } ) );
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#class1" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#class1" } ) );
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1" } ) );
 
 
     // Cleanup
@@ -552,22 +584,22 @@ TEST( Config, Exception_TypeOverride_KeyBadFormat )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p#=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p#=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#function1#p=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#function1#p=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type1#=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type1#=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@p=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1@p=Int" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@type1@=Int" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@type1@=Int" } ) );
 
     // Cleanup
 }
@@ -581,52 +613,52 @@ TEST( Config, Exception_TypeOverride_SpecificValueBadFormat )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=abc" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=~" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int~" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=Int~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int~abc" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=Int~abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Output" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1@=Output" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Skip" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1@=Skip" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=InputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=InputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:a<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=InputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=InputOfType:<a" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=InputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function2#p=OutputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function2#p=OutputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:a<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function2#p=OutputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function2#p=OutputOfType:<a" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function2#p=OutputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function3#p=MemoryBuffer:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function3#p=MemoryBuffer:" } ) );
 
     // Cleanup
 }
@@ -639,52 +671,52 @@ TEST( Config, Exception_TypeOverride_GenericValueBadFormat )
     // Prepare
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1=" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1=" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type1=abc" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type1=abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1=~" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1=~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#class1=Int~" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#class1=Int~" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type2=Int~abc" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type2=Int~abc" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1=Output" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1=Output" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1=Skip" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1=Skip" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type3=InputOfType:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type3=InputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type3=InputOfType:<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type3=InputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type3=InputOfType:a<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type3=InputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type3=InputOfType:<a" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type3=InputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type4=OutputOfType:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type4=OutputOfType:" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type4=OutputOfType:<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type4=OutputOfType:<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type4=OutputOfType:a<" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type4=OutputOfType:a<" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
 
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#type5=MemoryBuffer:" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#type5=MemoryBuffer:" } ) );
 
     // Cleanup
 }
@@ -698,7 +730,7 @@ TEST( Config, Exception_FunctionParameterRepeated )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1#p=Int", "function1#p=Double" } ) );
 }
 
 /*
@@ -710,7 +742,7 @@ TEST( Config, Exception_FunctionReturnRepeated )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "function1@=Int", "function1@=Double" } ) );
+                  Config( false, "", false, std::vector<std::string> { "function1@=Int", "function1@=Double" } ) );
 }
 
 /*
@@ -722,7 +754,7 @@ TEST( Config, Exception_TypeParameterRepeated )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "#class1=Int", "#class1=Double" } ) );
+                  Config( false, "", false, std::vector<std::string> { "#class1=Int", "#class1=Double" } ) );
 }
 
 /*
@@ -734,5 +766,5 @@ TEST( Config, Exception_TypeReturnRepeated )
 
     // Exercise & Verify
     CHECK_THROWS( std::runtime_error,
-                  Config( false, std::vector<std::string> { "@class1=Int", "@class1=Double" } ) );
+                  Config( false, "", false, std::vector<std::string> { "@class1=Int", "@class1=Double" } ) );
 }

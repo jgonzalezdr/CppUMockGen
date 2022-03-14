@@ -32,6 +32,7 @@
 #include "Parser.hpp"
 #include "FileHelper.hpp"
 
+#include "Config_expect.hpp"
 #include "Function_expect.hpp"
 #include "Method_expect.hpp"
 #include "Constructor_expect.hpp"
@@ -128,11 +129,13 @@ TEST( Parser, MockedFunction )
                 "void function1(int a);";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -227,12 +230,13 @@ TEST( Parser, MockedMethod )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -327,12 +331,13 @@ TEST( Parser, MockedConstructor )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Constructor$::Constructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -427,12 +432,13 @@ TEST( Parser, MockedDestructor )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Destructor$::Destructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -528,12 +534,13 @@ TEST( Parser, MockedMethod_Cpp17 )
             "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "c++17" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "c++17", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -628,12 +635,14 @@ TEST( Parser, MockedMethod_Cpp14 )
             "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "c++14" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "c++14", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -728,12 +737,14 @@ TEST( Parser, MockedMethod_Gnu98 )
             "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "gnu++98" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "gnu++98", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -831,12 +842,14 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, true );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor(4);
         expect::Method$::Method$ctor(2);
         expect::Function$::Parse( 4, IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -946,6 +959,8 @@ TEST( Parser, FunctionNonMockable )
                 "void function1(int a) {};";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
         expect::Function$::Function$dtor();
@@ -953,7 +968,7 @@ TEST( Parser, FunctionNonMockable )
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -995,6 +1010,7 @@ TEST( Parser, MethodNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1003,7 +1019,7 @@ TEST( Parser, MethodNonMockable )
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -1045,6 +1061,7 @@ TEST( Parser, ConstructorNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Constructor$::Constructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1053,7 +1070,7 @@ TEST( Parser, ConstructorNonMockable )
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -1095,6 +1112,7 @@ TEST( Parser, DestructorNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Destructor$::Destructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1103,7 +1121,7 @@ TEST( Parser, DestructorNonMockable )
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -1148,6 +1166,8 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
                 "};";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, true );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor( 4 );
         expect::Method$::Method$ctor( 2 );
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -1157,7 +1177,7 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
         expect::Function$::Function$dtor(2);
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -1255,10 +1275,12 @@ TEST( Parser, SyntaxError )
                 "foo function1(int a);";
         SetupTempFile( testHeader );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -1298,13 +1320,15 @@ TEST( Parser, Warning )
                 "void function1(int a);";
         SetupTempFile( testHeader );
 
-        expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
-
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
+        expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, false, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -1392,10 +1416,13 @@ TEST( Parser, NonExistingInputFile )
 
         std::filesystem::remove( nonexistingFilePath );
 
+        expect::Config$::InterpretAsCpp( config, false );
+        expect::Config$::GetLanguageStandard( config, "" );
+
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
-        bool result = parser->Parse( nonexistingFilePath, *config, false, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( nonexistingFilePath, *config, false, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( false, result );
@@ -1439,11 +1466,12 @@ TEST( Parser, IncludePaths )
 
         std::filesystem::current_path( tempDirPath );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( defaultTempFilename, *config, true, "", std::vector<std::string>{includePath}, error );
+        bool result = parser->Parse( defaultTempFilename, *config, true, std::vector<std::string>{includePath}, error );
 
         // Verify
         CHECK_EQUAL( true, result );
@@ -1522,12 +1550,13 @@ TEST( Parser, BaseDirectory )
                 "};";
         SetupTempFile( inputFileName, testHeader );
 
+        expect::Config$::GetLanguageStandard( config, "" );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
         // Exercise
-        bool result = parser->Parse( tempFilePath, *config, true, "", std::vector<std::string>(), error );
+        bool result = parser->Parse( tempFilePath, *config, true, std::vector<std::string>(), error );
 
         // Verify
         CHECK_EQUAL( true, result );

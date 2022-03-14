@@ -161,8 +161,8 @@ TEST( ConfigFile, EmptyFile )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
@@ -198,8 +198,8 @@ TEST( ConfigFile, IncludePaths )
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
@@ -235,8 +235,8 @@ TEST( ConfigFile, TypeOverrideOptions )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String\" -t \"@const bar=Int/&$\" -t \"foo#bar=String\" -t \"foo@=Int/&$\"", "", &outputText );
 
     // Exercise
@@ -272,8 +272,8 @@ TEST( ConfigFile, ForceCpp )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, true, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( true, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x", "", &outputText );
 
     // Exercise
@@ -309,8 +309,8 @@ TEST( ConfigFile, LanguageStandard )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "gnu++17", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "gnu++17", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s gnu++17", "", &outputText );
 
     // Exercise
@@ -346,8 +346,8 @@ TEST( ConfigFile, UnderlyingTypedef )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( true, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", true, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u", "", &outputText );
 
     // Exercise
@@ -383,8 +383,8 @@ TEST( ConfigFile, InputFile )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
@@ -420,8 +420,8 @@ TEST( ConfigFile, MockOutput )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", &outputText );
 
     // Exercise
@@ -458,8 +458,8 @@ TEST( ConfigFile, ExpectationOutput )
     std::string outputText1 = "#####TEXT1#####";
     std::string outputText2 = "#####TEXT2#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText1 );
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText2 );
 
@@ -534,8 +534,8 @@ TEST( ConfigFile, IncludeOtherConfigFile_1Level )
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"foo#bar=String\" -t \"foo@=Int/&$\"", "", &outputText );
 
     // Exercise
@@ -582,8 +582,8 @@ TEST( ConfigFile, IncludeOtherConfigFile_2Level )
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"foo#bar=String\" -t \"foo@=Int/&$\" -t \"#foo=String\" -t \"@const bar=Int/&$\"", "", &outputText );
 
     // Exercise
@@ -655,8 +655,8 @@ TEST( ConfigFile, IncludeOtherConfigFile_Recursive )
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"foo#bar=String\" -t \"foo@=Int/&$\"", "", &outputText );
 
     // Exercise
@@ -692,8 +692,8 @@ TEST( ConfigFile, ExtraWhiteSpaces )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String\" -t \"@const bar=Int/&$\"", "", &outputText );
 
     // Exercise
@@ -729,8 +729,8 @@ TEST( ConfigFile, EscapedQuotes )
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
-    expect::Config$::Config$ctor( false, typeOverrideOptions );
-    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, "", includePaths, &error, true );
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String~$ + \\\"bar\\\"\"", "", &outputText );
 
     // Exercise

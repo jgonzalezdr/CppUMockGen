@@ -36,13 +36,13 @@ public:
      *
      * @param inputFilepath [in] Filename for the C/C++ header file
      * @param config [in] Configuration to be used during mock generation
-     * @param interpretAsCpp [in] Forces interpreting the header file as C++
+     * @param isCppHeader [in] Indicates if the input file is recognized as a C++ header
      * @param includePaths [in] List of paths to search for included header files
      * @param error [out] Stream where errors will be written
      * @return @c true if the input file could be parsed successfully, @c false otherwise
      */
-    bool Parse( const std::filesystem::path &inputFilepath, const Config &config, bool interpretAsCpp,
-                const std::string &languageStandard, const std::vector<std::string> &includePaths, std::ostream &error );
+    bool Parse( const std::filesystem::path &inputFilepath, const Config &config, bool isCppHeader,
+                const std::vector<std::string> &includePaths, std::ostream &error );
 
     /**
      * Generates mocked functions for the C/C++ header parsed previously.

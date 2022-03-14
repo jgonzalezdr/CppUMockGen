@@ -59,10 +59,20 @@ const std::string & Config::OverrideSpec::GetExpectationArgTypeName() const noex
     return *static_cast<const std::string*>(mock().actualCall("Config::OverrideSpec::GetExpectationArgTypeName").onObject(this).returnConstPointerValue());
 }
 
-Config::Config(bool useUnderlyingTypedefType, const std::vector<std::string> & typeOverrideOptions)
+Config::Config(bool interpretAsCpp, const std::string & languageStandard, bool useUnderlyingTypedefType, const std::vector<std::string> & typeOverrideOptions)
 : m_typeOverrideMap( std::vector<std::string>() )
 {
-    mock().actualCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", useUnderlyingTypedefType).withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+    mock().actualCall("Config::Config").withBoolParameter("interpretAsCpp", interpretAsCpp).withStringParameter("languageStandard", languageStandard.c_str()).withBoolParameter("useUnderlyingTypedefType", useUnderlyingTypedefType).withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
+}
+
+bool Config::InterpretAsCpp() const noexcept
+{
+    return mock().actualCall("Config::InterpretAsCpp").onObject(this).returnBoolValue();
+}
+
+const std::string & Config::GetLanguageStandard() const noexcept
+{
+    return *static_cast<const std::string*>(mock().actualCall("Config::GetLanguageStandard").onObject(this).returnConstPointerValue());
 }
 
 bool Config::UseUnderlyingTypedefType() const noexcept

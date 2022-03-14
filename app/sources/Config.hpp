@@ -119,15 +119,28 @@ public:
     /**
      * Constructs a Config object.
      *
-     * @param useUnderlyingTypedefType [in] Indicates whether to use the underlying type of typedefs or the typedef name
-     *                                      to identify function parameters types
-     * @param typeOverrideOptions [in] Override options for specific or generic parameter or return types (see OverrideMap)
+     * @param[in] interpretAsCpp Forces interpreting the header file as C++
+     * @param[in] languageStandard Language standard to use when interpreting the header file
+     * @param[in] useUnderlyingTypedefType Indicates whether to use the underlying type of typedefs or the typedef name
+     *                                     to identify function parameters types
+     * @param[in] typeOverrideOptions Override options for specific or generic parameter or return types (see OverrideMap)
      */
-    Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions );
+    Config( bool interpretAsCpp, const std::string &languageStandard, bool useUnderlyingTypedefType, 
+            const std::vector<std::string> &typeOverrideOptions );
+
+    /**
+     * Returns if the header file must be interpreted as C++.
+     */
+    bool InterpretAsCpp() const noexcept;
+
+    /**
+     * Returns the language standard to use when interpreting the header file.
+     */
+    const std::string& GetLanguageStandard() const noexcept;
 
     /**
      * Returns whether the underlying type of typedefs or the typedef name has to be used to identify function
-     * parameters types
+     * parameters types.
      */
     bool UseUnderlyingTypedefType() const noexcept;
 
@@ -169,6 +182,8 @@ private:
         OverrideMapType m_map;
     };
 
+    bool m_interpretAsCpp;
+    std::string m_languageStandard;
     bool m_useUnderlyingTypedefType;
     OverrideMap m_typeOverrideMap;
 };

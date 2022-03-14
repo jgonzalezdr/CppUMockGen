@@ -10,9 +10,9 @@
 
 #include <CppUTestExt/MockSupport.h>
 
-bool Parser::Parse(const std::filesystem::path & inputFilepath, const Config & config, bool interpretAsCpp, const std::string & languageStandard, const std::vector<std::string> & includePaths, std::ostream & error)
+bool Parser::Parse(const std::filesystem::path & inputFilepath, const Config & config, bool interpretAsCpp, const std::vector<std::string> & includePaths, std::ostream & error)
 {
-    return mock().actualCall("Parser::Parse").onObject(this).withStringParameter("inputFilepath", inputFilepath.generic_string().c_str()).withConstPointerParameter("config", &config).withBoolParameter("interpretAsCpp", interpretAsCpp).withStringParameter("languageStandard", languageStandard.c_str()).withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error).returnBoolValue();
+    return mock().actualCall("Parser::Parse").onObject(this).withStringParameter("inputFilepath", inputFilepath.generic_string().c_str()).withConstPointerParameter("config", &config).withBoolParameter("interpretAsCpp", interpretAsCpp).withParameterOfType("std::vector<std::string>", "includePaths", &includePaths).withPointerParameter("error", &error).returnBoolValue();
 }
 
 void Parser::GenerateMock(const std::string & genOpts, const std::filesystem::path & baseDirPath, std::ostream & output) const noexcept

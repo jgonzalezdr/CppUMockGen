@@ -111,17 +111,19 @@ void Parse( CXTranslationUnit tu, const Config &config, std::vector<std::unique_
         (CXClientData) &parseData );
 }
 
-bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &config, bool interpretAsCpp,
-                    const std::string &languageStandard, const std::vector<std::string> &includePaths, std::ostream &error )
+bool Parser::Parse( const std::filesystem::path &inputFilepath, const Config &config, bool isCppHeader,
+                    const std::vector<std::string> &includePaths, std::ostream &error )
 {
     m_inputFilePath = inputFilepath;
-    m_interpretAsCpp = interpretAsCpp;
+    m_interpretAsCpp = isCppHeader || config.InterpretAsCpp();
 
     CXIndex index = clang_createIndex( 0, 0 );
 
     std::vector<const char*> clangOpts;
 
     std::string stdOpt;
+
+    auto languageStandard = config.GetLanguageStandard();
 
     if( !languageStandard.empty() )
     {

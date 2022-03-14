@@ -10,11 +10,15 @@
 
 #include <CppUTestExt/MockSupport.h>
 
+// CPPUMOCKGEN_USER_CODE_BEGIN
+
 class Function::Argument
 {};
 
 class Function::Return
 {};
+
+// CPPUMOCKGEN_USER_CODE_END
 
 Function::Function() noexcept
 {

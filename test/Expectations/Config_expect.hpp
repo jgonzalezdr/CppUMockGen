@@ -58,8 +58,18 @@ MockExpectedCall& GetExpectationArgTypeName(unsigned int __numCalls__, CppUMockG
 } } }
 
 namespace expect { namespace Config$ {
-MockExpectedCall& Config$ctor(CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
-MockExpectedCall& Config$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
+MockExpectedCall& Config$ctor(CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
+MockExpectedCall& Config$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<bool> interpretAsCpp, CppUMockGen::Parameter<const char*> languageStandard, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
+} }
+
+namespace expect { namespace Config$ {
+MockExpectedCall& InterpretAsCpp(CppUMockGen::Parameter<const Config*> __object__, bool __return__);
+MockExpectedCall& InterpretAsCpp(unsigned int __numCalls__, CppUMockGen::Parameter<const Config*> __object__, bool __return__);
+} }
+
+namespace expect { namespace Config$ {
+MockExpectedCall& GetLanguageStandard(CppUMockGen::Parameter<const Config*> __object__, const std::string & __return__);
+MockExpectedCall& GetLanguageStandard(unsigned int __numCalls__, CppUMockGen::Parameter<const Config*> __object__, const std::string & __return__);
 } }
 
 namespace expect { namespace Config$ {

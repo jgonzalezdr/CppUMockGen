@@ -275,20 +275,18 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             }
         }
 
-        bool interpretAsCpp = options[ "cpp" ].as<bool>();
-        if( !interpretAsCpp )
-        {
-            interpretAsCpp = HasCppHeaderExtension( inputFilePath );
-        }
+        bool isCppHeader = HasCppHeaderExtension( inputFilePath );
 
-        Config config( options["underlying-typedef"].as<bool>(),
+        Config config( options["cpp"].as<bool>(),
+                       options["std"].as<std::string>(),
+                       options["underlying-typedef"].as<bool>(),
                        options["type-override"].as<std::vector<std::string>>() );
 
         std::string genOpts = GetGenerationOptions( options );
 
         Parser parser;
 
-        if( parser.Parse( inputFilePath, config, interpretAsCpp, options["std"].as<std::string>(), options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
+        if( parser.Parse( inputFilePath, config, isCppHeader, options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
         {
             if( generateMock )
             {
