@@ -771,7 +771,8 @@ public:
 class ArgumentStandard : public Function::Argument
 {
 public:
-    ArgumentStandard() noexcept : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false), m_expectationUseBaseType(false) {}
+    ArgumentStandard( bool expectationUseBaseType ) noexcept
+    : m_expectationArgByRef(false), m_forceNotIgnored(false), m_isRVReference(false), m_expectationUseBaseType(expectationUseBaseType) {}
     virtual ~ArgumentStandard() noexcept {}
 
     virtual std::string GetMockSignature() const noexcept override
@@ -870,11 +871,6 @@ public:
         m_isRVReference = true;
     }
 
-    void SetExpectationUseBaseType() noexcept
-    {
-        m_expectationUseBaseType = true;
-    }
-
 protected:
     virtual bool isInput() const noexcept
     {
@@ -925,6 +921,7 @@ private:
 class ArgumentBool : public ArgumentStandard
 {
 public:
+    ArgumentBool( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentBool() noexcept {}
 
 protected:
@@ -942,6 +939,7 @@ protected:
 class ArgumentInt : public ArgumentStandard
 {
 public:
+    ArgumentInt( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentInt() noexcept {}
 
 protected:
@@ -959,6 +957,7 @@ protected:
 class ArgumentUnsignedInt : public ArgumentStandard
 {
 public:
+    ArgumentUnsignedInt( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentUnsignedInt() noexcept {}
 
 protected:
@@ -976,6 +975,7 @@ protected:
 class ArgumentLong : public ArgumentStandard
 {
 public:
+    ArgumentLong( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentLong() noexcept {}
 
 protected:
@@ -993,6 +993,7 @@ protected:
 class ArgumentUnsignedLong : public ArgumentStandard
 {
 public:
+    ArgumentUnsignedLong( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentUnsignedLong() noexcept {}
 
 protected:
@@ -1010,6 +1011,7 @@ protected:
 class ArgumentDouble : public ArgumentStandard
 {
 public:
+    ArgumentDouble( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentDouble() noexcept {}
 
 protected:
@@ -1027,6 +1029,7 @@ protected:
 class ArgumentString : public ArgumentStandard
 {
 public:
+    ArgumentString( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentString() noexcept {}
 
 protected:
@@ -1044,6 +1047,7 @@ protected:
 class ArgumentPointer : public ArgumentStandard
 {
 public:
+    ArgumentPointer( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentPointer() noexcept {}
 
 protected:
@@ -1061,6 +1065,7 @@ protected:
 class ArgumentConstPointer : public ArgumentStandard
 {
 public:
+    ArgumentConstPointer( bool expectationUseBaseType ) noexcept : ArgumentStandard( expectationUseBaseType ) {}
     virtual ~ArgumentConstPointer() noexcept {}
 
 protected:
@@ -1078,7 +1083,9 @@ protected:
 class ArgumentOutput : public ArgumentStandard
 {
 public:
-    ArgumentOutput() noexcept : m_calculateSizeFromType(false) {}
+    ArgumentOutput( bool expectationUseBaseType, bool calculateSizeFromType ) noexcept 
+    : ArgumentStandard( expectationUseBaseType ), m_calculateSizeFromType( calculateSizeFromType ) {}
+
     virtual ~ArgumentOutput() noexcept {}
 
     virtual std::string GetMockSignature() const noexcept override
@@ -1104,11 +1111,6 @@ public:
             ret += ", " SIZEOF_VAR_PREFIX + m_name;
         }
         return ret;
-    }
-
-    void CalculateSizeFromType() noexcept
-    {
-        m_calculateSizeFromType = true;
     }
 
 protected:
@@ -1156,17 +1158,13 @@ protected:
 class ArgumentInputOfType : public ArgumentStandard
 {
 public:
+    ArgumentInputOfType( bool expectationUseBaseType, const std::string &exposedType ) noexcept 
+    : ArgumentStandard( expectationUseBaseType ), m_exposedType( exposedType ) {}
+
+    ArgumentInputOfType( bool expectationUseBaseType, const std::string &exposedType, const std::string &expectationArgType ) noexcept 
+    : ArgumentStandard( expectationUseBaseType ), m_exposedType( exposedType ), m_expectationArgType( expectationArgType ) {}
+
     virtual ~ArgumentInputOfType() noexcept {}
-
-    void SetExposedType( const std::string &type ) noexcept
-    {
-        m_exposedType = type;
-    }
-
-    void SetExpectationArgType( const std::string &type ) noexcept
-    {
-        m_expectationArgType = type;
-    }
 
 protected:
     virtual std::string GetCallFront(bool) const noexcept override
@@ -1186,6 +1184,12 @@ protected:
 class ArgumentOutputOfType : public ArgumentInputOfType
 {
 public:
+    ArgumentOutputOfType( bool expectationUseBaseType, const std::string &exposedType ) noexcept
+    : ArgumentInputOfType( expectationUseBaseType, exposedType ) {}
+
+    ArgumentOutputOfType( bool expectationUseBaseType, const std::string &exposedType, const std::string &expectationArgType ) noexcept
+    : ArgumentInputOfType( expectationUseBaseType, exposedType, expectationArgType ) {}
+
     virtual ~ArgumentOutputOfType() noexcept {}
 
 protected:
@@ -1277,56 +1281,52 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
 
     if( overrideType == MockedType::InputOfType )
     {
-        ret = new ArgumentInputOfType;
-        static_cast<ArgumentInputOfType*>(ret)->SetExposedType( override->GetExposedTypeName() );
-        static_cast<ArgumentInputOfType*>(ret)->SetExpectationArgType( override->GetExpectationArgTypeName() );
+        ret = new ArgumentInputOfType( true, override->GetExposedTypeName(), override->GetExpectationArgTypeName() );
     }
     else if( overrideType == MockedType::OutputOfType )
     {
-        ret = new ArgumentOutputOfType;
-        static_cast<ArgumentOutputOfType*>(ret)->SetExposedType( override->GetExposedTypeName() );
-        static_cast<ArgumentOutputOfType*>(ret)->SetExpectationArgType( override->GetExpectationArgTypeName() );
+        ret = new ArgumentOutputOfType( true, override->GetExposedTypeName(), override->GetExpectationArgTypeName() );
     }
     else switch( overrideType ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case MockedType::Bool:
-            ret = new ArgumentBool;
+            ret = new ArgumentBool( true );
             break;
 
         case MockedType::Int:
-            ret = new ArgumentInt;
+            ret = new ArgumentInt( true );
             break;
 
         case MockedType::UnsignedInt:
-            ret = new ArgumentUnsignedInt;
+            ret = new ArgumentUnsignedInt( true );
             break;
 
         case MockedType::Long:
-            ret = new ArgumentLong;
+            ret = new ArgumentLong( true );
             break;
 
         case MockedType::UnsignedLong:
-            ret = new ArgumentUnsignedLong;
+            ret = new ArgumentUnsignedLong( true );
             break;
 
         case MockedType::Double:
-            ret = new ArgumentDouble;
+            ret = new ArgumentDouble( true );
             break;
 
         case MockedType::String:
-            ret = new ArgumentString;
+            ret = new ArgumentString( true );
             break;
 
         case MockedType::Pointer:
-            ret = new ArgumentPointer;
+            ret = new ArgumentPointer( true );
             break;
 
         case MockedType::ConstPointer:
-            ret = new ArgumentConstPointer;
+            ret = new ArgumentConstPointer( true );
             break;
 
         case MockedType::Output:
-            ret = new ArgumentOutput;
+            ret = new ArgumentOutput( true, false );
             break;
 
         case MockedType::Skip:
@@ -1340,7 +1340,6 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
 
     ret->MockArgExprPrepend( override->GetExprModFront() );
     ret->MockArgExprAppend( override->GetExprModBack() );
-    ret->SetExpectationUseBaseType();
 
     return ret;
 }
@@ -1352,7 +1351,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
     switch( argType.kind ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case CXType_Bool:
-            ret = new ArgumentBool;
+            ret = new ArgumentBool( false );
             break;
 
         case CXType_Char_S:
@@ -1360,11 +1359,11 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
         case CXType_Int:
         case CXType_Short:
         case CXType_WChar:
-            ret = new ArgumentInt;
+            ret = new ArgumentInt( false );
             break;
 
         case CXType_Enum:
-            ret = new ArgumentInt;
+            ret = new ArgumentInt( false );
             ret->MockArgExprPrepend( "static_cast<int>(" );
             ret->MockArgExprAppend( ")" );
             break;
@@ -1374,21 +1373,21 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
         case CXType_UInt:
         case CXType_UShort:
         case CXType_Char16:
-            ret = new ArgumentUnsignedInt;
+            ret = new ArgumentUnsignedInt( false );
             break;
 
         case CXType_Long:
-            ret = new ArgumentLong;
+            ret = new ArgumentLong( false );
             break;
 
         case CXType_ULong:
         case CXType_Char32:
-            ret = new ArgumentUnsignedLong;
+            ret = new ArgumentUnsignedLong( false );
             break;
 
         case CXType_Float:
         case CXType_Double:
-            ret = new ArgumentDouble;
+            ret = new ArgumentDouble( false );
             break;
 
         case CXType_Pointer:
@@ -1437,7 +1436,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
         ( pointeeType.kind == CXType_Char_S ) &&
         isPointeeConst )
     {
-        ret = new ArgumentString;
+        ret = new ArgumentString( false );
     }
     else
     {
@@ -1455,7 +1454,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
                     break;
 
                 default:
-                    ret = new ArgumentConstPointer;
+                    ret = new ArgumentConstPointer( false );
                     break;
             }
         }
@@ -1465,7 +1464,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
             {
                 case CXType_Void:
                 case CXType_Pointer:
-                    ret = new ArgumentPointer;
+                    ret = new ArgumentPointer( false );
                     break;
 
                 case CXType_Record:
@@ -1474,11 +1473,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
                     break;
 
                 default:
-                    ret = new ArgumentOutput;
-                    if( argType.kind != CXType_Pointer )
-                    {
-                        static_cast<ArgumentOutput*>(ret)->CalculateSizeFromType();
-                    }
+                    ret = new ArgumentOutput( false, ( argType.kind != CXType_Pointer ) );
                     break;
             }
         }
@@ -1537,15 +1532,15 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
             ( pointeeType.kind == CXType_Char_S ) &&
             isPointeeConst )
         {
-            ret = new ArgumentString;
+            ret = new ArgumentString( false );
         }
         else if( isPointeeConst )
         {
-            ret = new ArgumentConstPointer;
+            ret = new ArgumentConstPointer( false );
         }
         else
         {
-            ret = new ArgumentPointer;
+            ret = new ArgumentPointer( false );
         }
 
         if( underlyingType.kind == CXType_RValueReference )
@@ -1572,15 +1567,15 @@ ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, cons
     ArgumentInputOfType *ret;
 
     bool isConst = clang_isConstQualifiedType( argType ) || inheritConst;
+    auto exposedType = getBareTypeSpelling( m_config.UseUnderlyingTypedefType() ? argType : origArgType );
     if( !isPointee || isConst )
     {
-        ret = new ArgumentInputOfType;
+        ret = new ArgumentInputOfType( false, exposedType );
     }
     else
     {
-        ret = new ArgumentOutputOfType;
+        ret = new ArgumentOutputOfType( false, exposedType );
     }
-    ret->SetExposedType( getBareTypeSpelling( m_config.UseUnderlyingTypedefType() ? argType : origArgType ) );
 
     return ret;
 }
