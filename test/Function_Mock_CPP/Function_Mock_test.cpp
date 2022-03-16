@@ -5409,37 +5409,39 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
  */
 TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 {
-    struct ArgumentOverrideData
+    struct TestData
     {
         MockedType mockedType;
         std::string cpputestFunctionType;
         std::string argExprFront;
         std::string argExprBack;
+        std::string expectedCallExpr;
     };
 
-    const std::vector< struct ArgumentOverrideData > overrideOptions
+    const std::vector<struct TestData> testDataList
     {
-        { MockedType::Bool, "Bool", "(", "->a != 0)" },
-        { MockedType::Int, "Int", "(*", ").a" },
-        { MockedType::UnsignedInt, "UnsignedInt", "(unsigned)(", "->a)" },
-        { MockedType::Long, "LongInt", "", "->a" },
-        { MockedType::UnsignedLong, "UnsignedLongInt", "(unsigned)(", "->a)" },
-        { MockedType::Double, "Double", "(*", ").a" },
-        { MockedType::String, "String", "StringFromFormat(\"%d\", ", "->a).asCharString()" },
-        { MockedType::Pointer, "Pointer", "", "" },
-        { MockedType::ConstPointer, "ConstPointer", "", "" },
-        { MockedType::Output, "Output", "", "" },
+        { MockedType::Bool, "Bool", "(", "->a != 0)", "(p2->a != 0)" },
+        { MockedType::Int, "Int", "(*", ").a", "(*p2).a" },
+        { MockedType::UnsignedInt, "UnsignedInt", "(unsigned)(", "->a)", "(unsigned)(p2->a)" },
+        { MockedType::Long, "LongInt", "", "->a", "p2->a" },
+        { MockedType::UnsignedLong, "UnsignedLongInt", "(unsigned)(", "->a)", "(unsigned)(p2->a)" },
+        { MockedType::Double, "Double", "(*", ").a", "(*p2).a" },
+        { MockedType::String, "String", "StringFromFormat(\"%d\", ", "->a).asCharString()", "StringFromFormat(\"%d\", p2->a).asCharString()" },
+        { MockedType::Pointer, "Pointer", "", "", "p2" },
+        { MockedType::ConstPointer, "ConstPointer", "", "", "p2" },
+        { MockedType::Output, "Output", "", "", "p2" },
+        { MockedType::POD, "MemoryBuffer", "", "", "static_cast<const unsigned char *>(static_cast<const void *>(p2)), sizeof(*p2)" },
     };
 
     SimpleString testHeader =
             "struct Struct1 { int a; };\n"
             "unsigned long function1(const signed int* p1, struct Struct1* p2, signed char* p3, short p4);\n";
 
-    for( auto overrideOption : overrideOptions )
+    mock().installCopier( "std::string", stdStringCopier );
+
+    for( auto testData : testDataList )
     {
         // Prepare
-        mock().installCopier( "std::string", stdStringCopier );
-
         Config* config = GetMockConfig();
         const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
         expect::Config$::GetTypeOverride( config, "function1@", nullptr );
@@ -5453,9 +5455,9 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         expect::Config$::GetTypeOverride( config, "#signed char *", nullptr );
         expect::Config$::GetTypeOverride( config, "#short", nullptr );
 
-        expect::Config$::OverrideSpec$::GetType( override, overrideOption.mockedType );
-        expect::Config$::OverrideSpec$::GetExprModFront( override, overrideOption.argExprFront );
-        expect::Config$::OverrideSpec$::GetExprModBack( override, overrideOption.argExprBack );
+        expect::Config$::OverrideSpec$::GetType( override, testData.mockedType );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, testData.argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, testData.argExprBack );
 
         // Exercise
         std::vector<std::string> results;
@@ -5468,9 +5470,9 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         SimpleString expectedResult = StringFromFormat(
             "unsigned long function1(const int * p1, struct Struct1 * p2, signed char * p3, short p4)\n{\n"
             "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
-                 ".with%sParameter(\"p2\", %sp2%s)"
+                 ".with%sParameter(\"p2\", %s)"
                  ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
-            "}\n", overrideOption.cpputestFunctionType.c_str(), overrideOption.argExprFront.c_str(), overrideOption.argExprBack.c_str() );
+            "}\n", testData.cpputestFunctionType.c_str(), testData.expectedCallExpr.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
@@ -5594,11 +5596,82 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 }
 
 /*
+ * Check mock generation of a function with parameter override of type MemoryBuffer.
+ */
+TEST_EX( TEST_GROUP_NAME, ParameterOverride_MemoryBuffer )
+{
+    struct TestData
+    {
+        bool hasPlaceholder;
+        std::string sizeExprFront;
+        std::string sizeExprBack;
+        std::string expectedCallExpr;
+    };
+
+    const std::vector<struct TestData> testDataList
+    {
+        { false, "p4", "whatever", "p4" },
+        { true, "sizeof(", ")", "sizeof(p2)" },
+    };
+
+    const std::string argExprFront = "&(";
+    const std::string argExprBack = "->s)";
+
+    SimpleString testHeader =
+            "struct Struct1 { int a; };\n"
+            "struct Struct2 { struct Struct1 s; };\n"
+            "unsigned long function1(const signed int* p1, struct Struct2* p2, signed char* p3, short p4);\n";
+
+    mock().installCopier( "std::string", stdStringCopier );
+
+    for( auto testData : testDataList )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p2", override );
+        expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
+
+        expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
+        expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
+        expect::Config$::GetTypeOverride( config, "#signed char *", nullptr );
+        expect::Config$::GetTypeOverride( config, "#short", nullptr );
+
+        expect::Config$::OverrideSpec$::GetType( override, MockedType::MemoryBuffer );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
+        expect::Config$::OverrideSpec$::HasSizeExprPlaceholder( override, testData.hasPlaceholder );
+        expect::Config$::OverrideSpec$::GetSizeExprFront( override, testData.sizeExprFront );
+        expect::Config$::OverrideSpec$::GetSizeExprBack( override, testData.sizeExprBack );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        SimpleString expectedResult = StringFromFormat(
+            "unsigned long function1(const int * p1, struct Struct2 * p2, signed char * p3, short p4)\n{\n"
+            "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
+                ".withMemoryBufferParameter(\"p2\", static_cast<const unsigned char *>(static_cast<const void *>(&(p2->s))), %s)"
+                ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+            "}\n", testData.expectedCallExpr.c_str() );
+        STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+    }
+}
+
+/*
  * Check mock generation of a function with parameter override.
  */
-TEST_EX( TEST_GROUP_NAME,ReturnOverride )
+TEST_EX( TEST_GROUP_NAME, ReturnOverride )
 {
-    struct ReturnOverrideData
+    struct TestData
     {
         MockedType mockedType;
         std::string cpputestFunctionType;
@@ -5606,7 +5679,7 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
         std::string argExprBack;
     };
 
-    const std::vector< struct ReturnOverrideData > overrideOptions
+    const std::vector<struct TestData> testDataList
     {
         { MockedType::Bool, "Bool", "( ", " ? 123 : 0 )" },
         { MockedType::Int, "Int", "(unsigned long) ", "" },
@@ -5621,7 +5694,7 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
 
     SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2);";
 
-    for( auto overrideOption : overrideOptions )
+    for( auto testData : testDataList )
     {
         // Prepare
         Config* config = GetMockConfig();
@@ -5633,9 +5706,9 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
         expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
         expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
 
-        expect::Config$::OverrideSpec$::GetType( override, overrideOption.mockedType );
-        expect::Config$::OverrideSpec$::GetExprModFront( override, overrideOption.argExprFront );
-        expect::Config$::OverrideSpec$::GetExprModBack( override, overrideOption.argExprBack );
+        expect::Config$::OverrideSpec$::GetType( override, testData.mockedType );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, testData.argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, testData.argExprBack );
 
         // Exercise
         std::vector<std::string> results;
@@ -5649,7 +5722,7 @@ TEST_EX( TEST_GROUP_NAME,ReturnOverride )
                 "unsigned long function1(const int * p1, const char * p2)\n{\n"
                 "    return %smock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1).withStringParameter(\"p2\", p2)"
                      ".return%sValue()%s;\n"
-                "}\n", overrideOption.argExprFront.c_str(), overrideOption.cpputestFunctionType.c_str(), overrideOption.argExprBack.c_str() );
+                "}\n", testData.argExprFront.c_str(), testData.cpputestFunctionType.c_str(), testData.argExprBack.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 

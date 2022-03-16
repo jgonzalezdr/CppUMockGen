@@ -16,7 +16,7 @@
 #include "StringHelper.hpp"
 
 static const char EXPR_MOD_SEPARATOR = '~';
-static const char EXPR_MOD_ARG_PLACEHOLDER = '$';
+static const char EXPR_CURRENT_ARG_PLACEHOLDER = '$';
 static const char EXPECTATION_ARG_TYPE_SEPARATOR = '<';
 
 Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions )
@@ -45,17 +45,36 @@ static const std::vector<std::pair<std::string, MockedType>> validOverrideTypes 
     { "Pointer", MockedType::Pointer },
     { "ConstPointer", MockedType::ConstPointer },
     { "Output", MockedType::Output },
+    { "POD", MockedType::POD },
     { "Skip", MockedType::Skip },
 };
 
-static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 2 );
+static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 3 );
 static const std::map<std::string, MockedType> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
-static const std::vector<std::pair<std::string, MockedType>> validTypeOfOverrideTypes =
+static const std::vector<std::pair<std::string, MockedType>> validExtendedOverrideTypes =
 {
     { "InputOfType:", MockedType::InputOfType },
     { "OutputOfType:", MockedType::OutputOfType },
+    { "MemoryBuffer:", MockedType::MemoryBuffer },
 };
+
+static bool ParseExpression( const std::string &expression, std::string &front, std::string &back )
+{
+    size_t placeholderPos = expression.find( EXPR_CURRENT_ARG_PLACEHOLDER );
+    if( placeholderPos == std::string::npos )
+    {
+        front = expression;
+        back.clear();
+        return false;
+    }
+    else
+    {
+        front = expression.substr( 0, placeholderPos );
+        back = expression.substr( placeholderPos + 1 );
+        return true;
+    }
+}
 
 class OptionError : public std::runtime_error
 {
@@ -76,26 +95,22 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, bool isReturn )
     size_t exprModSepPos = value.find( EXPR_MOD_SEPARATOR );
     if( exprModSepPos != std::string::npos )
     {
-        type = value.substr(0, exprModSepPos);
+        type = TrimString( value.substr(0, exprModSepPos) );
         if( type.empty() )
         {
             throw OptionError( "Override option type cannot be empty" );
         }
 
-        std::string argExprMod = value.substr(exprModSepPos+1);
+        std::string argExprMod = TrimString( value.substr(exprModSepPos+1) );
         if( argExprMod.empty() )
         {
             throw OptionError( "Override option argument expression cannot be empty if specified" );
         }
 
-        size_t placeholderPos = argExprMod.find( EXPR_MOD_ARG_PLACEHOLDER );
-        if( placeholderPos == std::string::npos )
+        if( !ParseExpression( argExprMod, m_exprModFront, m_exprModBack ) )
         {
             throw OptionError( "Override option argument expression does not contain parameter name placeholder ($)" );
         }
-
-        m_exprModFront = argExprMod.substr( 0, placeholderPos );
-        m_exprModBack = argExprMod.substr( placeholderPos + 1 );
     }
     else
     {
@@ -125,32 +140,46 @@ Config::OverrideSpec::OverrideSpec( const std::string &value, bool isReturn )
         {
             bool overrideTypeFound = false;
 
-            for( auto overrideType : validTypeOfOverrideTypes )
+            for( auto overrideType : validExtendedOverrideTypes )
             {
                 if( type.find( overrideType.first ) == 0 )
                 {
                     m_type = overrideType.second;
-                    m_exposedTypeName = type.substr( overrideType.first.size() );
-
-                    size_t expectArgTypeSepPos = m_exposedTypeName.find( EXPECTATION_ARG_TYPE_SEPARATOR );
-                    if( expectArgTypeSepPos != std::string::npos )
+                    if( m_type == MockedType::MemoryBuffer )
                     {
-                        m_expectationArgTypeName = m_exposedTypeName.substr( expectArgTypeSepPos + 1 );
-                        m_exposedTypeName = m_exposedTypeName.substr( 0, expectArgTypeSepPos );
+                        auto sizeExpr = TrimString( type.substr( overrideType.first.size() ) );
 
-                        if( m_expectationArgTypeName.empty() )
+                        if( sizeExpr.empty() )
                         {
-                            throw OptionError( "Override option expectation argument type cannot be empty" );
+                            throw OptionError( "Override option memory buffer size expression cannot be empty" );
                         }
+
+                        m_hasSizeExprPlaceholder = ParseExpression( sizeExpr, m_sizeExprFront, m_sizeExprBack );
                     }
                     else
                     {
-                        m_expectationArgTypeName = m_exposedTypeName;
-                    }
+                        m_exposedTypeName = TrimString( type.substr( overrideType.first.size() ) );
 
-                    if( m_exposedTypeName.empty() )
-                    {
-                        throw OptionError( "Override option type name cannot be empty" );
+                        size_t expectArgTypeSepPos = m_exposedTypeName.find( EXPECTATION_ARG_TYPE_SEPARATOR );
+                        if( expectArgTypeSepPos != std::string::npos )
+                        {
+                            m_expectationArgTypeName = TrimString( m_exposedTypeName.substr( expectArgTypeSepPos + 1 ) );
+                            m_exposedTypeName = TrimString( m_exposedTypeName.substr( 0, expectArgTypeSepPos ) );
+
+                            if( m_expectationArgTypeName.empty() )
+                            {
+                                throw OptionError( "Override option expectation argument type cannot be empty" );
+                            }
+                        }
+                        else
+                        {
+                            m_expectationArgTypeName = m_exposedTypeName;
+                        }
+
+                        if( m_exposedTypeName.empty() )
+                        {
+                            throw OptionError( "Override option type name cannot be empty" );
+                        }
                     }
 
                     overrideTypeFound = true;
@@ -244,6 +273,21 @@ const std::string& Config::OverrideSpec::GetExprModFront() const noexcept
 const std::string& Config::OverrideSpec::GetExprModBack() const noexcept
 {
     return m_exprModBack;
+}
+
+const bool Config::OverrideSpec::HasSizeExprPlaceholder() const noexcept
+{
+    return m_hasSizeExprPlaceholder;
+}
+
+const std::string& Config::OverrideSpec::GetSizeExprFront() const noexcept
+{
+    return m_sizeExprFront;
+}
+
+const std::string& Config::OverrideSpec::GetSizeExprBack() const noexcept
+{
+    return m_sizeExprBack;
 }
 
 const std::string& Config::OverrideSpec::GetExpectationArgTypeName() const noexcept

@@ -10,15 +10,13 @@
 
 #include <CppUTestExt/MockSupport.h>
 
-Config::Config( bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions )
-: m_useUnderlyingTypedefType(false), m_typeOverrideMap( std::vector<std::string>() )
-{
-    mock().actualCall("Config::Config").withParameter("useUnderlyingTypedefType", useUnderlyingTypedefType)
-          .withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
-}
-
 Config::OverrideMap::OverrideMap( const std::vector<std::string> &options )
 {
+}
+
+Config::OverrideSpec::OverrideSpec(const std::string & value, bool isReturn)
+{
+    mock().actualCall("Config::OverrideSpec::OverrideSpec").withStringParameter("value", value.c_str()).withBoolParameter("isReturn", isReturn);
 }
 
 MockedType Config::OverrideSpec::GetType() const noexcept
@@ -41,9 +39,30 @@ const std::string & Config::OverrideSpec::GetExprModBack() const noexcept
     return *static_cast<const std::string*>(mock().actualCall("Config::OverrideSpec::GetExprModBack").onObject(this).returnConstPointerValue());
 }
 
+const bool Config::OverrideSpec::HasSizeExprPlaceholder() const noexcept
+{
+    return mock().actualCall("Config::OverrideSpec::HasSizeExprPlaceholder").onObject(this).returnBoolValue();
+}
+
+const std::string & Config::OverrideSpec::GetSizeExprFront() const noexcept
+{
+    return *static_cast<const std::string*>(mock().actualCall("Config::OverrideSpec::GetSizeExprFront").onObject(this).returnConstPointerValue());
+}
+
+const std::string & Config::OverrideSpec::GetSizeExprBack() const noexcept
+{
+    return *static_cast<const std::string*>(mock().actualCall("Config::OverrideSpec::GetSizeExprBack").onObject(this).returnConstPointerValue());
+}
+
 const std::string & Config::OverrideSpec::GetExpectationArgTypeName() const noexcept
 {
     return *static_cast<const std::string*>(mock().actualCall("Config::OverrideSpec::GetExpectationArgTypeName").onObject(this).returnConstPointerValue());
+}
+
+Config::Config(bool useUnderlyingTypedefType, const std::vector<std::string> & typeOverrideOptions)
+: m_typeOverrideMap( std::vector<std::string>() )
+{
+    mock().actualCall("Config::Config").withBoolParameter("useUnderlyingTypedefType", useUnderlyingTypedefType).withParameterOfType("std::vector<std::string>", "typeOverrideOptions", &typeOverrideOptions);
 }
 
 bool Config::UseUnderlyingTypedefType() const noexcept

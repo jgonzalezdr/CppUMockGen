@@ -12,9 +12,10 @@
 
 #include <CppUTestExt/MockSupport.h>
 
-namespace expect { namespace Config$ {
-MockExpectedCall& Config$(bool useUnderlyingTypedefType, const std::vector<std::string> &typeOverrideOptions);
-} }
+namespace expect { namespace Config$ { namespace OverrideSpec$ {
+MockExpectedCall& OverrideSpec$ctor(CppUMockGen::Parameter<const char*> value, CppUMockGen::Parameter<bool> isReturn);
+MockExpectedCall& OverrideSpec$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<const char*> value, CppUMockGen::Parameter<bool> isReturn);
+} } }
 
 namespace expect { namespace Config$ { namespace OverrideSpec$ {
 MockExpectedCall& GetType(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, MockedType __return__);
@@ -37,9 +38,29 @@ MockExpectedCall& GetExprModBack(unsigned int __numCalls__, CppUMockGen::Paramet
 } } }
 
 namespace expect { namespace Config$ { namespace OverrideSpec$ {
+MockExpectedCall& HasSizeExprPlaceholder(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const bool __return__);
+MockExpectedCall& HasSizeExprPlaceholder(unsigned int __numCalls__, CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const bool __return__);
+} } }
+
+namespace expect { namespace Config$ { namespace OverrideSpec$ {
+MockExpectedCall& GetSizeExprFront(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
+MockExpectedCall& GetSizeExprFront(unsigned int __numCalls__, CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
+} } }
+
+namespace expect { namespace Config$ { namespace OverrideSpec$ {
+MockExpectedCall& GetSizeExprBack(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
+MockExpectedCall& GetSizeExprBack(unsigned int __numCalls__, CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
+} } }
+
+namespace expect { namespace Config$ { namespace OverrideSpec$ {
 MockExpectedCall& GetExpectationArgTypeName(CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
 MockExpectedCall& GetExpectationArgTypeName(unsigned int __numCalls__, CppUMockGen::Parameter<const Config::OverrideSpec*> __object__, const std::string & __return__);
 } } }
+
+namespace expect { namespace Config$ {
+MockExpectedCall& Config$ctor(CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
+MockExpectedCall& Config$ctor(unsigned int __numCalls__, CppUMockGen::Parameter<bool> useUnderlyingTypedefType, CppUMockGen::Parameter<const std::vector<std::string> &> typeOverrideOptions);
+} }
 
 namespace expect { namespace Config$ {
 MockExpectedCall& UseUnderlyingTypedefType(CppUMockGen::Parameter<const Config*> __object__, bool __return__);

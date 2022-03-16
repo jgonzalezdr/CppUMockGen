@@ -89,15 +89,19 @@ TEST( Config, SpecificTypeOverrideOptions_Simple )
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("ns1::function2@");
 
     // Verify
-    CHECK( override1 != NULL );
-    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
-    STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
+    const Config::OverrideSpec* testedOverride;
 
-    CHECK( override2 != NULL );
-    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
-    STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
+    testedOverride = override1;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::Int, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+
+    testedOverride = override2;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
@@ -124,15 +128,19 @@ TEST( Config, GenericTypeOverrideOptions_Simple )
     const Config::OverrideSpec* override2 = testConfig.GetTypeOverride("@class2 *");
 
     // Verify
-    CHECK( override1 != NULL );
-    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
-    STRCMP_EQUAL( "", override1->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override1->GetExprModBack().c_str() );
+    const Config::OverrideSpec* testedOverride;
 
-    CHECK( override2 != NULL );
-    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
-    STRCMP_EQUAL( "", override2->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
+    testedOverride = override1;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::Int, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+
+    testedOverride = override2;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
@@ -169,6 +177,8 @@ TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
         "function1#p13=OutputOfType:MyType",
         "function1#p14=InputOfType:MyType<OtherType",
         "function1#p15=OutputOfType:MyType<OtherType",
+        "function1#p16=POD",
+        "function1#p17=MemoryBuffer:p17_size",
     } );
 
     // Verify
@@ -187,6 +197,8 @@ TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("function1#p13") != NULL );
     CHECK( testConfig.GetTypeOverride("function1#p14") != NULL );
     CHECK( testConfig.GetTypeOverride("function1#p15") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p16") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p17") != NULL );
 
     // Cleanup
 }
@@ -216,6 +228,8 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
         "#type13=OutputOfType:MyType",
         "#type14=InputOfType:MyType<OtherType",
         "#type15=OutputOfType:MyType<OtherType",
+        "#type16=POD",
+        "#type17=MemoryBuffer:sizeof(*$)",
     } );
 
     // Verify
@@ -234,14 +248,16 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("#type13") != NULL );
     CHECK( testConfig.GetTypeOverride("#type14") != NULL );
     CHECK( testConfig.GetTypeOverride("#type15") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type16") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type17") != NULL );
 
     // Cleanup
 }
 
 /*
- * Check that specific type override options are handled properly with override with argument expression.
+ * Check that specific type override options with argument/size expression are handled properly.
  */
-TEST( Config, SpecificTypeOverrideOptions_ArgumentExpression )
+TEST( Config, SpecificTypeOverrideOptions_WithExpressions )
 {
     // Prepare
     Config testConfig( false,
@@ -250,7 +266,13 @@ TEST( Config, SpecificTypeOverrideOptions_ArgumentExpression )
                                                   "func2#p=InputOfType:TypeZ~$->getZ()",
                                                   "func3#p=OutputOfType:TypeW~(*$).getW()",
                                                   "func4#p=InputOfType:TypeM<OtherTypeA~$->getM()",
-                                                  "func5#p=OutputOfType:TypeN<OtherTypeB~(*$).getN()" } );
+                                                  "func5#p=OutputOfType:TypeN<OtherTypeB~(*$).getN()",
+                                                  "func6#p1=MemoryBuffer:p2",
+                                                  "func7#p=MemoryBuffer:$",
+                                                  "func8#p=MemoryBuffer:sizeof(*$)",
+                                                  "func9#p1=MemoryBuffer:p3~&$",
+                                                  "func10#p=MemoryBuffer:getSize($)~$.get()",
+                                                } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("function1#p");
@@ -259,50 +281,118 @@ TEST( Config, SpecificTypeOverrideOptions_ArgumentExpression )
     const Config::OverrideSpec* override4 = testConfig.GetTypeOverride("func3#p");
     const Config::OverrideSpec* override5 = testConfig.GetTypeOverride("func4#p");
     const Config::OverrideSpec* override6 = testConfig.GetTypeOverride("func5#p");
+    const Config::OverrideSpec* override7 = testConfig.GetTypeOverride("func6#p1");
+    const Config::OverrideSpec* override8 = testConfig.GetTypeOverride("func7#p");
+    const Config::OverrideSpec* override9 = testConfig.GetTypeOverride("func8#p");
+    const Config::OverrideSpec* override10 = testConfig.GetTypeOverride("func9#p1");
+    const Config::OverrideSpec* override11 = testConfig.GetTypeOverride("func10#p");
 
     // Verify
-    CHECK( override1 != NULL );
-    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
-    STRCMP_EQUAL( "(", override1->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override1->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "", override1->GetExpectationArgTypeName().c_str() );
+    const Config::OverrideSpec* testedOverride;
 
-    CHECK( override2 != NULL );
-    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)override2->GetType() );
-    STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "", override2->GetExpectationArgTypeName().c_str() );
+    testedOverride = override1;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::Int, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "(", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ")", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override3 != NULL );
-    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override3->GetType() );
-    STRCMP_EQUAL( "", override3->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "->getZ()", override3->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeZ", override3->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "TypeZ", override3->GetExpectationArgTypeName().c_str() );
+    testedOverride = override2;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::ConstPointer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override4 != NULL );
-    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override4->GetType() );
-    STRCMP_EQUAL( "(*", override4->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ").getW()", override4->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeW", override4->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "TypeW", override4->GetExpectationArgTypeName().c_str() );
+    testedOverride = override3;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getZ()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeZ", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeZ", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override5 != NULL );
-    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override5->GetType() );
-    STRCMP_EQUAL( "", override5->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "->getM()", override5->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeM", override5->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "OtherTypeA", override5->GetExpectationArgTypeName().c_str() );
+    testedOverride = override4;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "(*", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ").getW()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeW", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeW", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override6 != NULL );
-    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override6->GetType() );
-    STRCMP_EQUAL( "(*", override6->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ").getN()", override6->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeN", override6->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "OtherTypeB", override6->GetExpectationArgTypeName().c_str() );
+    testedOverride = override5;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getM()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeM", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeA", testedOverride->GetExpectationArgTypeName().c_str() );
+
+    testedOverride = override6;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "(*", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ").getN()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeN", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeB", testedOverride->GetExpectationArgTypeName().c_str() );
+
+    testedOverride = override7;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_FALSE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "p2", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetSizeExprBack().c_str() );
+
+    testedOverride = override8;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_TRUE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetSizeExprBack().c_str() );
+
+    testedOverride = override9;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_TRUE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "sizeof(*", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( ")", testedOverride->GetSizeExprBack().c_str() );
+
+    testedOverride = override10;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_FALSE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "p3", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetSizeExprBack().c_str() );
+
+    testedOverride = override11;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ".get()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_TRUE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "getSize(", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( ")", testedOverride->GetSizeExprBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("ABC") );
@@ -315,9 +405,9 @@ TEST( Config, SpecificTypeOverrideOptions_ArgumentExpression )
 }
 
 /*
- * Check that generic type override options are handled properly with override with argument expression.
+ * Check that generic type override options with argument/size expression are handled properly.
  */
-TEST( Config, GenericTypeOverrideOptions_ArgumentExpression )
+TEST( Config, GenericTypeOverrideOptions_WithExpressions )
 {
     // Prepare
     Config testConfig( false,
@@ -326,7 +416,10 @@ TEST( Config, GenericTypeOverrideOptions_ArgumentExpression )
                                                   "#typeX=InputOfType:TypeY~&($.getY())",
                                                   "#typeQ=OutputOfType:TypeQ~&$->getQ()",
                                                   "#typeI=InputOfType:TypeK<OtherTypeC~&($.getK())",
-                                                  "#typeJ=OutputOfType:TypeL<OtherTypeD~&$->getL()" } );
+                                                  "#typeJ=OutputOfType:TypeL<OtherTypeD~&$->getL()", 
+                                                  "#typeM=MemoryBuffer:p3~&$",
+                                                  "#typeN=MemoryBuffer:getSize($)~$.get()",
+                                                } );
 
     // Exercise
     const Config::OverrideSpec* override1 = testConfig.GetTypeOverride("#const int *");
@@ -335,49 +428,81 @@ TEST( Config, GenericTypeOverrideOptions_ArgumentExpression )
     const Config::OverrideSpec* override4 = testConfig.GetTypeOverride("#typeQ");
     const Config::OverrideSpec* override5 = testConfig.GetTypeOverride("#typeI");
     const Config::OverrideSpec* override6 = testConfig.GetTypeOverride("#typeJ");
+    const Config::OverrideSpec* override7 = testConfig.GetTypeOverride("#typeM");
+    const Config::OverrideSpec* override8 = testConfig.GetTypeOverride("#typeN");
 
     // Verify
-    CHECK( override1 != NULL );
-    CHECK_EQUAL( (int)MockedType::Int, (int)override1->GetType() );
-    STRCMP_EQUAL( "(*", override1->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ")", override1->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override1->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "", override1->GetExpectationArgTypeName().c_str() );
+    const Config::OverrideSpec* testedOverride;
 
-    CHECK( override2 != NULL );
-    CHECK_EQUAL( (int)MockedType::Long, (int)override2->GetType() );
-    STRCMP_EQUAL( "&", override2->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "", override2->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "", override2->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "", override2->GetExpectationArgTypeName().c_str() );
+    testedOverride = override1;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::Int, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "(*", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ")", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override3 != NULL );
-    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override3->GetType() );
-    STRCMP_EQUAL( "&(", override3->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ".getY())", override3->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeY", override3->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "TypeY", override3->GetExpectationArgTypeName().c_str() );
+    testedOverride = override2;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::Long, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override4 != NULL );
-    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override4->GetType() );
-    STRCMP_EQUAL( "&", override4->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "->getQ()", override4->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeQ", override4->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "TypeQ", override4->GetExpectationArgTypeName().c_str() );
+    testedOverride = override3;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&(", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ".getY())", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeY", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeY", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override5 != NULL );
-    CHECK_EQUAL( (int)MockedType::InputOfType, (int)override5->GetType() );
-    STRCMP_EQUAL( "&(", override5->GetExprModFront().c_str() );
-    STRCMP_EQUAL( ".getK())", override5->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeK", override5->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "OtherTypeC", override5->GetExpectationArgTypeName().c_str() );
+    testedOverride = override4;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getQ()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeQ", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "TypeQ", testedOverride->GetExpectationArgTypeName().c_str() );
 
-    CHECK( override6 != NULL );
-    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)override6->GetType() );
-    STRCMP_EQUAL( "&", override6->GetExprModFront().c_str() );
-    STRCMP_EQUAL( "->getL()", override6->GetExprModBack().c_str() );
-    STRCMP_EQUAL( "TypeL", override6->GetExposedTypeName().c_str() );
-    STRCMP_EQUAL( "OtherTypeD", override6->GetExpectationArgTypeName().c_str() );
+    testedOverride = override5;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::InputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&(", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ".getK())", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeK", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeC", testedOverride->GetExpectationArgTypeName().c_str() );
+
+    testedOverride = override6;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::OutputOfType, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "->getL()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "TypeL", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "OtherTypeD", testedOverride->GetExpectationArgTypeName().c_str() );
+
+    testedOverride = override7;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "&", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_FALSE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "p3", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetSizeExprBack().c_str() );
+
+    testedOverride = override8;
+    CHECK( testedOverride != NULL );
+    CHECK_EQUAL( (int)MockedType::MemoryBuffer, (int)testedOverride->GetType() );
+    STRCMP_EQUAL( "", testedOverride->GetExprModFront().c_str() );
+    STRCMP_EQUAL( ".get()", testedOverride->GetExprModBack().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExposedTypeName().c_str() );
+    STRCMP_EQUAL( "", testedOverride->GetExpectationArgTypeName().c_str() );
+    CHECK_TRUE( testedOverride->HasSizeExprPlaceholder() );
+    STRCMP_EQUAL( "getSize(", testedOverride->GetSizeExprFront().c_str() );
+    STRCMP_EQUAL( ")", testedOverride->GetSizeExprBack().c_str() );
 
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("") );
     POINTERS_EQUAL( NULL, testConfig.GetTypeOverride("const int *") );
@@ -496,6 +621,9 @@ TEST( Config, Exception_TypeOverride_SpecificValueBadFormat )
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "function2#p=OutputOfType:<a" } ) );
 
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "function3#p=MemoryBuffer:" } ) );
+
     // Cleanup
 }
 
@@ -550,6 +678,9 @@ TEST( Config, Exception_TypeOverride_GenericValueBadFormat )
 
     CHECK_THROWS( std::runtime_error,
                   Config( false, std::vector<std::string> { "#type4=OutputOfType:<a" } ) );
+
+    CHECK_THROWS( std::runtime_error,
+                  Config( false, std::vector<std::string> { "#type5=MemoryBuffer:" } ) );
 
     // Cleanup
 }

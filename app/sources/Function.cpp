@@ -877,25 +877,35 @@ protected:
         return true;
     }
 
-    virtual std::string GetCallFront(bool mock) const noexcept = 0;
+    virtual std::string GetCallFront( bool mock ) const noexcept = 0;
 
-    virtual std::string GetCallBack(bool) const noexcept
+    virtual std::string GetCallMiddle( bool mock ) const noexcept
+    {
+        return "";
+    }
+
+    virtual std::string GetCallBack( bool mock, const std::string& getter ) const noexcept
     {
         return ")";
     }
 
     virtual std::string GetExpectationBaseType() const noexcept = 0;
 
+    std::string m_mockArgExprFront;
+    std::string m_mockArgExprBack;
+
 private:
     std::string GetMockBodyCall() const noexcept
     {
-        return GetCallFront(true) + "\"" + m_name + "\", " + m_mockArgExprFront + m_name + m_mockArgExprBack + GetCallBack(true);
+        return GetCallFront( true ) + "\"" + m_name + "\", " +  GetCallMiddle( true ) + m_mockArgExprFront + m_name + m_mockArgExprBack +
+               GetCallBack( true, "" );
     }
 
-    std::string GetExpectationBodyCall(const std::string& getter) const noexcept
+    std::string GetExpectationBodyCall( const std::string& getter ) const noexcept
     {
-        return GetCallFront(false) + "\"" + m_name + "\", " + ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) +
-               m_name + getter + ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack(false);
+        return GetCallFront( false ) + "\"" + m_name + "\", " + GetCallMiddle( false ) + 
+               ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) + m_name + getter + 
+               ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack( false, getter );
     }
 
     std::string GetSignatureType() const noexcept
@@ -910,8 +920,6 @@ private:
         }
     }
 
-    std::string m_mockArgExprFront;
-    std::string m_mockArgExprBack;
     bool m_expectationArgByRef;
     bool m_forceNotIgnored;
     bool m_isRVReference;
@@ -925,7 +933,7 @@ public:
     virtual ~ArgumentBool() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withBoolParameter(";
     }
@@ -943,7 +951,7 @@ public:
     virtual ~ArgumentInt() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withIntParameter(";
     }
@@ -961,7 +969,7 @@ public:
     virtual ~ArgumentUnsignedInt() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withUnsignedIntParameter(";
     }
@@ -979,7 +987,7 @@ public:
     virtual ~ArgumentLong() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withLongIntParameter(";
     }
@@ -997,7 +1005,7 @@ public:
     virtual ~ArgumentUnsignedLong() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withUnsignedLongIntParameter(";
     }
@@ -1015,7 +1023,7 @@ public:
     virtual ~ArgumentDouble() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withDoubleParameter(";
     }
@@ -1033,7 +1041,7 @@ public:
     virtual ~ArgumentString() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withStringParameter(";
     }
@@ -1051,7 +1059,7 @@ public:
     virtual ~ArgumentPointer() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withPointerParameter(";
     }
@@ -1069,7 +1077,7 @@ public:
     virtual ~ArgumentConstPointer() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withConstPointerParameter(";
     }
@@ -1119,7 +1127,7 @@ protected:
         return false;
     }
 
-    virtual std::string GetCallFront(bool mock) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         if( mock )
         {
@@ -1131,7 +1139,7 @@ protected:
         }
     }
 
-    virtual std::string GetCallBack(bool mock) const noexcept
+    virtual std::string GetCallBack( bool mock, const std::string& getter ) const noexcept
     {
         if( mock )
         {
@@ -1155,6 +1163,101 @@ protected:
     bool m_calculateSizeFromType;
 };
 
+class ArgumentMemoryBuffer : public ArgumentStandard
+{
+public:
+    ArgumentMemoryBuffer() noexcept 
+    : ArgumentStandard( false ), m_calculateSizeFromType( true ) {}
+
+    ArgumentMemoryBuffer( bool hasSizeExprPlaceholder, const std::string &sizeExprFront, const std::string &sizeExprBack ) noexcept
+    : ArgumentStandard( false ), m_calculateSizeFromType( false ), m_hasSizeExprPlaceholder( hasSizeExprPlaceholder ),
+      m_sizeExprFront( sizeExprFront ), m_sizeExprBack( sizeExprBack ) {}
+
+    virtual ~ArgumentMemoryBuffer() noexcept {}
+
+    virtual std::string GetMockSignature() const noexcept override
+    {
+        return m_originalType + " " + m_name;
+    }
+
+    virtual std::string GetExpectationSignature() const noexcept override
+    {
+        std::string ret = ArgumentStandard::GetExpectationSignature();
+        if( !m_calculateSizeFromType )
+        {
+            ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
+        }
+        return ret;
+    }
+
+    virtual std::string GetExpectationCallArgument() const noexcept override
+    {
+        std::string ret = ArgumentStandard::GetExpectationCallArgument();
+        if( !m_calculateSizeFromType )
+        {
+            ret += ", " SIZEOF_VAR_PREFIX + m_name;
+        }
+        return ret;
+    }
+
+protected:
+    virtual std::string GetCallFront( bool mock ) const noexcept override
+    {
+        return "withMemoryBufferParameter(";
+    }
+
+    virtual std::string GetCallMiddle( bool ) const noexcept override
+    {
+        return "static_cast<const unsigned char *>(static_cast<const void *>(";
+    }
+
+    virtual std::string GetCallBack( bool mock, const std::string& getter  ) const noexcept
+    {
+        if( mock )
+        {
+            if( m_calculateSizeFromType )
+            {
+                return ")), sizeof(*" + m_mockArgExprFront + m_name + m_mockArgExprBack + "))";
+            }
+            else
+            {
+                if( m_hasSizeExprPlaceholder )
+                {
+                    return ")), " + m_sizeExprFront + m_name + m_sizeExprBack + ")";
+                }
+                else
+                {
+                    return ")), " + m_sizeExprFront + ")";
+                }
+            }
+        }
+        else 
+        {
+            if( m_calculateSizeFromType )
+            {
+                return ")), sizeof(*" + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + "))";
+            }
+            else
+            {
+                return ")), " SIZEOF_VAR_PREFIX + m_name + ")";
+            }
+        }
+    }
+
+// LCOV_EXCL_START: Never called for this subclass
+    virtual std::string GetExpectationBaseType() const noexcept override
+    {
+        return "const void*";
+    }
+// LCOV_EXCL_STOP
+
+private:
+    bool m_calculateSizeFromType;
+    bool m_hasSizeExprPlaceholder;
+    std::string m_sizeExprFront;
+    std::string m_sizeExprBack;
+};
+
 class ArgumentInputOfType : public ArgumentStandard
 {
 public:
@@ -1167,7 +1270,7 @@ public:
     virtual ~ArgumentInputOfType() noexcept {}
 
 protected:
-    virtual std::string GetCallFront(bool) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         return "withParameterOfType(\"" + m_exposedType + "\", ";
     }
@@ -1198,7 +1301,7 @@ protected:
         return false;
     }
 
-    virtual std::string GetCallFront(bool mock) const noexcept override
+    virtual std::string GetCallFront( bool mock ) const noexcept override
     {
         if( mock )
         {
@@ -1287,6 +1390,10 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
     {
         ret = new ArgumentOutputOfType( true, override->GetExposedTypeName(), override->GetExpectationArgTypeName() );
     }
+    else if( overrideType == MockedType::MemoryBuffer )
+    {
+        ret = new ArgumentMemoryBuffer( override->HasSizeExprPlaceholder(), override->GetSizeExprFront(), override->GetSizeExprBack() );
+    }
     else switch( overrideType ) // LCOV_EXCL_BR_LINE: Defensive
     {
         case MockedType::Bool:
@@ -1327,6 +1434,10 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
 
         case MockedType::Output:
             ret = new ArgumentOutput( true, false );
+            break;
+
+        case MockedType::POD:
+            ret = new ArgumentMemoryBuffer;
             break;
 
         case MockedType::Skip:

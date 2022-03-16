@@ -29,6 +29,8 @@ enum class MockedType
     Output,
     InputOfType,
     OutputOfType,
+    MemoryBuffer,
+    POD,
     Skip
 };
 
@@ -78,6 +80,25 @@ public:
         const std::string& GetExprModBack() const noexcept;
 
         /**
+         * Indicates if the size expression includes the character '$' as a parameter name placeholder.
+         * 
+         * @return @c true if the size expression has a parameter name placeholder, otherwise @c false.
+         */
+        const bool HasSizeExprPlaceholder() const noexcept;
+
+        /**
+         * Returns the part before the character '$' of the expression that calculates the memory buffer size.
+         * @return String with the expression front part
+         */
+        const std::string& GetSizeExprFront() const noexcept;
+
+        /**
+         * Returns the part after the character '$' of the expression that calculates the memory buffer size.
+         * @return String with the expression back part
+         */
+        const std::string& GetSizeExprBack() const noexcept;
+
+        /**
          * Returns the expectation argument type name.
          * @return String with the expectation argument type name
          */
@@ -88,6 +109,9 @@ public:
         std::string m_exposedTypeName;
         std::string m_exprModFront;
         std::string m_exprModBack;
+        bool m_hasSizeExprPlaceholder;
+        std::string m_sizeExprFront;
+        std::string m_sizeExprBack;
         std::string m_expectationArgTypeName;
     };
 
