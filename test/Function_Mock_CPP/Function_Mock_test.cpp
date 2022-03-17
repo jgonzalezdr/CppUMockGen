@@ -5429,8 +5429,9 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         { MockedType::String, "String", "StringFromFormat(\"%d\", ", "->a).asCharString()", "StringFromFormat(\"%d\", p2->a).asCharString()" },
         { MockedType::Pointer, "Pointer", "", "", "p2" },
         { MockedType::ConstPointer, "ConstPointer", "", "", "p2" },
-        { MockedType::Output, "Output", "", "", "p2" },
-        { MockedType::POD, "MemoryBuffer", "", "", "static_cast<const unsigned char *>(static_cast<const void *>(p2)), sizeof(*p2)" },
+        { MockedType::Output, "Output", "(", ")", "(p2)" },
+        { MockedType::InputPOD, "MemoryBuffer", "(", ")", "static_cast<const unsigned char *>(static_cast<const void *>((p2))), sizeof(*(p2))" },
+        { MockedType::OutputPOD, "Output", "(", ")", "(p2)" },
     };
 
     SimpleString testHeader =

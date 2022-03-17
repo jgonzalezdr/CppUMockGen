@@ -26,11 +26,12 @@ enum class MockedType
     String,
     Pointer,
     ConstPointer,
+    MemoryBuffer,
     Output,
+    InputPOD,
+    OutputPOD,
     InputOfType,
     OutputOfType,
-    MemoryBuffer,
-    POD,
     Skip
 };
 

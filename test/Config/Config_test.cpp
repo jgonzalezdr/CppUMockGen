@@ -177,8 +177,9 @@ TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
         "function1#p13=OutputOfType:MyType",
         "function1#p14=InputOfType:MyType<OtherType",
         "function1#p15=OutputOfType:MyType<OtherType",
-        "function1#p16=POD",
+        "function1#p16=InputPOD",
         "function1#p17=MemoryBuffer:p17_size",
+        "function1#p18=OutputPOD",
     } );
 
     // Verify
@@ -199,6 +200,7 @@ TEST( Config, SpecificTypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("function1#p15") != NULL );
     CHECK( testConfig.GetTypeOverride("function1#p16") != NULL );
     CHECK( testConfig.GetTypeOverride("function1#p17") != NULL );
+    CHECK( testConfig.GetTypeOverride("function1#p18") != NULL );
 
     // Cleanup
 }
@@ -228,8 +230,9 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
         "#type13=OutputOfType:MyType",
         "#type14=InputOfType:MyType<OtherType",
         "#type15=OutputOfType:MyType<OtherType",
-        "#type16=POD",
+        "#type16=InputPOD",
         "#type17=MemoryBuffer:sizeof(*$)",
+        "#type18=OutputPOD",
     } );
 
     // Verify
@@ -250,6 +253,7 @@ TEST( Config, GenericTypeOverrideOptions_AllowedTypes )
     CHECK( testConfig.GetTypeOverride("#type15") != NULL );
     CHECK( testConfig.GetTypeOverride("#type16") != NULL );
     CHECK( testConfig.GetTypeOverride("#type17") != NULL );
+    CHECK( testConfig.GetTypeOverride("#type18") != NULL );
 
     // Cleanup
 }

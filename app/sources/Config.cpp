@@ -45,11 +45,12 @@ static const std::vector<std::pair<std::string, MockedType>> validOverrideTypes 
     { "Pointer", MockedType::Pointer },
     { "ConstPointer", MockedType::ConstPointer },
     { "Output", MockedType::Output },
-    { "POD", MockedType::POD },
+    { "InputPOD", MockedType::InputPOD },
+    { "OutputPOD", MockedType::OutputPOD },
     { "Skip", MockedType::Skip },
 };
 
-static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 3 );
+static const std::map<std::string, MockedType> validReturnOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() - 4 );
 static const std::map<std::string, MockedType> validParameterOverrideTypes( validOverrideTypes.begin(), validOverrideTypes.end() );
 
 static const std::vector<std::pair<std::string, MockedType>> validExtendedOverrideTypes =

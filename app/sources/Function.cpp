@@ -1147,7 +1147,7 @@ protected:
         }
         else if( m_calculateSizeFromType )
         {
-            return ", sizeof(" + m_name + "))";
+            return ", sizeof(*" + m_mockArgExprFront + m_name + m_mockArgExprBack + "))";
         }
         else
         {
@@ -1436,8 +1436,12 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
             ret = new ArgumentOutput( true, false );
             break;
 
-        case MockedType::POD:
+        case MockedType::InputPOD:
             ret = new ArgumentMemoryBuffer;
+            break;
+
+        case MockedType::OutputPOD:
+            ret = new ArgumentOutput( false, true );
             break;
 
         case MockedType::Skip:
