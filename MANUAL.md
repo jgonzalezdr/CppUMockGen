@@ -301,12 +301,12 @@ CppUMockGen deduces the <code>with<i>&lt;MockedType></i>Parameter</code>/<code>r
 | `enum` <br> `enum class`                                          | `withIntParameter` | `returnIntValue` |
 | `class` <br> `struct`                                             | `withParameterOfType` | `returnConstPointerValue` |
 | `const char *`                                                    | `withStringParameter` | `returnStringValue` |
-| <code>const <i>&lt;PrimitiveType></i> &ast;</code> <br> <code>const <i>&lt;PrimitiveType></i> &</code> | `withConstPointerParameter` | `returnConstPointerValue` |
-| <code><i>&lt;PrimitiveType></i> &ast;</code> <br> <code><i>&lt;PrimitiveType></i> &</code> | `withOutputParameter` | `returnPointerValue` |
-| <code><i>&lt;PrimitiveType></i> &&</code>                         | _Same as_ <code><i>&lt;PrimitiveType></i></code> | `returnPointerValue` |
+| `const void *` <br> <code>const&nbsp;<i>&lt;PrimitiveType></i>&nbsp;&ast;</code> <br> <code>const&nbsp;<i>&lt;PrimitiveType></i>&nbsp;&amp;</code> | `withConstPointerParameter` | `returnConstPointerValue` |
+| <code><i>&lt;PrimitiveType></i>&nbsp;&ast;</code> <br> <code><i>&lt;PrimitiveType></i>&nbsp;&amp;</code> | `withOutputParameter` | `returnPointerValue` |
+| <code><i>&lt;PrimitiveType></i>&nbsp;&amp;&amp;</code>                         | _Same as_ <code><i>&lt;PrimitiveType></i></code> | `returnPointerValue` |
 | `const class *` <br> `const struct *` <br> `const class &` <br> `const struct &` | `withParameterOfType` | `returnConstPointerValue` |
 | `class *` <br> `struct *` <br> `class &` <br> `struct &` <br> `class &&` <br> `struct &&` | `withOutputParameterOfType` | `returnPointerValue` |
-| `void *` <br> <code><i>&lt;AnyType></i> &ast; &ast;</code> <br> <code><i>&lt;AnyType></i> &ast; &</code>    | `withPointerParameter` | `returnPointerValue` |
+| `void *` <br> <code><i>&lt;AnyType></i>&nbsp;&ast;&nbsp;&ast;</code> <br> <code><i>&lt;AnyType></i>&nbsp;&ast;&nbsp;&amp;</code> | `withPointerParameter` | `returnPointerValue` |
 
 > **Note:** _&lt;PrimitiveType>_ is any of: `bool`, `char`, `short`, `int`, `wchar_t`, `unsigned char`, `unsigned short`, `unsigned int`, `char16_t`, `long`, `unsigned long`, `char32_t`, `float`, `double`, `enum`, `enum class`.
 
@@ -346,68 +346,71 @@ A function-specific or generic type override specification is passed on the comm
 
 > **Note:** Use the same override specifications when generating the mocks and expectations for a header file, otherwise the mock and the expectations will probably not be compatible and will break the tests. To ensure this it is recommended to generate both the mock and expectations in a single run by passing both options `-m` and `-e` on the command line.
 
-#### Function-Specific Parameter Type Override
+#### Parameter Type Overrides
 
 Function-specific parameter type override options take the form:
 
-&ensp; <code><i>&lt;QualifiedFunctionName></i><b>'#'</b><i>&lt;ParameterName></i><b>'='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;ArgExpr></i>]</code>
+&ensp; <code><i>&lt;QualifiedFunctionName></i><b>'#'</b><i>&lt;ParameterName></i><b>'='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;CallArgExpr></i>]</code>
+
+Generic parameter type override options take the form:
+
+&ensp; <code><b>'#'</b><i>&lt;ParameterType></i><b>'='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;CallArgExpr></i>]</code>
 
 Where:
 - <code><i>&lt;QualifiedFunctionName></i></code> is the fully-qualified name of a mocked function, including namespace (e.g. `namespace1::class1::method1`).
 - <code><i>&lt;ParameterName></i></code> is the name of the parameter.
-- <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output, Skip_, or an <code>InputOfType</code> or <code>OutputOfType</code> option.
+- <code><i>&lt;ParameterType></i></code> is a C/C++ data type.
+- <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output, InputPOD, OutputPOD, Skip_, or an <code><i>&lt;InputOfType></i></code>, <code><i>&lt;OutputOfType></i></code> or <code><i>&lt;MemoryBuffer></i></code> option.
   - When set to _Skip_ the corresponding method call on the `MockActualCall` and  `MockExpectedCall` objects for the parameter will be skipped, and the parameter will not appear in the signature of expectation functions.
-  - An <code>InputOfType</code> option takes the form <b>'InputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
+  - When set to _InputPOD_ the parameter is handled as a CppUMock _MemoryBuffer_ type pointing to a Plain-Old-Data (POD) object. The size of the buffer is calculated from the size of the pointed type.
+  - When set to _OutputPOD_ the parameter is handled as a CppUMock _Output_ type pointing to a Plain-Old-Data (POD) object. The size of the buffer is calculated from the size of the pointed type.
+  - An <code><i>&lt;InputOfType></i></code> option takes the form <b>'InputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
     - <code><i>&lt;DeclaredType></i></code> indicates the type name to be passed to the <code>withParameterOfType</code> method of <code>MockActualCall</code> and <code>MockExpectedCall</code>.
     - <code><i>&lt;ExpectationType></i></code> optionally indicates a different parameter's type to use in expectation functions instead of the original type.
-  - An <code>OutputOfType</code> option takes the form <b>'OutputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
+  - An <code><i>&lt;OutputOfType></i></code> option takes the form <b>'OutputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
     - <code><i>&lt;DeclaredType></i></code> indicates the type name to be passed to the <code>withOutputParameterOfType</code> method of <code>MockActualCall</code> and to the <code>withOutputParameterOfTypeReturning</code> method of <code>MockExpectedCall</code>.
     - <code><i>&lt;ExpectationType></i></code> optionally indicates a different parameter's type to use in expectation functions instead of the original type.
-- <code><i>&lt;ArgExpr></i></code> is an optional C++ expression that must contain the **'$'** placeholder character. If defined, it will be passed as the argument for the CppUMock actual call parameter method, replacing **'$'** by the mocked function parameter name.
+  - A <code><i>&lt;MemoryBuffer></i></code> option takes the form <b>'MemoryBuffer:'</b><code><i>&lt;SizeExpr></i></code>, where:
+    - <code><i>&lt;SizeExpr></i></code> is a C++ expression that calculates the size of the memory buffer passed to the actual call (static or dynamically). This expression can contain the **'$'** placeholder character, which will be replaced by the overriden parameter name.
+- <code><i>&lt;CallArgExpr></i></code> is an optional C++ expression that will be passed as the argument for the CppUMock actual call parameter method. This expression must contain the **'$'** placeholder character, which will be replaced by the overriden parameter name.
 
-#### Function-Specific Mocked Return Type Override
+The following table describes how the different parameter override mocked types are handled:
+
+| _&lt;MockedType>_ | C/C++ Base Type | Usage Notes |
+| - | - | - |
+| _Bool_ <br> _Int_ <br> _UnsignedInt_ <br> _LongInt_ <br> _UnsignedLongInt_ <br> _Double_ <br> _String_ <br> _Pointer_ <br> _ConstPointer_ | <code>bool</code> <br> <code>int</code> <br> <code>unsigned&nbsp;int</code> <br> <code>long</code> <br> <code>unsigned&nbsp;long</code> <br> <code>double</code> <br> <code>const&nbsp;char&nbsp;&ast;</code> <br> <code>void&nbsp;&ast;</code> <br> <code>const&nbsp;void&nbsp;&ast;</code> | The mocked function parameter value must be implicitly convertable to a value of the mocked base type, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts values of the mocked base type. |
+| _InputPOD_ | <code>const&nbsp;_&lt;Type>_&nbsp;&ast;</code> | The mocked function parameter value must be a pointer to a POD object, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts a value of the same type than the mocked function parameter, which will be binary compared to the actual calls parameter values. If <code><i>&lt;CallArgExpr></i></code> is used then it is also applied in expectation function parameters to get a pointer to a POD object. |
+| _OutputPOD_ | <code>_&lt;Type>_&nbsp;&ast;</code> | The mocked function parameter value must be a pointer to a POD object, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts a value of the same type than the mocked function parameter, which will be copied into the actual call parameter value. If <code><i>&lt;CallArgExpr></i></code> is used then it is also applied in expectation function parameters to get a pointer to a POD object. |
+| _MemoryBuffer_ | <code>const&nbsp;_&lt;Type>_&nbsp;&ast;</code> | The mocked function parameter value must be implicitly convertable to <code>const&nbsp;void&nbsp;&ast;</code>, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls. The size of the buffer is calculated using <code><i>&lt;SizeExpr></i></code>. <br><br>The expectation function parameter accepts a value of the same type than the mocked function parameter. If <code><i>&lt;CallArgExpr></i></code> is used then it is also applied in expectation function parameters to get a pointer to a buffer. The buffer pointed by the parameter value contains the data to be binary compared to the actual call parameter values. The expectation function has an additional <code>size_t</code> parameter to pass the size of the data to be compared. |
+| _Output_ | <code>_&lt;Type>_&nbsp;&ast;</code> | The mocked function parameter value must be implicitly convertable to <code>void&nbsp;&ast;</code>, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts a value of the same type than the mocked function parameter. If <code><i>&lt;CallArgExpr></i></code> is used then it is also applied in expectation function parameters to get a pointer to a buffer. The buffer pointed by the parameter value contains the output data to be copied. The expectation function has an additional <code>size_t</code> parameter to pass the size of the data to be copied. |
+| _InputOfType_ | <code>const&nbsp;_&lt;DeclaredType>_&nbsp;&ast;</code> | The mocked function parameter value must be implictly convertable to <code>const&nbsp;_&lt;DeclaredType>_&nbsp;&ast;</code>, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts a <code>const&nbsp;_&lt;DeclaredType>_&nbsp;&ast;</code> value (or <code>const&nbsp;_&lt;ExpectationType>_&nbsp;&ast;</code> value), which will be compared (using installed CppUTest comparators) to the actual calls parameter values. |
+| _OutputOfType_ | <code>_&lt;DeclaredType>_&nbsp;&ast;</code> | The mocked function parameter value must be implictly convertable to <code>_&lt;DeclaredType>_&nbsp;&ast;</code>, otherwise <code><i>&lt;CallArgExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function parameter accepts a <code>const&nbsp;_&lt;DeclaredType>_&nbsp;&ast;</code> value (or <code>const&nbsp;_&lt;ExpectationType>_&nbsp;&ast;</code> value), which will be copied (using installed CppUTest copiers) into the actual call parameter value. |
+
+#### Return Type Overrides
 
 Function-specific return type override options take the form:
 
 &ensp; <code><i>&lt;QualifiedFunctionName></i><b>'@='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;RetExpr></i>]</code>
-
-Where:
-- <code><i>&lt;QualifiedFunctionName></i></code> is the fully-qualified name of a mocked function, including namespace (e.g. `namespace1::class1::method1`).
-- <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the return value, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer_.
-- <code><i>&lt;RetExpr></i></code> is an optional C++ expression that must contain the **'$'** placeholder character. If defined, it will be used as the return value of the mocked function, replacing **'$'** by the CppUMock actual call sequence.
-
-#### Generic Mocked Parameter Type Override
-
-Generic parameter type override options take the form:
-
-&ensp; <code><b>'#'</b><i>&lt;ParameterType></i><b>'='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;ArgExpr></i>]</code>
-
-Where:
-- <code><i>&lt;ParameterType></i></code> is a C/C++ data type.
-- <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the parameter, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer, Output, Skip_, or an <code>InputOfType</code> or <code>OutputOfType</code> option.
-  - When set to _Skip_ the corresponding method call on the `MockActualCall` and  `MockExpectedCall` objects for the parameter will be skipped, and the parameter will not appear in the signature of expectation functions.
-  - An <code>InputOfType</code> option takes the form <b>'InputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
-    - <code><i>&lt;DeclaredType></i></code> indicates the type name to be passed to the <code>withParameterOfType</code> method of <code>MockActualCall</code> and <code>MockExpectedCall</code>.
-    - <code><i>&lt;ExpectationType></i></code> optionally indicates an override type to use as the argument of expectation functions.
-  - An <code>OutputOfType</code> option takes the form <b>'OutputOfType:'</b><code><i>&lt;DeclaredType></i>[<b>'&lt;'</b><i>&lt;ExpectationType></i>]</code>, where:
-    - <code><i>&lt;DeclaredType></i></code> indicates the type name to be passed to the <code>withOutputParameterOfType</code> method of <code>MockActualCall</code> and to the <code>withOutputParameterOfTypeReturning</code> method of <code>MockExpectedCall</code>.
-    - <code><i>&lt;ExpectationType></i></code> optionally indicates a different parameter's type to use in expectation functions instead of the original type.
-- <code><i>&lt;ArgExpr></i></code> is an optional C++ expression that must contain the **'$'** placeholder character. If defined, it will be passed as the argument for the CppUMock actual call parameter method, replacing **'$'** by the mocked function parameter name.
-
-#### Generic Mocked Return Type Override
 
 Generic return type override options take the form:
 
 &ensp; <code><b>'@'</b><i>&lt;ReturnType></i><b>'='</b><i>&lt;MockedType></i>[<b>'~'</b><i>&lt;RetExpr></i>]</code>
 
 Where:
+- <code><i>&lt;QualifiedFunctionName></i></code> is the fully-qualified name of a mocked function, including namespace (e.g. `namespace1::class1::method1`).
 - <code><i>&lt;ReturnType></i></code> is a C/C++ data type.
 - <code><i>&lt;MockedType></i></code> indicates the CppUMock type to use for the return value, admitted values are: _Bool, Int, UnsignedInt, LongInt, UnsignedLongInt, Double, String, Pointer, ConstPointer_.
-- <code><i>&lt;RetExpr></i></code> is an optional C++ expression that must contain the **'$'** character. If defined, it will be used as the return value of the mocked function, replacing **'$'** by the CppUMock actual call sequence.
+- <code><i>&lt;RetExpr></i></code> is an optional C++ expression that will be used as the return value of the mocked function. This expression must contain the **'$'** placeholder character, which will be replaced by the CppUMock actual call sequence.
+
+The following table describes how the different return override mocked types are handled:
+
+| _&lt;MockedType>_ | C/C++ Base Type | Notes |
+| - | - | - |
+| _Bool_ <br> _Int_ <br> _UnsignedInt_ <br> _LongInt_ <br> _UnsignedLongInt_ <br> _Double_ <br> _String_ <br> _Pointer_ <br> _ConstPointer_ | <code>bool</code> <br> <code>int</code> <br> <code>unsigned&nbsp;int</code> <br> <code>long</code> <br> <code>unsigned&nbsp;long</code> <br> <code>double</code> <br> <code>const&nbsp;char&nbsp;&ast;</code> <br> <code>void&nbsp;&ast;</code> <br> <code>const&nbsp;void&nbsp;&ast;</code> | The value of the mocked base type must be implicitly convertable to then mocked function return value, otherwise <code><i>&lt;RetExpr></i></code> must be used to explicitly convert it in mocked actual calls.<br><br>The expectation function return parameter accepts values of the mocked base type. |
 
 ## Examples
 
-### Example 1: Simple generation
+### Example: Simple generation
 
 Assuming that we want to mock the following class:
 
@@ -447,7 +450,7 @@ TEST( TestSuite, Test1 )
 ```
 
 &ensp;
-### Example 2: Function-specific parameter type override
+### Example: Function-specific parameter type override
 
 Assuming that we want to mock the following class, which has method which gets an input string but it is ill-designed (i.e., the parameter should had been declared as a reference to a _const_ string instead of just as a reference to a _non-const_ string):
 
@@ -492,7 +495,7 @@ TEST( TestSuite, Test2 )
 ```
 
 &ensp;
-### Example 3: Function-specific parameter and return type overrides
+### Example: Function-specific parameter and return type overrides
 
 Assuming that we want to mock the following function:
 
@@ -529,7 +532,7 @@ TEST( TestSuite, Test3 )
 ```
 
 &ensp;
-### Example 4: Generic parameter and return type overrides
+### Example: Generic parameter and return type overrides
 
 Assuming that we want to mock the following functions:
 
@@ -571,7 +574,7 @@ TEST( TestSuite, Test4 )
 ```
 
 &ensp;
-### Example 5: Skipping a parameter (at generation time)
+### Example: Skipping a parameter (at generation time)
 
 Assuming that we want to mock the following function:
 
@@ -603,7 +606,7 @@ TEST( TestSuite, Test5 )
 ```
 
 &ensp;
-### Example 6: Ignoring a parameter (at test time)
+### Example: Ignoring a parameter (at test time)
 
 Assuming that we want to mock the following class:
 
@@ -643,7 +646,7 @@ TEST( TestSuite, Test6 )
 ```
 
 &ensp;
-### Example 7: Typed input parameter with symmetrical comparator
+### Example: Typed input parameter with symmetrical comparator
 
 Assuming that we want to mock the following function:
 
@@ -684,7 +687,7 @@ public:
 };
 ```
 
-Assuming that the tested function should call `function7` once, passing a vector of strings containing the values "foo" and "bar" in `p1`, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function7` once, passing a vector of strings containing the values "foo" and "bar" in `p1`, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
 StdVectorOfStringsComparator stdVectorOfStringsComparator;
@@ -707,7 +710,7 @@ TEST( TestSuite, Test7 )
 ```
 
 &ensp;
-### Example 8: Typed output parameter with asymmetrical copier
+### Example: Typed output parameter with asymmetrical copier
 
 Assuming that we want to mock the following function:
 
@@ -733,7 +736,7 @@ public:
 CppUMockGen default behavior with typed output parameters is to expect a symmetrical copier. To indicate to CppUMockGen to use an asymmetrical copier for all references to `std::ostream`, we can use the following command:
 
 ```powershell
-CppUMockGen <InputFilename> -m -e -t "#std::ostream &=OutputOfType:std::ostream<char~&$"
+CppUMockGen <InputFilename> -m -e -t "#std::ostream &=OutputOfType:std::ostream<char~&$'
 ```
 
 Now the expectation functions get a C string instead of a reference to an output stream.
@@ -761,7 +764,7 @@ TEST( TestSuite, Test8 )
 ```
 
 &ensp;
-### Example 9: Non-typed struct output parameter
+### Example: Struct input parameter as POD
 
 Assuming that we want to mock the following function:
 
@@ -772,29 +775,29 @@ struct Struct9
     int b;
 };
 
-void Function9( Struct9 *p1 );
+void Function91( const Struct9 *p1 );
 ```
 
-CppUMockGen will determine that `p1` is a typed output parameter, since by default parameters which types are pointers or references to _non-const_ class or struct types are considered typed output parameters. This means that we need a copier to be installed in order to copy `Struct9` objects.
+CppUMockGen will determine that `p1` is a typed input parameter (the default behavior for parameters which types are pointers or references to _const_ class or struct types). This means that we need a comparator to be installed in order to compare `Struct9` objects.
 
-However, taking in account that `Struct9` is a simple data type (also known as _POD_ or _Plain Old Data_ type) that can be copied just by copying memory, we can indicate to CppUMockGen to override `p1` as a non-typed output using the following command:
+However, taking in account that `Struct9` is a simple data type (also known as _POD_ or _Plain-Old-Data_ type) that can be compared just by binary comparing memory, we can indicate to CppUMockGen to override `Struct9` as a POD input using the following command:
 
 ```powershell
-CppUMockGen -i <InputFilename> -m -e -t "Function9#p1=Output"
+CppUMockGen -i <InputFilename> -m -e -t "#const Struct9 *=InputPOD"
 ```
 
-Assuming that the tested function should call `Function9` once, passing a pointer to a `Struct9` struct in `p1`, and then the mocked function should initialize that struct, we can use the generated mock and expectations in an unit test like this:
+Assuming that the tested function should call `Function91` once, passing a pointer to a `Struct9` struct in `p1`, we can use the generated mock and expectations in an unit test like this:
 
 ```cpp
-TEST( TestSuite, Test9 )
+TEST( TestSuite, Test91 )
 {
     // Prepare
-    Struct9 output = { 2344, 4324 };
+    Struct9 expectedInput = { 1234, 5674 };
 
-    expect::Function9( output, sizeof(output) );
+    expect::Function91( &expectedInput );
 
     // Exercise
-    FunctionToTest9();
+    FunctionToTest91();
 
     // Verify
     mock().checkExpectations();
@@ -802,7 +805,84 @@ TEST( TestSuite, Test9 )
 ```
 
 &ensp;
-### Example 10: Non-typed string output parameter
+### Example: Struct output parameter as POD
+
+Assuming that we want to mock the following function:
+
+```cpp
+struct Struct9
+{
+    int a;
+    int b;
+};
+
+void Function92( Struct9 &p1 );
+```
+
+CppUMockGen will determine that `p1` is a typed output parameter (the default behavior for parameters which types are pointers or references to _non-const_ class or struct types). This means that we need a copier to be installed in order to copy `Struct9` objects.
+
+However, taking in account that `Struct9` is a simple data type (also known as _POD_ or _Plain-Old-Data_ type) that can be copied just by binary copying memory, we can indicate to CppUMockGen to override `p1` as a POD output using the following command:
+
+```powershell
+CppUMockGen -i <InputFilename> -m -e -t "Function92#p1=OutputPOD~&$"
+```
+
+Assuming that the tested function should call `Function92` once, passing a reference to a `Struct9` struct in `p1`, and then the mocked function should initialize that struct, we can use the generated mock and expectations in an unit test like this:
+
+```cpp
+TEST( TestSuite, Test92 )
+{
+    // Prepare
+    Struct9 providedOutput = { 2344, 4324 };
+
+    expect::Function92( providedOutput );
+
+    // Exercise
+    FunctionToTest92();
+
+    // Verify
+    mock().checkExpectations();
+}
+```
+
+
+&ensp;
+### Example: Array input parameter
+
+Assuming that we want to mock the following function, that gets an array and its number of elements as parameters:
+
+```cpp
+void Function35( const int *array, unsigned int itemCount );
+```
+
+CppUMockGen will determine that `array` is an pointer to constant primitive parameter (the default behavior for parameters which types are pointers or references to _const_ primitive types).
+
+CppUMockGen cannot deduce that `array` is an input array, but we can easily handle it by indicating to CppUMockGen to consider it a memory buffer (for easy comparison) using the following command:
+
+```powershell
+CppUMockGen -i <InputFilename> -m -e -t "Function35#array=MemoryBuffer:itemCount*sizeof(*$)"
+```
+
+Assuming that the tested function should call `Function35` once, passing an array in `array` with some specific elements, and the number of elements of that array in `arrayLen`, we can use the generated mock and expectations in an unit test like this:
+
+```cpp
+TEST( TestSuite, Test35 )
+{
+    // Prepare
+    const int expectedInput[] = { 1, 2, 3, 4, -1 };
+
+    expect::Function35( expectedInput, sizeof(expectedInput), 5 );
+
+    // Exercise
+    FunctionToTest35();
+
+    // Verify
+    mock().checkExpectations();
+}
+```
+
+&ensp;
+### Example: C string output parameter
 
 Assuming that we want to mock the following function:
 
@@ -816,7 +896,7 @@ To generate the mock and expectations we can use the following command:
 CppUMockGen -i <InputFilename> -m -e
 ```
 
-CppUMockGen will determine that `str` is an non-typed output parameter, since by default parameters which types are pointers or references to _non-const_ primitive types are considered non-typed output parameters.
+CppUMockGen will determine that `str` is an non-typed output parameter (the default behavior for parameters which types are pointers or references to _non-const_ primitive types).
 
 Assuming that the tested function should call `Function10` once, passing a buffer to receive a string in `str`, and the size of that buffer in `maxStrSize` set to 100, and then the mocked function should write "foo" on the passed buffer, we can use the generated mock and expectations in an unit test like this:
 
@@ -837,7 +917,7 @@ TEST( TestSuite, Test10 )
 ```
 
 &ensp;
-### Example 11: Non-typed array output parameter
+### Example: Array output parameter
 
 Assuming that we want to mock the following function, that gets an array and its number of elements as parameters:
 
@@ -851,7 +931,7 @@ To generate the mock and expectations we can use the following command:
 CppUMockGen -i <InputFilename> -m -e
 ```
 
-CppUMockGen will determine that `array` is an non-typed output parameter, since by default parameters which types are pointers or references to _non-const_ primitive types are considered non-typed output parameters.
+CppUMockGen will determine that `array` is an non-typed output parameter (the default behavior for parameters which types are pointers or references to _non-const_ primitive types.
 
 Assuming that the tested function should call `Function11` once, passing the array to be initialized in `array`, and the number of elements of that array in `arrayLen` set to 5, and then the mocked function should initialize the array, we can use the generated mock and expectations in an unit test like this:
 
