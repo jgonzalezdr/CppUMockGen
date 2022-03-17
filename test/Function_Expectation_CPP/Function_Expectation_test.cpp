@@ -7576,8 +7576,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 TEST_EX( TEST_GROUP_NAME, ParameterOverride_Output )
 {
     // Prepare
-    const std::string argExprFront = "##%%";
-    const std::string argExprBack = "&&//";
+    const std::string argExprFront = "(";
+    const std::string argExprBack = ")";
 
     mock().installCopier( "std::string", stdStringCopier );
 
@@ -7613,19 +7613,19 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_Output )
     CHECK_EQUAL( 1, resultsProto.size() );
     SimpleString expectedResultProto =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const void* p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const void* p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, struct Struct1 * p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, struct Struct1 * p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
             "}\n";
     SimpleString expectedResultImpl =
             "namespace expect {\n"
-            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, const void* p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, struct Struct1 * p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    return function1(1, p1, p2, __sizeof_p2, p3, __sizeof_p3, p4, __return__);\n"
             "}\n"
-            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, const void* p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, struct Struct1 * p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
             "    bool __ignoreOtherParams__ = false;\n"
             "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
             "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
-            "    __expectedCall__.withOutputParameterReturning(\"p2\", p2, __sizeof_p2);\n"
+            "    __expectedCall__.withOutputParameterReturning(\"p2\", (p2), __sizeof_p2);\n"
             "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
             "    if(p4.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
             "    __expectedCall__.andReturnValue(__return__);\n"

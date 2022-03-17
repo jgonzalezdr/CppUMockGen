@@ -1091,8 +1091,8 @@ protected:
 class ArgumentOutput : public ArgumentStandard
 {
 public:
-    ArgumentOutput( bool expectationUseBaseType, bool calculateSizeFromType ) noexcept 
-    : ArgumentStandard( expectationUseBaseType ), m_calculateSizeFromType( calculateSizeFromType ) {}
+    ArgumentOutput( bool calculateSizeFromType ) noexcept 
+    : ArgumentStandard( false ), m_calculateSizeFromType( calculateSizeFromType ) {}
 
     virtual ~ArgumentOutput() noexcept {}
 
@@ -1155,10 +1155,12 @@ protected:
         }
     }
 
+// LCOV_EXCL_START: Never called for this subclass
     virtual std::string GetExpectationBaseType() const noexcept override
     {
         return "const void*";
     }
+// LCOV_EXCL_STOP
 
     bool m_calculateSizeFromType;
 };
@@ -1433,7 +1435,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
             break;
 
         case MockedType::Output:
-            ret = new ArgumentOutput( true, false );
+            ret = new ArgumentOutput( false );
             break;
 
         case MockedType::InputPOD:
@@ -1441,7 +1443,7 @@ Function::Argument* ArgumentParser::ProcessOverride( const Config::OverrideSpec 
             break;
 
         case MockedType::OutputPOD:
-            ret = new ArgumentOutput( false, true );
+            ret = new ArgumentOutput( true );
             break;
 
         case MockedType::Skip:
@@ -1588,7 +1590,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
                     break;
 
                 default:
-                    ret = new ArgumentOutput( false, ( argType.kind != CXType_Pointer ) );
+                    ret = new ArgumentOutput( argType.kind != CXType_Pointer );
                     break;
             }
         }
