@@ -22,8 +22,8 @@ class ClangParseHelper
 public:
     /**
      * Parses C/C++ code and calls a callback function for each parsed C/C++ function.
-     * @param code [in] Code to be parsed
-     * @param callback [in] Function to be called for each parsed C/C++ function
+     * @param[in] code Code to be parsed
+     * @param[in] callback Function to be called for each parsed C/C++ function
      */
     static void ParseHeader( const std::string &code, const std::function<void( CXCursor )> &callback );
 

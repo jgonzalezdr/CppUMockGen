@@ -45,7 +45,7 @@ public:
     /**
      * Constructor.
      *
-     * @param consoleType [in] Console to colorize
+     * @param[in] consoleType Console to colorize
      */
     ConsoleColorizer( ConsoleType consoleType ) noexcept;
 
@@ -57,7 +57,7 @@ public:
     /**
      * Sets (or resets) the console color.
      *
-     * @param color [in] Color to be set, or RESET to reset to default value
+     * @param[in] color Color to be set, or RESET to reset to default value
      */
     void SetColor( Color color ) noexcept;
 

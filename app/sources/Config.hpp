@@ -50,9 +50,9 @@ public:
         /**
          * Constructs a OverrideSpec object.
          *
-         * @param value [in] Override specification, consisting in a element identifier optionally followed
+         * @param[in] value Override specification, consisting in a element identifier optionally followed
          *                   by the '=' character and an argument / return expression modifier
-         * @param isReturn [in] Indicates that the option is for return type if @c true, or for parameter
+         * @param[in] isReturn Indicates that the option is for return type if @c true, or for parameter
          *                      type otherwise
          */
         OverrideSpec( const std::string &value, bool isReturn );
@@ -148,7 +148,7 @@ public:
      * Returns the override spec related to the parameter or return type represented
      * by @p key (if it exists).
      *
-     * @param key [in] Identifier for a parameter or return type
+     * @param[in] key Identifier for a parameter or return type
      * @return A pointer to an override spec, or NULL if it does not exist
      */
     const OverrideSpec* GetTypeOverride( const std::string& key ) const noexcept;
@@ -163,7 +163,7 @@ private:
         /**
          * Constructs an OverrideMap object.
          *
-         * @param options [in] Override options, each consisting in a pair of element identifier
+         * @param[in] options Override options, each consisting in a pair of element identifier
          *                     (key) / override specification (value) separated by a '=' character
          */
         OverrideMap( const std::vector<std::string> &options );
@@ -172,7 +172,7 @@ private:
          * Returns the override specification related to an element represented by @p key
          * (if it exists).
          *
-         * @param key [in] Identifier for an element
+         * @param[in] key Identifier for an element
          * @return A pointer to an override specification, or NULL if it does not exist
          */
         const OverrideSpec* GetOverride( const std::string& key ) const noexcept;

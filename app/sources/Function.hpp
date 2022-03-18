@@ -35,8 +35,8 @@ public:
     /**
      * Parses a function.
      *
-     * @param cursor [in] Cursor representing a function
-     * @param config [in] Configuration to be used for parsing
+     * @param[in] cursor Cursor representing a function
+     * @param[in] config Configuration to be used for parsing
      */
     bool Parse( const CXCursor &cursor, const Config &config );
 
@@ -50,7 +50,7 @@ public:
     /**
      * Generates an expectation function prototype or implementation for the function.
      *
-     * @param proto [in] Generate function prototype if @c true, or function implementation otherwise.
+     * @param[in] proto Generate function prototype if @c true, or function implementation otherwise.
      * @return String containing the generated expectation function prototype
      */
     std::string GenerateExpectation( bool proto ) const noexcept;

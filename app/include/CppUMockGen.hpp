@@ -27,7 +27,7 @@ class Parameter {
 public:
     /**
      * Constructor for non-ignored parameters.
-     * @param value [in] Value of the parameter
+     * @param[in] value Value of the parameter
      */
     Parameter(const BaseType &value) : m_value(&value), m_isIgnored(false) {}
 

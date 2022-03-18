@@ -23,8 +23,8 @@ public:
     /**
      * Checks that a generated mock compiles properly.
      *
-     * @param inputHeader [in] Input header used to generate the mock
-     * @param testedSource [in] Generated mock source
+     * @param[in] inputHeader Input header used to generate the mock
+     * @param[in] testedSource Generated mock source
      * @return @c true if the compilation was successful, @c false otherwise
      */
     static bool CheckMockCompilation( const std::string &inputHeader, const std::string &testedSource );
@@ -32,9 +32,9 @@ public:
     /**
      * Checks that a generated expectation helper compiles properly.
      *
-     * @param inputHeader [in] Input header used to generate the mock
-     * @param testedHeader [in] Generated expectation helper header
-     * @param testedSource [in] Generated expectation helper source
+     * @param[in] inputHeader Input header used to generate the mock
+     * @param[in] testedHeader Generated expectation helper header
+     * @param[in] testedSource Generated expectation helper source
      * @return @c true if the compilation was successful, @c false otherwise
      */
     static bool CheckExpectationCompilation( const std::string &inputHeader, 

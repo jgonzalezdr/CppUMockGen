@@ -21,16 +21,16 @@ public:
     /**
      * Constructor.
      *
-     * @param cout [out] Stream where standard output will be printed
-     * @param cerr [out] Stream where error output will be printed
+     * @param[out] cout Stream where standard output will be printed
+     * @param[out] cerr Stream where error output will be printed
      */
     App( std::ostream &cout, std::ostream &cerr ) noexcept;
 
     /**
      * Executes the application.
      *
-     * @param argc [in] Number of arguments
-     * @param argv [in] Array of pointer to the arguments
+     * @param[in] argc Number of arguments
+     * @param[in] argv Array of pointer to the arguments
      * @return Exit code
      */
     int Execute( int argc, const char* argv[] ) noexcept;
