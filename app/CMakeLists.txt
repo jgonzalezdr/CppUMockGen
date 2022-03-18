@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.3 )
 
-project( CppUMockGen VERSION 0.5.0 )
+project( CppUMockGen VERSION 0.6.0 )
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
 
