@@ -88,3 +88,16 @@ test_script:
 after_test:
   - ps: ci/appveyor_ci_after_test.ps1
   - ps: if ($env:Configuration -eq 'Coverage') { codecov -f build/test/reports/coverage/app_stripped.info $env:CODECOV_FLAG $env:Platform }
+
+deploy:
+  provider: GitHub
+  release: "Release ${APPVEYOR_REPO_TAG_NAME}"
+  description: "Release ${APPVEYOR_REPO_TAG_NAME} (commit: ${APPVEYOR_REPO_COMMIT} build number: ${APPVEYOR_BUILD_NUMBER})"
+  draft: true
+  prerelease: false
+  force_update: true
+  auth_token:
+    secure: FukMKKhe9zoLYhuIqa66i/s+F5GVepPem6C4mnCVshTVyzs1rmIp0Ef19hq4XS8s
+  on:
+    APPVEYOR_REPO_TAG: true
+    PublishArtifacts: true
