@@ -91,6 +91,7 @@ after_test:
 
 deploy:
   provider: GitHub
+  tag: ${APPVEYOR_REPO_TAG_NAME}
   release: "Release ${APPVEYOR_REPO_TAG_NAME}"
   description: "Release ${APPVEYOR_REPO_TAG_NAME} (commit: ${APPVEYOR_REPO_COMMIT} build number: ${APPVEYOR_BUILD_NUMBER})"
   draft: true
