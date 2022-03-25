@@ -59,6 +59,8 @@ Config* GetMockConfig()
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
+static const std::string EMPTY_STRING;
+
 static const std::filesystem::path tempDirPath = std::filesystem::temp_directory_path();
 static const std::string defaultTempFilename = "CppUMockGen_Parser.h";
 static const std::string nonexistingFilePath = ( tempDirPath / "CppUMockGen_Parser_NotExisting.h" ).generic_string();
@@ -131,7 +133,7 @@ TEST( Parser, MockedFunction )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
@@ -231,7 +233,7 @@ TEST( Parser, MockedMethod )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -332,7 +334,7 @@ TEST( Parser, MockedConstructor )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Constructor$::Constructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -433,7 +435,7 @@ TEST( Parser, MockedDestructor )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Destructor$::Destructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -526,6 +528,7 @@ TEST( Parser, MockedMethod_Cpp17 )
         // Prepare
         Config *config = GetMockConfig();
         std::ostringstream error;
+        std::string languageStandard = "c++17";
 
         SimpleString testHeader =
             "#include <filesystem>\n"
@@ -535,7 +538,7 @@ TEST( Parser, MockedMethod_Cpp17 )
             "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "c++17" );
+        expect::Config$::GetLanguageStandard( config, &languageStandard );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -628,6 +631,7 @@ TEST( Parser, MockedMethod_Cpp14 )
         // Prepare
         Config *config = GetMockConfig();
         std::ostringstream error;
+        std::string languageStandard = "c++14";
 
         SimpleString testHeader =
             "class class1 {\n"
@@ -637,7 +641,7 @@ TEST( Parser, MockedMethod_Cpp14 )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "c++14" );
+        expect::Config$::GetLanguageStandard( config, &languageStandard );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -730,6 +734,7 @@ TEST( Parser, MockedMethod_Gnu98 )
         // Prepare
         Config *config = GetMockConfig();
         std::ostringstream error;
+        std::string languageStandard = "gnu++98";
 
         SimpleString testHeader =
             "class class1 {\n"
@@ -739,7 +744,7 @@ TEST( Parser, MockedMethod_Gnu98 )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "gnu++98" );
+        expect::Config$::GetLanguageStandard( config, &languageStandard );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -844,7 +849,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, true );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor(4);
         expect::Method$::Method$ctor(2);
         expect::Function$::Parse( 4, IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -961,7 +966,7 @@ TEST( Parser, FunctionNonMockable )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
         expect::Function$::Function$dtor();
@@ -1011,7 +1016,7 @@ TEST( Parser, MethodNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1062,7 +1067,7 @@ TEST( Parser, ConstructorNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Constructor$::Constructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1113,7 +1118,7 @@ TEST( Parser, DestructorNonMockable )
                 "};";
         SetupTempFile( testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Destructor$::Destructor$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, false );
@@ -1168,7 +1173,7 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, true );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor( 4 );
         expect::Method$::Method$ctor( 2 );
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
@@ -1277,7 +1282,7 @@ TEST( Parser, SyntaxError )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
         // Exercise
@@ -1322,7 +1327,7 @@ TEST( Parser, Warning )
         SetupTempFile( testHeader );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
@@ -1418,7 +1423,7 @@ TEST( Parser, NonExistingInputFile )
         std::filesystem::remove( nonexistingFilePath );
 
         expect::Config$::InterpretAsCpp( config, false );
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
 
         expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
@@ -1467,7 +1472,7 @@ TEST( Parser, IncludePaths )
 
         std::filesystem::current_path( tempDirPath );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );
 
@@ -1551,7 +1556,7 @@ TEST( Parser, BaseDirectory )
                 "};";
         SetupTempFile( inputFileName, testHeader );
 
-        expect::Config$::GetLanguageStandard( config, "" );
+        expect::Config$::GetLanguageStandard( config, &EMPTY_STRING );
         expect::Function$::Function$ctor();
         expect::Method$::Method$ctor();
         expect::Function$::Parse( IgnoreParameter::YES, IgnoreParameter::YES, config, true );

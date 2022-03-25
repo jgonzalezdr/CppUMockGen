@@ -5457,8 +5457,8 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
         expect::Config$::GetTypeOverride( config, "#short", nullptr );
 
         expect::Config$::OverrideSpec$::GetType( override, testData.mockedType );
-        expect::Config$::OverrideSpec$::GetExprModFront( override, testData.argExprFront );
-        expect::Config$::OverrideSpec$::GetExprModBack( override, testData.argExprBack );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, &testData.argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, &testData.argExprBack );
 
         // Exercise
         std::vector<std::string> results;
@@ -5514,10 +5514,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
     expect::Config$::GetTypeOverride( config, "#short", nullptr );
 
     expect::Config$::OverrideSpec$::GetType( override, MockedType::InputOfType );
-    expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
-    expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
-    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
+    expect::Config$::OverrideSpec$::GetExprModFront( override, &argExprFront );
+    expect::Config$::OverrideSpec$::GetExprModBack( override, &argExprBack );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, &exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, &expectationArgTypeName );
 
     // Exercise
     std::vector<std::string> results;
@@ -5571,10 +5571,10 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
     expect::Config$::GetTypeOverride( config, "#short", nullptr );
 
     expect::Config$::OverrideSpec$::GetType( override, MockedType::OutputOfType );
-    expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
-    expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
-    expect::Config$::OverrideSpec$::GetExposedTypeName( override, exposedTypeName );
-    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, expectationArgTypeName );
+    expect::Config$::OverrideSpec$::GetExprModFront( override, &argExprFront );
+    expect::Config$::OverrideSpec$::GetExprModBack( override, &argExprBack );
+    expect::Config$::OverrideSpec$::GetExposedTypeName( override, &exposedTypeName );
+    expect::Config$::OverrideSpec$::GetExpectationArgTypeName( override, &expectationArgTypeName );
 
     // Exercise
     std::vector<std::string> results;
@@ -5642,11 +5642,11 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_MemoryBuffer )
         expect::Config$::GetTypeOverride( config, "#short", nullptr );
 
         expect::Config$::OverrideSpec$::GetType( override, MockedType::MemoryBuffer );
-        expect::Config$::OverrideSpec$::GetExprModFront( override, argExprFront );
-        expect::Config$::OverrideSpec$::GetExprModBack( override, argExprBack );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, &argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, &argExprBack );
         expect::Config$::OverrideSpec$::HasSizeExprPlaceholder( override, testData.hasPlaceholder );
-        expect::Config$::OverrideSpec$::GetSizeExprFront( override, testData.sizeExprFront );
-        expect::Config$::OverrideSpec$::GetSizeExprBack( override, testData.sizeExprBack );
+        expect::Config$::OverrideSpec$::GetSizeExprFront( override, &testData.sizeExprFront );
+        expect::Config$::OverrideSpec$::GetSizeExprBack( override, &testData.sizeExprBack );
 
         // Exercise
         std::vector<std::string> results;
@@ -5708,8 +5708,8 @@ TEST_EX( TEST_GROUP_NAME, ReturnOverride )
         expect::Config$::GetTypeOverride( config, "#const char *", nullptr );
 
         expect::Config$::OverrideSpec$::GetType( override, testData.mockedType );
-        expect::Config$::OverrideSpec$::GetExprModFront( override, testData.argExprFront );
-        expect::Config$::OverrideSpec$::GetExprModBack( override, testData.argExprBack );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, &testData.argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, &testData.argExprBack );
 
         // Exercise
         std::vector<std::string> results;
