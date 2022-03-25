@@ -4,7 +4,7 @@ endif()
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
 
-add_custom_target( build_tests )
+add_custom_target( build_tests ALL )
 
 # Test errors are ignored with MSVC to avoid the IDE nagging
 add_custom_target( execute_tests COMMAND ctest -V ${IGNORE_ERROR} DEPENDS build_tests )
@@ -56,7 +56,7 @@ if( COVERAGE AND NOT MSVC )
     add_custom_target( coverage_clean
                        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVDST_DIR}
                        COMMAND ${PERL_EXECUTABLE} ${LCOV_EXECUTABLE} -z -d ${CMAKE_BINARY_DIR}
-                       DEPENDS build_tests )
+                       DEPENDS build_tests build )
 
     add_custom_target( coverage_initial
                        COMMAND ${PERL_EXECUTABLE} ${LCOV_EXECUTABLE} ${LCOV_ARGS} -c -i --no-external -d ${CMAKE_BINARY_DIR} -b ${COVSRC_DIR} -o ${COVDST_DIR}/app_base.info

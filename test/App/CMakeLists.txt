@@ -24,6 +24,8 @@ set( TEST_SRC_FILES
      ${EXPECTATIONS_DIR}/ConsoleColorizer_expect.cpp
      ${MOCKS_DIR}/Config_mock.cpp
      ${EXPECTATIONS_DIR}/Config_expect.cpp
+     ${MOCKS_DIR}/OutputFileParser_mock.cpp
+     ${EXPECTATIONS_DIR}/OutputFileParser_expect.cpp
 )
 
 # Generate test target

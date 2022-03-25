@@ -41,5 +41,6 @@ if( BUILD_TESTING )
     add_subdirectory( Constructor_Expectation )
     add_subdirectory( Destructor_Mock )
     add_subdirectory( Destructor_Expectation )
+    add_subdirectory( OutputFileParser )
 
 endif()

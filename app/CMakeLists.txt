@@ -27,6 +27,7 @@ set( SRC_LIST
      sources/FileHelper.cpp
      sources/ConfigFile.cpp
      sources/StringHelper.cpp
+     sources/OutputFileParser.cpp
 )
 
 set( INC_LIST
@@ -42,6 +43,7 @@ set( INC_LIST
      sources/FileHelper.hpp
      sources/ConfigFile.hpp
      sources/StringHelper.hpp
+     sources/OutputFileParser.hpp
      include/CppUMockGen.hpp
 )
 

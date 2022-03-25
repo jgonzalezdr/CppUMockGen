@@ -22,6 +22,7 @@
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
 #include "ConfigFile.hpp"
+#include "OutputFileParser.hpp"
 
 #include "VersionInfo.h"
 
@@ -206,6 +207,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
         }
 
         std::ofstream mockOutputStream;
+        std::string mockUserCode;
         if( generateMock )
         {
             if( mockOutputFilePath != "@" )
@@ -220,6 +222,10 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 {
                     mockOutputFilePath += IMPL_FILE_EXTENSION;
                 }
+
+                OutputFileParser outputFileParser;
+                outputFileParser.Parse( mockOutputFilePath );
+                mockUserCode = outputFileParser.GetUserCode();
 
                 mockOutputStream.open( mockOutputFilePath );
                 if( !mockOutputStream.is_open() )
@@ -297,7 +303,7 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 }
 
                 std::ostringstream output;
-                parser.GenerateMock( genOpts, mockBaseDirPath, output );
+                parser.GenerateMock( genOpts, mockUserCode, mockBaseDirPath, output );
 
                 if( mockOutputStream.is_open() )
                 {

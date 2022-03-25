@@ -31,6 +31,7 @@
 
 #include "Parser.hpp"
 #include "FileHelper.hpp"
+#include "OutputFileParser.hpp"
 
 #include "Config_expect.hpp"
 #include "Function_expect.hpp"
@@ -152,7 +153,7 @@ TEST( Parser, MockedFunction )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -253,7 +254,7 @@ TEST( Parser, MockedMethod )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -354,7 +355,7 @@ TEST( Parser, MockedConstructor )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -455,7 +456,7 @@ TEST( Parser, MockedDestructor )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -557,7 +558,7 @@ TEST( Parser, MockedMethod_Cpp17 )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -659,7 +660,7 @@ TEST( Parser, MockedMethod_Cpp14 )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -761,7 +762,7 @@ TEST( Parser, MockedMethod_Gnu98 )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -869,7 +870,7 @@ TEST( Parser, MultipleMockableFunctionsAndMethods )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock[3] );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock[0], output1.str().c_str() );
@@ -1195,7 +1196,7 @@ TEST( Parser, MixedMockableNonMockableFunctionsAndMethods )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock[1] );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock[0], output1.str().c_str() );
@@ -1345,7 +1346,7 @@ TEST( Parser, Warning )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", "", output1 );
+        parser->GenerateMock( "", "", "", output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -1491,7 +1492,7 @@ TEST( Parser, IncludePaths )
 }
 
 /*
- * Check that regeneration options are printed properly.
+ * Check that regeneration options are stored properly.
  */
 TEST( Parser, WithRegenOpts )
 {
@@ -1509,7 +1510,7 @@ TEST( Parser, WithRegenOpts )
         const char* testRegenOpts = "####REGEN_OPTS######";
 
         // Exercise
-        parser->GenerateMock( testRegenOpts, "", output );
+        parser->GenerateMock( testRegenOpts, "", "", output );
 
         // Verify
         STRCMP_CONTAINS( StringFromFormat( "Generation options: %s", testRegenOpts ).asCharString(), output.str().c_str() );
@@ -1573,7 +1574,7 @@ TEST( Parser, BaseDirectory )
         expect::Function$::GenerateMock( IgnoreParameter::YES, testMock );
 
         // Exercise
-        parser->GenerateMock( "", tempDirPath, output1 );
+        parser->GenerateMock( "", "", tempDirPath, output1 );
 
         // Verify
         STRCMP_CONTAINS( testMock, output1.str().c_str() );
@@ -1619,6 +1620,48 @@ TEST( Parser, BaseDirectory )
 
         // Prepare
         expect::Function$::Function$dtor();
+
+        // Exercise
+        delete( parser );
+
+    SUBTEST_END
+}
+
+/*
+ * Check that user code is stored properly.
+ */
+TEST( Parser, UserCode )
+{
+    SUBTEST_BEGIN( "Parser instance creation" )
+
+        // Exercise
+        Parser *parser = new Parser();
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "Parser::Parse invocation" )
+
+        // Prepare
+        std::ostringstream output;
+        const char* userCode =
+            "User code...\n"
+            "spanning more than...\n"
+            "one line.\n";
+
+        // Exercise
+        parser->GenerateMock( "", userCode, "", output );
+
+        // Verify
+        STRCMP_CONTAINS( StringFromFormat( "\n"
+                "// " USER_CODE_BEGIN "\n"
+                "%s"
+                "// " USER_CODE_END "\n",
+                userCode ).asCharString(), 
+            output.str().c_str() );
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "Parser instance deletion" )
 
         // Exercise
         delete( parser );
