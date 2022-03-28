@@ -33,15 +33,15 @@ static const std::filesystem::path tempDirPath = std::filesystem::temp_directory
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
-TEST_GROUP( OptionsFromCommandLine )
+TEST_GROUP( Options_FromCommandLine )
 {
 };
 
-TEST_GROUP( OptionsFromString )
+TEST_GROUP( Options_FromString )
 {
 };
 
-TEST_GROUP( OptionsFromConfigFile )
+TEST_GROUP( Options_FromConfigFile )
 {
     std::filesystem::path initialDir;
     std::string outputFilepath1;
@@ -84,7 +84,7 @@ TEST_GROUP( OptionsFromConfigFile )
  *                    TEST CASES IMPLEMENTATION
  *===========================================================================*/
 
-TEST( OptionsFromCommandLine, None )
+TEST( Options_FromCommandLine, None )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe" };
@@ -116,7 +116,7 @@ TEST( OptionsFromCommandLine, None )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Help_Short )
+TEST( Options_FromCommandLine, Help_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-h" };
@@ -151,7 +151,7 @@ TEST( OptionsFromCommandLine, Help_Short )
     STRCMP_CONTAINS( "Usage:\n  CppUMockGenFoo [OPTION...] <input>", options.GetHelpText().c_str() );
 }
 
-TEST( OptionsFromCommandLine, Help_Long )
+TEST( Options_FromCommandLine, Help_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--help" };
@@ -186,7 +186,7 @@ TEST( OptionsFromCommandLine, Help_Long )
     STRCMP_CONTAINS( "Usage:\n  CppUMockGenFoo [OPTION...] <input>", options.GetHelpText().c_str() );
 }
 
-TEST( OptionsFromCommandLine, Version_Short )
+TEST( Options_FromCommandLine, Version_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-v" };
@@ -218,7 +218,7 @@ TEST( OptionsFromCommandLine, Version_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Version_Long )
+TEST( Options_FromCommandLine, Version_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-v" };
@@ -250,7 +250,7 @@ TEST( OptionsFromCommandLine, Version_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Input_Short )
+TEST( Options_FromCommandLine, Input_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-i", "INPUT_PATH" };
@@ -282,7 +282,7 @@ TEST( OptionsFromCommandLine, Input_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Input_Long )
+TEST( Options_FromCommandLine, Input_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--input", "INPUT_PATH" };
@@ -314,7 +314,7 @@ TEST( OptionsFromCommandLine, Input_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Input_Positional )
+TEST( Options_FromCommandLine, Input_Positional )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "INPUT_PATH" };
@@ -346,7 +346,7 @@ TEST( OptionsFromCommandLine, Input_Positional )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Mock_Short_NoPath )
+TEST( Options_FromCommandLine, Mock_Short_NoPath )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-m" };
@@ -378,7 +378,7 @@ TEST( OptionsFromCommandLine, Mock_Short_NoPath )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Mock_Short_WithPath )
+TEST( Options_FromCommandLine, Mock_Short_WithPath )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-m", "OUTPUT_PATH" };
@@ -410,7 +410,7 @@ TEST( OptionsFromCommandLine, Mock_Short_WithPath )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Mock_Long )
+TEST( Options_FromCommandLine, Mock_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--mock-output", "OUTPUT_PATH" };
@@ -442,7 +442,7 @@ TEST( OptionsFromCommandLine, Mock_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Expectations_Short_NoPath )
+TEST( Options_FromCommandLine, Expectations_Short_NoPath )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-e" };
@@ -474,7 +474,7 @@ TEST( OptionsFromCommandLine, Expectations_Short_NoPath )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Expectations_Short_WithPath )
+TEST( Options_FromCommandLine, Expectations_Short_WithPath )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-e", "OUTPUT_PATH" };
@@ -506,7 +506,7 @@ TEST( OptionsFromCommandLine, Expectations_Short_WithPath )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Expectations_Long )
+TEST( Options_FromCommandLine, Expectations_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--expect-output", "OUTPUT_PATH" };
@@ -538,7 +538,7 @@ TEST( OptionsFromCommandLine, Expectations_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, BaseDirectory_Short )
+TEST( Options_FromCommandLine, BaseDirectory_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-B", "BASE_DIR_PATH" };
@@ -570,7 +570,7 @@ TEST( OptionsFromCommandLine, BaseDirectory_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, BaseDirectory_Long )
+TEST( Options_FromCommandLine, BaseDirectory_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--base-directory", "BASE_DIR_PATH" };
@@ -602,7 +602,7 @@ TEST( OptionsFromCommandLine, BaseDirectory_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Regeneration_Short )
+TEST( Options_FromCommandLine, Regeneration_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-r" };
@@ -634,7 +634,7 @@ TEST( OptionsFromCommandLine, Regeneration_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Regeneration_Long )
+TEST( Options_FromCommandLine, Regeneration_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--regen" };
@@ -666,7 +666,7 @@ TEST( OptionsFromCommandLine, Regeneration_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, InterpretAsCpp_Short )
+TEST( Options_FromCommandLine, InterpretAsCpp_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-x" };
@@ -698,7 +698,7 @@ TEST( OptionsFromCommandLine, InterpretAsCpp_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, InterpretAsCpp_Long )
+TEST( Options_FromCommandLine, InterpretAsCpp_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--cpp" };
@@ -730,7 +730,7 @@ TEST( OptionsFromCommandLine, InterpretAsCpp_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, LanguageStandard_Short )
+TEST( Options_FromCommandLine, LanguageStandard_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-s", "LANG_STD" };
@@ -762,7 +762,7 @@ TEST( OptionsFromCommandLine, LanguageStandard_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, LanguageStandard_Long )
+TEST( Options_FromCommandLine, LanguageStandard_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--std", "LANG_STD" };
@@ -794,7 +794,7 @@ TEST( OptionsFromCommandLine, LanguageStandard_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, UseUnderlyingTypedef_Short )
+TEST( Options_FromCommandLine, UseUnderlyingTypedef_Short )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-u" };
@@ -826,7 +826,7 @@ TEST( OptionsFromCommandLine, UseUnderlyingTypedef_Short )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, UseUnderlyingTypedef_Long )
+TEST( Options_FromCommandLine, UseUnderlyingTypedef_Long )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--underlying-typedef" };
@@ -858,7 +858,7 @@ TEST( OptionsFromCommandLine, UseUnderlyingTypedef_Long )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, IncludePaths )
+TEST( Options_FromCommandLine, IncludePaths )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-I", "IncludePath1", "--include-path", "IncludePath2" };
@@ -892,7 +892,7 @@ TEST( OptionsFromCommandLine, IncludePaths )
     STRCMP_EQUAL( "IncludePath2", includePaths[1].c_str() );
 }
 
-TEST( OptionsFromCommandLine, TypeOverrides )
+TEST( Options_FromCommandLine, TypeOverrides )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-t", "TypeOverride1", "--type-override", "TypeOverride2" };
@@ -926,7 +926,7 @@ TEST( OptionsFromCommandLine, TypeOverrides )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromCommandLine, Combination )
+TEST( Options_FromCommandLine, Combination )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "-I", "IncludePath1", "-t", "@std::string=String", "--include-path", "IncludePath2",
@@ -967,7 +967,7 @@ TEST( OptionsFromCommandLine, Combination )
     STRCMP_EQUAL( "IncludePath2", includePaths[1].c_str() );
 }
 
-TEST( OptionsFromCommandLine, NonExistingOption )
+TEST( Options_FromCommandLine, NonExistingOption )
 {
     // Prepare
     std::vector<const char *> args = { "CppUMockGen.exe", "--non-existing" };
@@ -993,7 +993,7 @@ TEST( OptionsFromCommandLine, NonExistingOption )
     STRCMP_CONTAINS( "does not exist", exceptionMessage.c_str() );
 }
 
-TEST( OptionsFromString, Empty )
+TEST( Options_FromString, Empty )
 {
     // Prepare
     Options options;
@@ -1023,7 +1023,7 @@ TEST( OptionsFromString, Empty )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromString, Combination )
+TEST( Options_FromString, Combination )
 {
     // Prepare
     Options options;
@@ -1062,7 +1062,7 @@ TEST( OptionsFromString, Combination )
     STRCMP_EQUAL( "IncludePath2", includePaths[1].c_str() );
 }
 
-TEST( OptionsFromString, NonExistingOption )
+TEST( Options_FromString, NonExistingOption )
 {
     // Prepare
     bool exceptionThrown = false;
@@ -1090,7 +1090,7 @@ TEST( OptionsFromString, NonExistingOption )
 /*
  * Check that escaped quotes are parsed properly
  */
-TEST( OptionsFromString, EscapedQuotes )
+TEST( Options_FromString, EscapedQuotes )
 {
     // Prepare
     Options options;
@@ -1124,7 +1124,7 @@ TEST( OptionsFromString, EscapedQuotes )
 /*
  * Check that if the config file has a non matching ending quote, an error is thrown
  */
-TEST( OptionsFromString, NotMatchingEndQuote )
+TEST( Options_FromString, NotMatchingEndQuote )
 {
     // Prepare
     bool exceptionThrown = false;
@@ -1151,7 +1151,7 @@ TEST( OptionsFromString, NotMatchingEndQuote )
  /*
   * Check that an empty configuration file is handled properly
   */
-TEST( OptionsFromConfigFile, EmptyFile )
+TEST( Options_FromConfigFile, EmptyFile )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1186,7 +1186,7 @@ TEST( OptionsFromConfigFile, EmptyFile )
     CHECK( includePaths.empty() );
 }
 
-TEST( OptionsFromConfigFile, Combination )
+TEST( Options_FromConfigFile, Combination )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1230,7 +1230,7 @@ TEST( OptionsFromConfigFile, Combination )
     STRCMP_EQUAL( "IncludePath2", includePaths[1].c_str() );
 }
 
-TEST( OptionsFromConfigFile, NonExistingOption )
+TEST( Options_FromConfigFile, NonExistingOption )
 {
     // Prepare
     bool exceptionThrown = false;
@@ -1263,7 +1263,7 @@ TEST( OptionsFromConfigFile, NonExistingOption )
 /*
  * Check that if the config file cannot be opened, an error is thrown
  */
-TEST( OptionsFromConfigFile, CannotOpenFile )
+TEST( Options_FromConfigFile, CannotOpenFile )
 {
     // Prepare
     bool exceptionThrown = false;
@@ -1294,7 +1294,7 @@ TEST( OptionsFromConfigFile, CannotOpenFile )
 /*
  * Check that other config files specified in a config file are parsed properly
  */
-TEST( OptionsFromConfigFile, IncludeOtherConfigFile_1Level )
+TEST( Options_FromConfigFile, IncludeOtherConfigFile_1Level )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1347,7 +1347,7 @@ TEST( OptionsFromConfigFile, IncludeOtherConfigFile_1Level )
 /*
  * Check that other config files specified in a config file are parsed properly
  */
-TEST( OptionsFromConfigFile, IncludeOtherConfigFile_2Level )
+TEST( Options_FromConfigFile, IncludeOtherConfigFile_2Level )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1405,7 +1405,7 @@ TEST( OptionsFromConfigFile, IncludeOtherConfigFile_2Level )
 /*
  * Check that if an included config file cannot be opened, an error is thrown
  */
-TEST( OptionsFromConfigFile, IncludeOtherConfigFile_CannotOpenFile )
+TEST( Options_FromConfigFile, IncludeOtherConfigFile_CannotOpenFile )
 {
     // Prepare
     bool exceptionThrown = false;
@@ -1439,7 +1439,7 @@ TEST( OptionsFromConfigFile, IncludeOtherConfigFile_CannotOpenFile )
 /*
  * Check that if a config file is included recursively, it is ignored
  */
-TEST( OptionsFromConfigFile, IncludeOtherConfigFile_Recursive )
+TEST( Options_FromConfigFile, IncludeOtherConfigFile_Recursive )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1479,7 +1479,7 @@ TEST( OptionsFromConfigFile, IncludeOtherConfigFile_Recursive )
 /*
  * Check that escaped quotes are parsed properly
  */
-TEST( OptionsFromConfigFile, EscapedQuotes )
+TEST( Options_FromConfigFile, EscapedQuotes )
 {
     // Prepare
     outputFilepath1 = ( tempDirPath / "ConfigFile.cfg" ).generic_string();
@@ -1518,7 +1518,7 @@ TEST( OptionsFromConfigFile, EscapedQuotes )
 /*
  * Check that if the config file has a non matching ending quote, an error is thrown
  */
-TEST( OptionsFromConfigFile, NotMatchingEndQuote )
+TEST( Options_FromConfigFile, NotMatchingEndQuote )
 {
     // Prepare
     bool exceptionThrown = false;

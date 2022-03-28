@@ -32,13 +32,12 @@
  *===========================================================================*/
 
 #ifdef INTERPRET_C
-#define TEST_GROUP_NAME Function_Mock_C
+#define TEST_GROUP_EX(x) TEST_GROUP_BASE(Function_Mock_C_ ## x, FunctionBase)
+#define TEST_EX(x, y) TEST(Function_Mock_C_ ## x, y)
 #else
-#define TEST_GROUP_NAME Function_Mock_CPP
+#define TEST_GROUP_EX(x) TEST_GROUP_BASE(Function_Mock_CPP_ ## x, FunctionBase)
+#define TEST_EX(x, y) TEST(Function_Mock_CPP_ ## x, y)
 #endif
-
-#define TEST_GROUP_EX(x) TEST_GROUP(x)
-#define TEST_EX(x,y) TEST(x,y)
 
 #ifdef INTERPRET_C
 #define ENUM_TAG "enum "
@@ -73,7 +72,7 @@ StdStringCopier stdStringCopier;
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
 
-TEST_GROUP_EX( TEST_GROUP_NAME )
+TEST_BASE( FunctionBase )
 {
     struct PrimitiveTypeData
     {
@@ -166,6 +165,26 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
     }
 };
 
+TEST_GROUP_EX( Generic )
+{    
+};
+
+TEST_GROUP_EX( Parameter )
+{    
+};
+
+TEST_GROUP_EX( Return )
+{    
+};
+
+TEST_GROUP_EX( Combination )
+{    
+};
+
+TEST_GROUP_EX( TypeOverrides )
+{    
+};
+
 /*===========================================================================
  *                    TEST CASES IMPLEMENTATION
  *===========================================================================*/
@@ -179,7 +198,7 @@ TEST_GROUP_EX( TEST_GROUP_NAME )
 /*
  * Check that a function with definition is not mocked.
  */
-TEST_EX( TEST_GROUP_NAME, WithDefinition )
+TEST_EX( Generic, WithDefinition )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -200,7 +219,7 @@ TEST_EX( TEST_GROUP_NAME, WithDefinition )
 /*
  * Check that a function declared twice is mocked just once.
  */
-TEST_EX( TEST_GROUP_NAME, DoubleDeclaration )
+TEST_EX( Generic, DoubleDeclaration )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -227,7 +246,7 @@ TEST_EX( TEST_GROUP_NAME, DoubleDeclaration )
 /*
  * Check that a function inside a namespace is mocked properly.
  */
-TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
+TEST_EX( Generic, FunctionWithinNamespace )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -252,20 +271,10 @@ TEST_EX( TEST_GROUP_NAME, FunctionWithinNamespace )
 }
 #endif
 
-//*************************************************************************************************
-//
-//                                DIFFERENT RETURNS / NO PARAMETERS
-//
-//*************************************************************************************************
-
-//*************************************************************************************************
-//                                          Basic Return
-//*************************************************************************************************
-
 /*
  * Check mock generation of a function without parameters nor return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
+TEST_EX( Generic, NoReturnNoParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -290,7 +299,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnNoParameters )
 /*
  * Check mock generation of a function with return and an explicit void parameter.
  */
-TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
+TEST_EX( Generic, NoReturnExplicitVoidParameter )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -312,10 +321,20 @@ TEST_EX( TEST_GROUP_NAME, ExplicitVoidParameter )
     // Cleanup
 }
 
+//*************************************************************************************************
+//
+//                                DIFFERENT RETURNS / NO PARAMETERS
+//
+//*************************************************************************************************
+
+//*************************************************************************************************
+//                                          Basic Return
+//*************************************************************************************************
+
 /*
  * Check mock generation of a function without parameters and returning a primitive type value.
  */
-TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -361,7 +380,7 @@ TEST_EX( TEST_GROUP_NAME, PrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning an enum value.
  */
-TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
+TEST_EX( Return, Enum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -392,7 +411,7 @@ TEST_EX( TEST_GROUP_NAME, EnumReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a scoped enum value.
  */
-TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
+TEST_EX( Return, ScopedEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -422,7 +441,7 @@ TEST_EX( TEST_GROUP_NAME, ScopedEnumReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a class.
  */
-TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
+TEST_EX( Return, Class )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -452,7 +471,7 @@ TEST_EX( TEST_GROUP_NAME, ClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a template class.
  */
-TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
+TEST_EX( Return, TemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -483,7 +502,7 @@ TEST_EX( TEST_GROUP_NAME, TemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a struct.
  */
-TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
+TEST_EX( Return, Struct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -517,7 +536,7 @@ TEST_EX( TEST_GROUP_NAME, StructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -554,7 +573,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for an enum.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
+TEST_EX( Return, TypedefForEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -585,7 +604,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForEnumReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a scoped enum.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
+TEST_EX( Return, TypedefForScopedEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -616,7 +635,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForScopedEnumReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a class.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
+TEST_EX( Return, TypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -647,7 +666,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a template class.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
+TEST_EX( Return, TypedefForTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -679,7 +698,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a struct.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
+TEST_EX( Return, TypedefForStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -714,7 +733,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a non-const void value.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
+TEST_EX( Return, PointerToVoid )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -742,7 +761,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToVoidReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const void value.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
+TEST_EX( Return, PointerToConstVoid )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -770,7 +789,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstVoidReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -805,7 +824,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutString )
     {
@@ -840,7 +859,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a string.
  */
-TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
+TEST_EX( Return, String )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -869,7 +888,7 @@ TEST_EX( TEST_GROUP_NAME, StringReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
+TEST_EX( Return, PointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -899,7 +918,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
+TEST_EX( Return, PointerToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -929,7 +948,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a non-const template class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
+TEST_EX( Return, PointerToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -959,7 +978,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const template class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
+TEST_EX( Return, PointerToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -990,7 +1009,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a non-const struct.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
+TEST_EX( Return, PointerToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1020,7 +1039,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const struct.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
+TEST_EX( Return, PointerToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1055,7 +1074,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, LVReferenceToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -1090,7 +1109,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, LVReferenceToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -1125,7 +1144,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
+TEST_EX( Return, LVReferenceToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1157,7 +1176,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a const class.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
+TEST_EX( Return, LVReferenceToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1189,7 +1208,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a non-const template class.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
+TEST_EX( Return, LVReferenceToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1221,7 +1240,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a const template class.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
+TEST_EX( Return, LVReferenceToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1253,7 +1272,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a non-const struct.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
+TEST_EX( Return, LVReferenceToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1285,7 +1304,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a const struct.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
+TEST_EX( Return, LVReferenceToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1321,7 +1340,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, RVReferenceToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -1356,7 +1375,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, RVReferenceToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -1391,7 +1410,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
+TEST_EX( Return, RVReferenceToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1423,7 +1442,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a const class.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
+TEST_EX( Return, RVReferenceToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1455,7 +1474,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a non-const template class.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
+TEST_EX( Return, RVReferenceToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1487,7 +1506,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a const template class.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
+TEST_EX( Return, RVReferenceToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1519,7 +1538,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstTemplateClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a non-const struct.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
+TEST_EX( Return, RVReferenceToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1551,7 +1570,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a right-value reference to a const struct.
  */
-TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
+TEST_EX( Return, RVReferenceToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1588,7 +1607,7 @@ TEST_EX( TEST_GROUP_NAME, RVReferenceToConstStructReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a typedef for a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PointerToTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1623,7 +1642,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a typedef for a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PointerToTypedefForConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1658,7 +1677,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const typedef for a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, PointerToConstTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1693,7 +1712,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a const pointer to a typedef for a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, ConstPointerToTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1729,7 +1748,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToTypedefForPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a pointer to a typedef for a class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
+TEST_EX( Return, PointerToTypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1760,7 +1779,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a pointer to a const typedef for a class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
+TEST_EX( Return, PointerToTypedefForConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1791,7 +1810,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToTypedefForConstClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a const pointer to a typedef for a class.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
+TEST_EX( Return, PointerToConstTypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1827,7 +1846,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstTypedefForClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a pointer to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1862,7 +1881,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a pointer to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -1897,7 +1916,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a typedef for a const pointer to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForConstPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1932,7 +1951,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a const typedef for a pointer to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, ConstTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -1967,7 +1986,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToPrimitiveTypeReturnNoParameter
 /*
  * Check mock generation of a function without parameters and returning a typedef for a string.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
+TEST_EX( Return, TypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -1997,7 +2016,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForStringReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a const typedef for a string.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
+TEST_EX( Return, ConstTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2028,7 +2047,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForStringReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a pointer to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
+TEST_EX( Return, TypedefForPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2059,7 +2078,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a pointer to a const class.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
+TEST_EX( Return, TypedefForPointerToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2090,7 +2109,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForPointerToConstClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a const pointer to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
+TEST_EX( Return, TypedefForConstPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2121,7 +2140,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstPointerToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a const typedef for a pointer to a non-const class.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
+TEST_EX( Return, ConstTypedefForPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2162,7 +2181,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForPointerToClassReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a typedef for a left-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForLVReferenceToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -2199,7 +2218,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForLVReferenceToPrimitiveTypeReturnNoParameters
 /*
  * Check mock generation of a function without parameters and returning a typedef for a right-value reference to a non-const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForRVReferenceToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -2241,7 +2260,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForRVReferenceToPrimitiveTypeReturnNoParameters
 /*
  * Check mock generation of a function without parameters and returning a non-const pointer to a non-const pointer.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
+TEST_EX( Return, PointerToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2269,7 +2288,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToPointerReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a non-const pointer to a const pointer.
  */
-TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
+TEST_EX( Return, PointerToConstPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2297,7 +2316,7 @@ TEST_EX( TEST_GROUP_NAME, PointerToConstPointerReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a const pointer to a non-const pointer.
  */
-TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
+TEST_EX( Return, ConstPointerToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2330,7 +2349,7 @@ TEST_EX( TEST_GROUP_NAME, ConstPointerToPointerReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a non-const pointer.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
+TEST_EX( Return, LVReferenceToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2358,7 +2377,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToPointerReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a left-value reference to a const pointer.
  */
-TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
+TEST_EX( Return, LVReferenceToConstPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2391,7 +2410,7 @@ TEST_EX( TEST_GROUP_NAME, LVReferenceToConstPointerReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a double typedef for a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForTypedefForPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -2433,7 +2452,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPrimitiveTypeReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerReturnNoParameters )
+TEST_EX( Return, TypedefForTypedefForPointerToPrimitiveTypePointer )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -2469,7 +2488,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToPrimitiveTypePointerRetur
 /*
  * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForConstTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -2505,7 +2524,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToPrimitiveTypeReturnN
 /*
  * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, ConstTypedefForTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -2541,7 +2560,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToPrimitiveTypeReturnN
 /*
  * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -2577,7 +2596,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForPointerToConstPrimitiveTypeReturnN
 /*
  * Check mock generation of a function without parameters and returning a double non-const / const typedef for a pointer to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, TypedefForConstTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -2613,7 +2632,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForPointerToConstPrimitiveTypeRe
 /*
  * Check mock generation of a function without parameters and returning a double const / non-const typedef for a pointer to a const primitive type.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeReturnNoParameters )
+TEST_EX( Return, ConstTypedefForTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -2649,7 +2668,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForPointerToConstPrimitiveTypeRe
 /*
  * Check mock generation of a function without parameters and returning a double non-const typedef for a string.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
+TEST_EX( Return, TypedefForTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2680,7 +2699,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForTypedefForStringReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a double non-const / const typedef for a string.
  */
-TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
+TEST_EX( Return, TypedefForConstTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2711,7 +2730,7 @@ TEST_EX( TEST_GROUP_NAME, TypedefForConstTypedefForStringReturnNoParameters )
 /*
  * Check mock generation of a function without parameters and returning a double const / non-const typedef for a string.
  */
-TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
+TEST_EX( Return, ConstTypedefForTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2752,7 +2771,7 @@ TEST_EX( TEST_GROUP_NAME, ConstTypedefForTypedefForStringReturnNoParameters )
 /*
  * Check mock generation of a function with a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
+TEST_EX( Parameter, PrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -2787,7 +2806,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with an enum parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
+TEST_EX( Parameter, Enum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2818,7 +2837,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnEnumParameter )
 /*
  * Check mock generation of a function with a scoped enum parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
+TEST_EX( Parameter, ScopedEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2848,7 +2867,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnScopedEnumParameter )
 /*
  * Check mock generation of a function with a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
+TEST_EX( Parameter, Class )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2879,7 +2898,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnClassParameter )
 /*
  * Check mock generation of a function with a template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
+TEST_EX( Parameter, TemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2911,7 +2930,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTemplateClassParameter )
 /*
  * Check mock generation of a function with a struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
+TEST_EX( Parameter, Struct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -2946,7 +2965,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStructParameter )
 /*
  * Check mock generation of a function with a typedef for primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -2983,7 +3002,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a typedef for an enum parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
+TEST_EX( Parameter, TypedefForEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3014,7 +3033,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForEnumParameter )
 /*
  * Check mock generation of a function with a typedef for a scoped enum parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
+TEST_EX( Parameter, TypedefForScopedEnum )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3045,7 +3064,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForScopedEnumParameter )
 /*
  * Check mock generation of a function with a typedef for a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
+TEST_EX( Parameter, TypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3077,7 +3096,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter )
 /*
  * Check mock generation of a function with a typedef for a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
+TEST_EX( Parameter, TypedefForClass_UseUnderlyingType )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3109,7 +3128,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForClassParameter_UseUnderlyingType )
 /*
  * Check mock generation of a function with a typedef for a template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
+TEST_EX( Parameter, TypedefForTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3141,7 +3160,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter )
 /*
  * Check mock generation of a function with a typedef for a template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyingType )
+TEST_EX( Parameter, TypedefForTemplateClass_UseUnderlyingType )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3174,7 +3193,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTemplateClassParameter_UseUnderlyi
 /*
  * Check mock generation of a function with a typedef for a struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
+TEST_EX( Parameter, TypedefForStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3206,7 +3225,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter )
 /*
  * Check mock generation of a function with a typedef for a struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType )
+TEST_EX( Parameter, TypedefForStruct_UseUnderlyingType )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3242,7 +3261,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStructParameter_UseUnderlyingType 
 /*
  * Check mock generation of a function with a pointer to non-const void parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
+TEST_EX( Parameter, PointerToVoid )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3270,7 +3289,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToVoidParameter )
 /*
  * Check mock generation of a function with pointer to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, PointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -3307,7 +3326,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a pointer to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, PointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -3344,7 +3363,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
+TEST_EX( Parameter, String )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3373,7 +3392,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnStringParameter )
 /*
  * Check mock generation of a function with a pointer to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
+TEST_EX( Parameter, PointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3404,7 +3423,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToClassParameter )
 /*
  * Check mock generation of a function with a pointer to a const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
+TEST_EX( Parameter, PointerToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3435,7 +3454,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstClassParameter )
 /*
  * Check mock generation of a function with a pointer to a non-const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
+TEST_EX( Parameter, PointerToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3466,7 +3485,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTemplateClassParameter )
 /*
  * Check mock generation of a function with a pointer to a const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
+TEST_EX( Parameter, PointerToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3498,7 +3517,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTemplateClassParameter )
 /*
  * Check mock generation of a function with a pointer to a non-const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
+TEST_EX( Parameter, PointerToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3529,7 +3548,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToStructParameter )
 /*
  * Check mock generation of a function with a pointer to a const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
+TEST_EX( Parameter, PointerToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3565,7 +3584,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstStructParameter )
 /*
  * Check mock generation of a function with a left-value reference to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
+TEST_EX( Parameter, LVReferenceToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -3602,7 +3621,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a left-value reference to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, LVReferenceToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -3639,7 +3658,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a left-value reference to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
+TEST_EX( Parameter, LVReferenceToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3672,7 +3691,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToClassParameter )
 /*
  * Check mock generation of a function with a left-value reference to a const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
+TEST_EX( Parameter, LVReferenceToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3705,7 +3724,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstClassParameter )
 /*
  * Check mock generation of a function with a left-value reference to a non-const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
+TEST_EX( Parameter, LVReferenceToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3738,7 +3757,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToTemplateClassParameter )
 /*
  * Check mock generation of a function with a left-value reference to a const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
+TEST_EX( Parameter, LVReferenceToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3771,7 +3790,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstTemplateClassParameter )
 /*
  * Check mock generation of a function with a left-value reference to a non-const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
+TEST_EX( Parameter, LVReferenceToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3804,7 +3823,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToStructParameter )
 /*
  * Check mock generation of a function with a left-value reference to a const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
+TEST_EX( Parameter, LVReferenceToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3841,7 +3860,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstStructParameter )
 /*
  * Check mock generation of a function with a right-value reference to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
+TEST_EX( Parameter, RVReferenceToPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -3878,7 +3897,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a right-value reference to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, RVReferenceToConstPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -3915,7 +3934,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a right-value reference to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
+TEST_EX( Parameter, RVReferenceToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3948,7 +3967,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToClassParameter )
 /*
  * Check mock generation of a function with a right-value reference to a const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
+TEST_EX( Parameter, RVReferenceToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -3981,7 +4000,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstClassParameter )
 /*
  * Check mock generation of a function with a right-value reference to a non-const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
+TEST_EX( Parameter, RVReferenceToTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4014,7 +4033,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToTemplateClassParameter )
 /*
  * Check mock generation of a function with a right-value reference to a const template class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
+TEST_EX( Parameter, RVReferenceToConstTemplateClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4047,7 +4066,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstTemplateClassParameter )
 /*
  * Check mock generation of a function with a right-value reference to a non-const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
+TEST_EX( Parameter, RVReferenceToStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4080,7 +4099,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToStructParameter )
 /*
  * Check mock generation of a function with a right-value reference to a const struct parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
+TEST_EX( Parameter, RVReferenceToConstStruct )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4118,7 +4137,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnRVReferenceToConstStructParameter )
 /*
  * Check mock generation of a function with a pointer to a typedef for a void type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
+TEST_EX( Parameter, PointerToTypedefForVoid )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4148,7 +4167,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForVoidParameter )
 /*
  * Check mock generation of a function with a const pointer to a typedef for a void type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
+TEST_EX( Parameter, ConstPointerToTypedefForVoid )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4178,7 +4197,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForVoidParameter )
 /*
  * Check mock generation of a function with a pointer to a typedef for a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
+TEST_EX( Parameter, PointerToTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -4212,7 +4231,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a pointer to a typedef for a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParameter )
+TEST_EX( Parameter, PointerToTypedefForConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -4246,7 +4265,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a pointer to a const typedef for a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParameter )
+TEST_EX( Parameter, PointerToConstTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -4280,7 +4299,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a const pointer to a typedef for a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParameter )
+TEST_EX( Parameter, ConstPointerToTypedefForPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithString )
     {
@@ -4315,7 +4334,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a pointer to a typedef for a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
+TEST_EX( Parameter, PointerToTypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4347,7 +4366,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForClassParameter )
 /*
  * Check mock generation of a function with a pointer to a typedef for a const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
+TEST_EX( Parameter, PointerToTypedefForConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4379,7 +4398,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToTypedefForConstClassParameter )
 /*
  * Check mock generation of a function with a pointer to a const typedef for a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
+TEST_EX( Parameter, PointerToConstTypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4411,7 +4430,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstTypedefForClassParameter )
 /*
  * Check mock generation of a function with a const pointer to a typedef for a class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
+TEST_EX( Parameter, ConstPointerToTypedefForClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4448,7 +4467,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToTypedefForClassParameter )
 /*
  * Check mock generation of a function with a typedef for a pointer to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -4483,7 +4502,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a typedef for a pointer to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -4518,7 +4537,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a typedef for a const pointer to a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForConstPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -4553,7 +4572,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a const typedef for a pointer to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, ConstTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -4588,7 +4607,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToPrimitiveTypeParamet
 /*
  * Check mock generation of a function with a typedef for a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
+TEST_EX( Parameter, TypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4618,7 +4637,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForStringParameter )
 /*
  * Check mock generation of a function with a const typedef for a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
+TEST_EX( Parameter, ConstTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4649,7 +4668,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForStringParameter )
 /*
  * Check mock generation of a function with a typedef for a pointer to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
+TEST_EX( Parameter, TypedefForPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4680,7 +4699,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToClassParameter )
 /*
  * Check mock generation of a function with a typedef for a pointer to a const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
+TEST_EX( Parameter, TypedefForPointerToConstClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4711,7 +4730,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForPointerToConstClassParameter )
 /*
  * Check mock generation of a function with a typedef for a const pointer to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
+TEST_EX( Parameter, TypedefForConstPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4742,7 +4761,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstPointerToClassParameter )
 /*
  * Check mock generation of a function with a const typedef for a pointer to a non-const class parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
+TEST_EX( Parameter, ConstTypedefForPointerToClass )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4781,7 +4800,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForPointerToClassParameter )
 /*
  * Check mock generation of a function with a typedef for a reference to a non-const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForReferenceToPrimitiveType )
 {
     const std::vector<std::string> referenceTypes = { "&", "&&" };
 
@@ -4826,7 +4845,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForReferenceToPrimitiveTypeParameter 
 /*
  * Check mock generation of a function with a pointer to a pointer parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
+TEST_EX( Parameter, PointerToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4854,7 +4873,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToPointerParameter )
 /*
  * Check mock generation of a function with a pointer to a const pointer parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
+TEST_EX( Parameter, PointerToConstPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4882,7 +4901,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnPointerToConstPointerParameter )
 /*
  * Check mock generation of a function with a const pointer to a pointer parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
+TEST_EX( Parameter, ConstPointerToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4915,7 +4934,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstPointerToPointerParameter )
 /*
  * Check mock generation of a function with a left-value reference to a pointer parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
+TEST_EX( Parameter, LVReferenceToPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4943,7 +4962,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToPointerParameter )
 /*
  * Check mock generation of a function with a left-value reference to a const pointer parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
+TEST_EX( Parameter, LVReferenceToConstPointer )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -4976,7 +4995,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnLVReferenceToConstPointerParameter )
 /*
  * Check mock generation of a function with a double typedef for a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForTypedefForPrimitiveType )
 {
     for( auto typeData : primitiveTypes )
     {
@@ -5018,7 +5037,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPrimitiveTypeParameter )
 /*
  * Check mock generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePointerParameter )
+TEST_EX( Parameter, TypedefForTypedefForPointerToPrimitiveTypePointer )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -5054,7 +5073,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToPrimitiveTypePo
 /*
  * Check mock generation of a function with a double non-const / const typedef for a pointer to a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForConstTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -5090,7 +5109,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToPrimitiveT
 /*
  * Check mock generation of a function with a double const / non-const typedef for a pointer to a primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveTypeParameter )
+TEST_EX( Parameter, ConstTypedefForTypedefForPointerToPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithStringAndVoid )
     {
@@ -5126,7 +5145,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToPrimitiveT
 /*
  * Check mock generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -5162,7 +5181,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForPointerToConstPrimitiveT
 /*
  * Check mock generation of a function with a double non-const / const typedef for a pointer to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, TypedefForConstTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -5198,7 +5217,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForPointerToConstPrimi
 /*
  * Check mock generation of a function with a double const / non-const typedef for a pointer to a const primitive type parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimitiveTypeParameter )
+TEST_EX( Parameter, ConstTypedefForTypedefForPointerToConstPrimitiveType )
 {
     for( auto typeData : primitivePointedTypesWithoutStringWithVoid )
     {
@@ -5234,7 +5253,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForPointerToConstPrimi
 /*
  * Check mock generation of a function with a double non-const typedef for a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
+TEST_EX( Parameter, TypedefForTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -5265,7 +5284,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForTypedefForStringParameter )
 /*
  * Check mock generation of a function with a double non-const / const typedef for a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
+TEST_EX( Parameter, TypedefForConstTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -5296,7 +5315,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnTypedefForConstTypedefForStringParameter )
 /*
  * Check mock generation of a function with a double const / non-const typedef for a string parameter and without return value.
  */
-TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
+TEST_EX( Parameter, ConstTypedefForTypedefForString )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -5333,7 +5352,7 @@ TEST_EX( TEST_GROUP_NAME, VoidReturnConstTypedefForTypedefForStringParameter )
 /*
  * Check mock generation of a function with return and multiple parameters.
  */
-TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
+TEST_EX( Combination, ReturnAndMultipleParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -5370,7 +5389,7 @@ TEST_EX( TEST_GROUP_NAME, ReturnAndMultipleParameters )
 /*
  * Check mock generation of a function with return and multiple unnamed parameters.
  */
-TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
+TEST_EX( Combination, MultipleUnnamedParameters )
 {
     // Prepare
     Config* config = GetMockConfig();
@@ -5404,10 +5423,16 @@ TEST_EX( TEST_GROUP_NAME, MultipleUnnamedParameters )
     // Cleanup
 }
 
+//*************************************************************************************************
+//
+//                                         TYPE OVERRIDES
+//
+//*************************************************************************************************
+
 /*
  * Check mock generation of a function with parameter override.
  */
-TEST_EX( TEST_GROUP_NAME, ParameterOverride )
+TEST_EX( TypeOverrides, ParameterOverride_Simple )
 {
     struct TestData
     {
@@ -5485,7 +5510,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride )
 /*
  * Check mock generation of a function with parameter override of type InputOfType.
  */
-TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
+TEST_EX( TypeOverrides, ParameterOverride_InputOfType )
 {
     // Prepare
     const std::string exposedTypeName = "Struct1";
@@ -5542,7 +5567,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_InputOfType )
 /*
  * Check mock generation of a function with parameter override of type OutputOfType.
  */
-TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
+TEST_EX( TypeOverrides, ParameterOverride_OutputOfType )
 {
     // Prepare
     const std::string exposedTypeName = "Struct1";
@@ -5599,7 +5624,7 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_OutputOfType )
 /*
  * Check mock generation of a function with parameter override of type MemoryBuffer.
  */
-TEST_EX( TEST_GROUP_NAME, ParameterOverride_MemoryBuffer )
+TEST_EX( TypeOverrides, ParameterOverride_MemoryBuffer )
 {
     struct TestData
     {
@@ -5668,9 +5693,51 @@ TEST_EX( TEST_GROUP_NAME, ParameterOverride_MemoryBuffer )
 }
 
 /*
+ * Check mock generation of a function with parameter override that skips a parameter.
+ */
+TEST_EX( TypeOverrides, ParameterOverride_Skip )
+{
+    // Prepare
+    mock().installCopier( "std::string", stdStringCopier );
+
+    Config* config = GetMockConfig();
+    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p2", override );
+    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
+
+    expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
+    expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
+    expect::Config$::GetTypeOverride( config, "#signed char *", nullptr );
+    expect::Config$::GetTypeOverride( config, "#short", nullptr );
+
+    expect::Config$::OverrideSpec$::GetType( override, MockedType::Skip );
+
+    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
+
+    // Exercise
+    std::vector<std::string> results;
+    unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+    // Verify
+    mock().checkExpectations();
+    CHECK_EQUAL( 1, functionCount );
+    CHECK_EQUAL( 1, results.size() );
+    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char *, signed char * p3, short p4)\n{\n"
+                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
+                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
+                  "}\n", results[0].c_str() );
+    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+    // Cleanup
+}
+
+/*
  * Check mock generation of a function with parameter override.
  */
-TEST_EX( TEST_GROUP_NAME, ReturnOverride )
+TEST_EX( TypeOverrides, ReturnOverride )
 {
     struct TestData
     {
@@ -5731,47 +5798,3 @@ TEST_EX( TEST_GROUP_NAME, ReturnOverride )
         mock().clear();
     }
 }
-
-/*
- * Check mock generation of a function with parameter override that skips a parameter.
- */
-TEST_EX( TEST_GROUP_NAME, ParameterOverride_Skip )
-{
-    // Prepare
-    mock().installCopier( "std::string", stdStringCopier );
-
-    Config* config = GetMockConfig();
-    const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
-    expect::Config$::GetTypeOverride( config, "function1#p2", override );
-    expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
-    expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
-
-    expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
-    expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
-    expect::Config$::GetTypeOverride( config, "#signed char *", nullptr );
-    expect::Config$::GetTypeOverride( config, "#short", nullptr );
-
-    expect::Config$::OverrideSpec$::GetType( override, MockedType::Skip );
-
-    SimpleString testHeader = "unsigned long function1(const signed int* p1, const char* p2, signed char* p3, short p4);\n";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "unsigned long function1(const int * p1, const char *, signed char * p3, short p4)\n{\n"
-                  "    return mock().actualCall(\"function1\").withConstPointerParameter(\"p1\", p1)"
-                       ".withOutputParameter(\"p3\", p3).withIntParameter(\"p4\", p4).returnUnsignedLongIntValue();\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-
