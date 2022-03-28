@@ -32,7 +32,7 @@ const std::string& OutputFileParser::GetGenerationOptions() const
 
 void OutputFileParser::Parse( const std::filesystem::path &filepath )
 {
-    bool captureUserCode;
+    bool captureUserCode = false;
     std::string line;
 
     std::ifstream outputFile( filepath );
