@@ -14,6 +14,7 @@
 #include <string>
 
 #include "ClangHelper.hpp"
+#include "StringHelper.hpp"
 
 //*************************************************************************************************
 //                                             CONSTANTS
@@ -690,11 +691,20 @@ ReturnStandard* ReturnParser::ProcessTypeTypedef( const CXType &returnType, bool
 //
 //*************************************************************************************************
 
+static std::string GetSignature( const std::string &typePre, const std::string &name, const std::string &typePost ) noexcept
+{
+    return TrimString( typePre + " " + name + typePost );
+}
 
 class Function::Argument
 {
 public:
     virtual ~Argument() noexcept {}
+
+    const std::string& GetName() const noexcept
+    {
+        return m_name;
+    }
 
     void SetName( const std::string &name ) noexcept
     {
@@ -703,7 +713,19 @@ public:
 
     void SetOriginalType( const std::string &type ) noexcept
     {
-        m_originalType = type;
+        size_t postPos = type.find( '[' );
+        if( postPos != std::string::npos )
+        {
+            m_mockTypePre = TrimString( type.substr( 0, postPos ) );
+            m_mockTypePost = type.substr( postPos );
+            m_expectationType = m_mockTypePre + " *";
+        }
+        else
+        {
+            m_mockTypePre = type;
+            m_mockTypePost.clear();
+            m_expectationType = type;
+        }
     }
 
     virtual std::string GetMockSignature() const noexcept = 0;
@@ -721,8 +743,26 @@ public:
     virtual bool IsSkipped() const noexcept = 0;
 
 protected:
+    const std::string& GetMockTypePre() const noexcept
+    {
+        return m_mockTypePre;
+    }
+
+    const std::string& GetMockTypePost() const noexcept
+    {
+        return m_mockTypePost;
+    }
+
+    const std::string& GetExpectationType() const noexcept
+    {
+        return m_expectationType;
+    }
+
+private:
     std::string m_name;
-    std::string m_originalType;
+    std::string m_mockTypePre;
+    std::string m_mockTypePost;
+    std::string m_expectationType;
 };
 
 class ArgumentSkip : public Function::Argument
@@ -732,7 +772,7 @@ public:
 
     virtual std::string GetMockSignature() const noexcept override
     {
-        return m_originalType;
+        return GetSignature( GetMockTypePre(), "", GetMockTypePost() );
     }
 
     virtual std::string GetExpectationSignature() const noexcept override
@@ -777,32 +817,19 @@ public:
 
     virtual std::string GetMockSignature() const noexcept override
     {
-        return m_originalType + " " + m_name;
+        return GetSignature( GetMockTypePre(), GetName(), GetMockTypePost() );
     }
 
     virtual std::string GetExpectationSignature() const noexcept override
     {
+        std::string usedType = ( m_expectationUseBaseType ? GetExpectationBaseType() : GetExpectationSignatureType() );
         if( CanBeIgnored() )
         {
-            if( m_expectationUseBaseType )
-            {
-                return "CppUMockGen::Parameter<" + GetExpectationBaseType() + "> " + m_name;
-            }
-            else
-            {
-                return "CppUMockGen::Parameter<" + m_originalType + (m_expectationArgByRef ? "&> " : "> ") + m_name;
-            }
+            return "CppUMockGen::Parameter<" + usedType + "> " + GetName();
         }
         else
         {
-            if( m_expectationUseBaseType )
-            {
-                return GetExpectationBaseType() + " " + m_name;
-            }
-            else
-            {
-                return GetSignatureType() + (m_expectationArgByRef ? " &" : " ") + m_name;
-            }
+            return usedType + " " + GetName();
         }
     }
 
@@ -813,7 +840,7 @@ public:
 
     virtual std::string GetExpectationCallArgument() const noexcept override
     {
-        return m_name;
+        return GetName();
     }
 
     virtual std::string GetExpectationBody( bool argumentsSkipped ) const noexcept override
@@ -822,11 +849,11 @@ public:
         {
             if( argumentsSkipped )
             {
-                return INDENT "if(!" + m_name + ".isIgnored()) { " EXPECTED_CALL_VAR_NAME "." + GetExpectationBodyCall( ".getValue()" ) + "; }\n";
+                return INDENT "if(!" + GetName() + ".isIgnored()) { " EXPECTED_CALL_VAR_NAME "." + GetExpectationBodyCall( ".getValue()" ) + "; }\n";
             }
             else
             {
-                return INDENT "if(" + m_name + ".isIgnored()) { " IGNORE_OTHERS_VAR_NAME " = true; } else { " EXPECTED_CALL_VAR_NAME "." +
+                return INDENT "if(" + GetName() + ".isIgnored()) { " IGNORE_OTHERS_VAR_NAME " = true; } else { " EXPECTED_CALL_VAR_NAME "." +
                         GetExpectationBodyCall( ".getValue()" ) + "; }\n";
             }
         }
@@ -897,27 +924,32 @@ protected:
 private:
     std::string GetMockBodyCall() const noexcept
     {
-        return GetCallFront( true ) + "\"" + m_name + "\", " +  GetCallMiddle( true ) + m_mockArgExprFront + m_name + m_mockArgExprBack +
-               GetCallBack( true, "" );
+        return GetCallFront( true ) + "\"" + GetName() + "\", " + GetCallMiddle( true ) + m_mockArgExprFront + GetName() +
+            m_mockArgExprBack + GetCallBack( true, "" );
     }
 
     std::string GetExpectationBodyCall( const std::string& getter ) const noexcept
     {
-        return GetCallFront( false ) + "\"" + m_name + "\", " + GetCallMiddle( false ) + 
-               ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) + m_name + getter + 
-               ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack( false, getter );
+        return GetCallFront( false ) + "\"" + GetName() + "\", " + GetCallMiddle( false ) +
+            ( m_expectationUseBaseType ? "" : m_mockArgExprFront ) + GetName() + getter +
+            ( m_expectationUseBaseType ? "" : m_mockArgExprBack ) + GetCallBack( false, getter );
     }
 
-    std::string GetSignatureType() const noexcept
+    std::string GetExpectationSignatureType() const noexcept
     {
+        std::string ret = GetExpectationType();
+        
         if( m_isRVReference )
         {
-            return m_originalType.substr( 0, ( m_originalType.size() - 1 ) );
+            ret = ret.substr( 0, ( ret.size() - 1 ) );
         }
-        else
+
+        if( m_expectationArgByRef )
         {
-            return m_originalType;
+            ret += "&";
         }
+
+        return ret;
     }
 
     bool m_expectationArgByRef;
@@ -1096,17 +1128,12 @@ public:
 
     virtual ~ArgumentOutput() noexcept {}
 
-    virtual std::string GetMockSignature() const noexcept override
-    {
-        return m_originalType + " " + m_name;
-    }
-
     virtual std::string GetExpectationSignature() const noexcept override
     {
         std::string ret = ArgumentStandard::GetExpectationSignature();
         if( !m_calculateSizeFromType )
         {
-            ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
+            ret += ", size_t " SIZEOF_VAR_PREFIX + GetName();
         }
         return ret;
     }
@@ -1116,7 +1143,7 @@ public:
         std::string ret = ArgumentStandard::GetExpectationCallArgument();
         if( !m_calculateSizeFromType )
         {
-            ret += ", " SIZEOF_VAR_PREFIX + m_name;
+            ret += ", " SIZEOF_VAR_PREFIX + GetName();
         }
         return ret;
     }
@@ -1147,11 +1174,11 @@ protected:
         }
         else if( m_calculateSizeFromType )
         {
-            return ", sizeof(*" + m_mockArgExprFront + m_name + m_mockArgExprBack + "))";
+            return ", sizeof(*" + m_mockArgExprFront + GetName() + m_mockArgExprBack + "))";
         }
         else
         {
-            return ", " SIZEOF_VAR_PREFIX + m_name + ")";
+            return ", " SIZEOF_VAR_PREFIX + GetName() + ")";
         }
     }
 
@@ -1177,17 +1204,12 @@ public:
 
     virtual ~ArgumentMemoryBuffer() noexcept {}
 
-    virtual std::string GetMockSignature() const noexcept override
-    {
-        return m_originalType + " " + m_name;
-    }
-
     virtual std::string GetExpectationSignature() const noexcept override
     {
         std::string ret = ArgumentStandard::GetExpectationSignature();
         if( !m_calculateSizeFromType )
         {
-            ret += ", size_t " SIZEOF_VAR_PREFIX + m_name;
+            ret += ", size_t " SIZEOF_VAR_PREFIX + GetName();
         }
         return ret;
     }
@@ -1197,7 +1219,7 @@ public:
         std::string ret = ArgumentStandard::GetExpectationCallArgument();
         if( !m_calculateSizeFromType )
         {
-            ret += ", " SIZEOF_VAR_PREFIX + m_name;
+            ret += ", " SIZEOF_VAR_PREFIX + GetName();
         }
         return ret;
     }
@@ -1219,13 +1241,13 @@ protected:
         {
             if( m_calculateSizeFromType )
             {
-                return ")), sizeof(*" + m_mockArgExprFront + m_name + m_mockArgExprBack + "))";
+                return ")), sizeof(*" + m_mockArgExprFront + GetName() + m_mockArgExprBack + "))";
             }
             else
             {
                 if( m_hasSizeExprPlaceholder )
                 {
-                    return ")), " + m_sizeExprFront + m_name + m_sizeExprBack + ")";
+                    return ")), " + m_sizeExprFront + GetName() + m_sizeExprBack + ")";
                 }
                 else
                 {
@@ -1237,11 +1259,11 @@ protected:
         {
             if( m_calculateSizeFromType )
             {
-                return ")), sizeof(*" + m_mockArgExprFront + m_name + getter + m_mockArgExprBack + "))";
+                return ")), sizeof(*" + m_mockArgExprFront + GetName() + getter + m_mockArgExprBack + "))";
             }
             else
             {
-                return ")), " SIZEOF_VAR_PREFIX + m_name + ")";
+                return ")), " SIZEOF_VAR_PREFIX + GetName() + ")";
             }
         }
     }
@@ -1328,10 +1350,11 @@ public:
 private:
     Function::Argument* ProcessOverride( const Config::OverrideSpec *override );
     ArgumentStandard* ProcessType( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    ArgumentStandard* ProcessTypePointer( const CXType &argType, const CXType &origArgType ) noexcept;
+    ArgumentStandard* ProcessTypePointer( const CXType &argType, const CXType &origArgType );
+    ArgumentStandard* ProcessTypeArray( const CXType &argType, const CXType &origArgType );
     ArgumentStandard* ProcessTypeRVReference( const CXType &argType, const CXType &origArgType );
     ArgumentStandard* ProcessTypeTypedef( const CXType &argType, const CXType &origArgType, bool inheritConst );
-    ArgumentStandard* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee ) noexcept;
+    ArgumentStandard* ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee );
 
     const Config &m_config;
 };
@@ -1512,6 +1535,10 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
             ret = ProcessTypePointer( argType, origArgType );
             break;
 
+        case CXType_IncompleteArray:
+            ret = ProcessTypeArray( argType, origArgType );
+            break;
+
         case CXType_RValueReference:
             ret = ProcessTypeRVReference( argType, origArgType );
             break;
@@ -1542,7 +1569,7 @@ ArgumentStandard* ArgumentParser::ProcessType( const CXType &argType, const CXTy
     return ret;
 }
 
-ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType ) noexcept
+ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, const CXType &origArgType )
 {
     ArgumentStandard *ret;
 
@@ -1580,7 +1607,7 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
             switch( underlyingPointeeType.kind )
             {
                 case CXType_Void:
-                case CXType_Pointer:
+                case CXType_Pointer: // TODO: Remove, should be output
                     ret = new ArgumentPointer( false );
                     break;
 
@@ -1602,6 +1629,25 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
     }
 
     return ret;
+}
+
+ArgumentStandard* ArgumentParser::ProcessTypeArray( const CXType &argType, const CXType &origArgType )
+{
+    const CXType elementType = clang_getElementType( argType );
+    bool isElementConst = clang_isConstQualifiedType( elementType );
+
+    // Resolve possible typedefs
+    const CXType underlyingElementType = clang_getCanonicalType( elementType );
+    bool isUnderlyingElementConst = clang_isConstQualifiedType( underlyingElementType );
+
+    if( isElementConst || isUnderlyingElementConst )
+    {
+        return new ArgumentConstPointer( false );
+    }
+    else
+    {
+        return new ArgumentOutput( false );
+    }
 }
 
 ArgumentStandard* ArgumentParser::ProcessTypeRVReference( const CXType &argType, const CXType &origArgType )
@@ -1670,6 +1716,19 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
             ret->MockArgExprPrepend("&");
         }
     }
+    else if( underlyingType.kind == CXType_IncompleteArray )
+    {
+        bool isArrayConst = clang_isConstQualifiedType( underlyingType );
+
+        if( isArrayConst )
+        {
+            ret = new ArgumentConstPointer( false );
+        }
+        else
+        {
+            ret = new ArgumentOutput( false );
+        }
+    }
     else
     {
         bool isTypedefConst = clang_isConstQualifiedType( argType ) || inheritConst;
@@ -1679,7 +1738,7 @@ ArgumentStandard* ArgumentParser::ProcessTypeTypedef( const CXType &argType, con
     return ret;
 }
 
-ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee ) noexcept
+ArgumentStandard* ArgumentParser::ProcessTypeRecord( const CXType &argType, const CXType &origArgType, bool inheritConst, bool isPointee )
 {
     ArgumentInputOfType *ret;
 

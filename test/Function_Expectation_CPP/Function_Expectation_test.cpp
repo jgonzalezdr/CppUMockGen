@@ -4811,6 +4811,158 @@ TEST_EX( Parameter, PointerToConstStruct )
 }
 
 //*************************************************************************************************
+//                              Simple Array Parameters
+//*************************************************************************************************
+
+/*
+ * Check expectation generation of a function with an array of non-const types parameter and without return value.
+ */
+TEST_EX( Parameter, ArrayOfTypes )
+{
+    auto testedTypes = primitivePointedTypesWithString;
+
+    testedTypes.insert( testedTypes.end(),
+    { 
+#ifndef INTERPRET_C
+        { "ScopedEnum1", "ScopedEnum1" },
+        { "Class1", "Class1" },
+        { "TClass1<short>", "TClass1<short>" },
+        { "Enum2", "Enum2" },
+#else
+        { "enum Enum2", "enum Enum2" },
+#endif
+        { "struct Struct1", "struct Struct1" }
+    } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
+        SimpleString typeKey = StringFromFormat( "#%s []", typeData.mockedType.c_str() );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat(
+#ifndef INTERPRET_C
+            "enum class ScopedEnum1 { A, B, C };\n"
+            "class Class1 { int member1[100]; };\n"
+            "template<class T> class TClass1 { T member1[100]; };\n"
+#endif
+            "enum Enum2 { X, Y, Z };\n"
+            "struct Struct1 { int member1[100]; };\n"
+            "void function1(%s p[]);",
+            typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(%s * p, size_t __sizeof_p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, %s * p, size_t __sizeof_p);\n"
+            "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(%s * p, size_t __sizeof_p)\n{\n"
+            "    return function1(1, p, __sizeof_p);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, %s * p, size_t __sizeof_p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check expectation generation of a function with an array of const types parameter and without return value.
+ */
+TEST_EX( Parameter, ArrayOfConstTypes )
+{
+    auto testedTypes = primitivePointedTypesWithString;
+
+    testedTypes.insert( testedTypes.end(),
+    { 
+#ifndef INTERPRET_C
+        { "ScopedEnum1", "ScopedEnum1" },
+        { "Class1", "Class1" },
+        { "TClass1<short>", "TClass1<short>" },
+        { "Enum2", "Enum2" },
+#else
+        { "enum Enum2", "enum Enum2" },
+#endif
+        { "struct Struct1", "struct Struct1" }
+    } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
+        SimpleString typeKey = StringFromFormat( "#const %s []", typeData.mockedType.c_str() );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat(
+#ifndef INTERPRET_C
+            "enum class ScopedEnum1 { A, B, C };\n"
+            "class Class1 { int member1[100]; };\n"
+            "template<class T> class TClass1 { T member1[100]; };\n"
+#endif
+            "enum Enum2 { X, Y, Z };\n"
+            "struct Struct1 { int member1[100]; };\n"
+            "void function1(const %s p[]);",
+            typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto = StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const %s *> p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s *> p);\n"
+            "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        SimpleString expectedResultImpl = StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const %s *> p)\n{\n"
+            "    return function1(1, p);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const %s *> p)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n", typeData.mockedType.c_str(), typeData.mockedType.c_str() );
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
 //                              Simple Left-Value Reference Parameters
 //*************************************************************************************************
 
@@ -6510,6 +6662,233 @@ TEST_EX( Parameter, ConstTypedefForPointerToClass )
 }
 
 //*************************************************************************************************
+//                                 Typedef for Array Parameters
+//*************************************************************************************************
+
+/*
+ * Check expectation generation of a function with a typedef for an array of non-const types parameter and without return value.
+ */
+TEST_EX( Parameter, TypedefForArrayOfType )
+{
+    auto testedTypes = primitivePointedTypesWithString;
+
+    testedTypes.insert( testedTypes.end(),
+    { 
+#ifndef INTERPRET_C
+        { "ScopedEnum1", "ScopedEnum1" },
+        { "Class1", "Class1" },
+        { "TClass1<short>", "TClass1<short>" },
+        { "Enum2", "Enum2" },
+#else
+        { "enum Enum2", "enum Enum2" },
+#endif
+        { "struct Struct1", "struct Struct1" }
+    } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
+
+        SimpleString testHeader = StringFromFormat(
+#ifndef INTERPRET_C
+            "enum class ScopedEnum1 { A, B, C };\n"
+            "class Class1 { int member1[100]; };\n"
+            "template<class T> class TClass1 { T member1[100]; };\n"
+#endif
+            "enum Enum2 { X, Y, Z };\n"
+            "struct Struct1 { int member1[100]; };\n"
+            "typedef %s Type1[];\n"
+            "void function1(Type1 p);",
+            typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 p, size_t __sizeof_p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 p, size_t __sizeof_p);\n"
+            "}\n",
+            resultsProto[0].c_str() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(Type1 p, size_t __sizeof_p)\n{\n"
+            "    return function1(1, p, __sizeof_p);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, Type1 p, size_t __sizeof_p)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    __expectedCall__.withOutputParameterReturning(\"p\", p, __sizeof_p);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n",
+            resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check expectation generation of a function with a typedef for an array of const types parameter and without return value.
+ */
+TEST_EX( Parameter, TypedefForArrayOfConstTypes )
+{
+    auto testedTypes = primitivePointedTypesWithString;
+
+    testedTypes.insert( testedTypes.end(),
+    { 
+#ifndef INTERPRET_C
+        { "ScopedEnum1", "ScopedEnum1" },
+        { "Class1", "Class1" },
+        { "TClass1<short>", "TClass1<short>" },
+        { "Enum2", "Enum2" },
+#else
+        { "enum Enum2", "enum Enum2" },
+#endif
+        { "struct Struct1", "struct Struct1" }
+    } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "#Type1", nullptr );
+
+        SimpleString testHeader = StringFromFormat(
+#ifndef INTERPRET_C
+            "enum class ScopedEnum1 { A, B, C };\n"
+            "class Class1 { int member1[100]; };\n"
+            "template<class T> class TClass1 { T member1[100]; };\n"
+#endif
+            "enum Enum2 { X, Y, Z };\n"
+            "struct Struct1 { int member1[100]; };\n"
+            "typedef const %s Type1[];\n"
+            "void function1(Type1 p);",
+            typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p);\n"
+            "}\n",
+            resultsProto[0].c_str() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<Type1> p)\n{\n"
+            "    return function1(1, p);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<Type1> p)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n",
+            resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check expectation generation of a function with a const typedef for an array of types parameter and without return value.
+ */
+TEST_EX( Parameter, ConstTypedefForArrayOfTypes )
+{
+    auto testedTypes = primitivePointedTypesWithString;
+
+    testedTypes.insert( testedTypes.end(),
+    { 
+#ifndef INTERPRET_C
+        { "ScopedEnum1", "ScopedEnum1" },
+        { "Class1", "Class1" },
+        { "TClass1<short>", "TClass1<short>" },
+        { "Enum2", "Enum2" },
+#else
+        { "enum Enum2", "enum Enum2" },
+#endif
+        { "struct Struct1", "struct Struct1" }
+    } );
+
+    for( auto typeData : testedTypes )
+    {
+        // Prepare
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#p", nullptr );
+        expect::Config$::GetTypeOverride( config, "#const Type1", nullptr );
+
+        SimpleString testHeader = StringFromFormat(
+#ifndef INTERPRET_C
+            "enum class ScopedEnum1 { A, B, C };\n"
+            "class Class1 { int member1[100]; };\n"
+            "template<class T> class TClass1 { T member1[100]; };\n"
+#endif
+            "enum Enum2 { X, Y, Z };\n"
+            "struct Struct1 { int member1[100]; };\n"
+            "typedef %s Type1[];\n"
+            "void function1(const Type1 p);",
+            typeData.originalType.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p);\n"
+            "}\n",
+            resultsProto[0].c_str() );
+        STRCMP_EQUAL( 
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<const Type1> p)\n{\n"
+            "    return function1(1, p);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const Type1> p)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    if(p.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p\", p.getValue()); }\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n",
+            resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
 //                                 Reference to Typedef Parameters
 //*************************************************************************************************
 
@@ -6746,6 +7125,116 @@ TEST_EX( Parameter, ConstPointerToPointer )
     CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
 
     // Cleanup
+}
+
+//*************************************************************************************************
+//                           Array of Pointers Parameters
+//*************************************************************************************************
+
+/*
+ * Check expectation generation of a function with an array of pointers parameter and without return value.
+ */
+TEST_EX( Parameter, ArrayOfPointers )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        auto typeOverride = StringFromFormat( "#%s *[]", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
+        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* i[]);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(%s * * i, size_t __sizeof_i);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, %s * * i, size_t __sizeof_i);\n"
+            "}\n",  type.c_str(), type.c_str() ).asCharString(),
+            resultsProto[0].c_str() );
+        STRCMP_EQUAL( StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(%s * * i, size_t __sizeof_i)\n{\n"
+            "    return function1(1, i, __sizeof_i);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, %s * * i, size_t __sizeof_i)\n{\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    __expectedCall__.withOutputParameterReturning(\"i\", i, __sizeof_i);\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check expectation generation of a function with an array of const pointers parameter and without return value.
+ */
+TEST_EX( Parameter, ArrayOfConstPointers )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        auto typeOverride = StringFromFormat( "#%s *const []", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
+        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* const j[]);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<%s *const *> j);\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<%s *const *> j);\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            resultsProto[0].c_str() );
+        STRCMP_EQUAL( StringFromFormat(
+            "namespace expect {\n"
+            "MockExpectedCall& function1(CppUMockGen::Parameter<%s *const *> j)\n{\n"
+            "    return function1(1, j);\n"
+            "}\n"
+            "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<%s *const *> j)\n{\n"
+            "    bool __ignoreOtherParams__ = false;\n"
+            "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+            "    if(j.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"j\", j.getValue()); }\n"
+            "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+            "    return __expectedCall__;\n"
+            "}\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
 }
 
 //*************************************************************************************************
@@ -7956,7 +8445,7 @@ TEST_EX( TypeOverrides, ParameterOverride_OutputPOD )
 /*
  * Check expectation generation of a function with parameter override of type POD.
  */
-TEST_EX( TypeOverrides, ParameterOverride_MemoryBuffer )
+TEST_EX( TypeOverrides, ParameterOverride_MemoryBuffer_FromPointer )
 {
     // Prepare
     const std::string argExprFront = "(";
@@ -7991,6 +8480,82 @@ TEST_EX( TypeOverrides, ParameterOverride_MemoryBuffer )
         SimpleString testHeader =
                 "struct Struct1 { int a; };\n"
                 "unsigned long function1(const signed int* p1, struct Struct1* p2, signed char* p3, short p4);\n";
+
+        // Exercise
+        std::vector<std::string> resultsProto;
+        std::vector<std::string> resultsImpl;
+        unsigned int functionCount = ParseHeader( testHeader, *config, resultsProto, resultsImpl );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, resultsProto.size() );
+        SimpleString expectedResultProto =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<struct Struct1 *> p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<struct Struct1 *> p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__);\n"
+                "}\n";
+        SimpleString expectedResultImpl =
+                "namespace expect {\n"
+                "MockExpectedCall& function1(CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<struct Struct1 *> p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+                "    return function1(1, p1, p2, __sizeof_p2, p3, __sizeof_p3, p4, __return__);\n"
+                "}\n"
+                "MockExpectedCall& function1(unsigned int __numCalls__, CppUMockGen::Parameter<const int *> p1, CppUMockGen::Parameter<struct Struct1 *> p2, size_t __sizeof_p2, signed char * p3, size_t __sizeof_p3, CppUMockGen::Parameter<short> p4, unsigned long __return__)\n{\n"
+                "    bool __ignoreOtherParams__ = false;\n"
+                "    MockExpectedCall& __expectedCall__ = mock().expectNCalls(__numCalls__, \"function1\");\n"
+                "    if(p1.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withConstPointerParameter(\"p1\", p1.getValue()); }\n"
+                "    if(p2.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withMemoryBufferParameter(\"p2\", static_cast<const unsigned char *>(static_cast<const void *>((p2.getValue()))), __sizeof_p2); }\n"
+                "    __expectedCall__.withOutputParameterReturning(\"p3\", p3, __sizeof_p3);\n"
+                "    if(p4.isIgnored()) { __ignoreOtherParams__ = true; } else { __expectedCall__.withIntParameter(\"p4\", p4.getValue()); }\n"
+                "    __expectedCall__.andReturnValue(__return__);\n"
+                "    if(__ignoreOtherParams__) { __expectedCall__.ignoreOtherParameters(); }\n"
+                "    return __expectedCall__;\n"
+                "}\n"
+                "}\n";
+        STRCMP_EQUAL( expectedResultProto.asCharString(), resultsProto[0].c_str() );
+        STRCMP_EQUAL( expectedResultImpl.asCharString(), resultsImpl[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckExpectationCompilation( testHeader.asCharString(), resultsProto[0], resultsImpl[0] ) );
+    }
+}
+
+/*
+ * Check expectation generation of a function with parameter override of type POD.
+ */
+TEST_EX( TypeOverrides, ParameterOverride_MemoryBuffer_FromArray )
+{
+    // Prepare
+    const std::string argExprFront = "(";
+    const std::string argExprBack = ")";
+    const std::string sizeExprFront = "whatever!";
+    const std::string sizeExprBack = "don't care";
+
+    mock().installCopier( "std::string", stdStringCopier );
+
+    for( auto hasPlaceholder : { true, false } )
+    {
+        Config* config = GetMockConfig();
+        const Config::OverrideSpec* override = GetMockConfig_OverrideSpec(1);
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p1", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p2", override );
+        expect::Config$::GetTypeOverride( config, "function1#p3", nullptr );
+        expect::Config$::GetTypeOverride( config, "function1#p4", nullptr );
+
+        expect::Config$::GetTypeOverride( config, "@unsigned long", nullptr );
+        expect::Config$::GetTypeOverride( config, "#const int *", nullptr );
+        expect::Config$::GetTypeOverride( config, "#signed char *", nullptr );
+        expect::Config$::GetTypeOverride( config, "#short", nullptr );
+
+        expect::Config$::OverrideSpec$::GetType( override, MockedType::MemoryBuffer );
+        expect::Config$::OverrideSpec$::GetExprModFront( override, &argExprFront );
+        expect::Config$::OverrideSpec$::GetExprModBack( override, &argExprBack );
+        expect::Config$::OverrideSpec$::HasSizeExprPlaceholder( override, hasPlaceholder );
+        expect::Config$::OverrideSpec$::GetSizeExprFront( override, &sizeExprFront );
+        expect::Config$::OverrideSpec$::GetSizeExprBack( override, &sizeExprBack );
+
+        SimpleString testHeader =
+                "struct Struct1 { int a; };\n"
+                "unsigned long function1(const signed int* p1, struct Struct1 p2[], signed char* p3, short p4);\n";
 
         // Exercise
         std::vector<std::string> resultsProto;
