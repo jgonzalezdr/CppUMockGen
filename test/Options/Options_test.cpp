@@ -989,7 +989,8 @@ TEST( OptionsFromCommandLine, NonExistingOption )
 
     // Verify
     CHECK_TRUE( exceptionThrown );
-    STRCMP_CONTAINS( "Option 'non-existing' does not exist", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "non-existing", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "does not exist", exceptionMessage.c_str() );
 }
 
 TEST( OptionsFromString, Empty )
@@ -1082,7 +1083,8 @@ TEST( OptionsFromString, NonExistingOption )
 
     // Verify
     CHECK_TRUE( exceptionThrown );
-    STRCMP_CONTAINS( "Option 'non-existing' does not exist", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "non-existing", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "does not exist", exceptionMessage.c_str() );
 }
 
 /*
@@ -1254,7 +1256,8 @@ TEST( OptionsFromConfigFile, NonExistingOption )
 
     // Verify
     CHECK_TRUE( exceptionThrown );
-    STRCMP_CONTAINS( "Option 'non-existing' does not exist", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "non-existing", exceptionMessage.c_str() );
+    STRCMP_CONTAINS( "does not exist", exceptionMessage.c_str() );
 }
 
 /*
