@@ -109,14 +109,14 @@ static void ProcessParams( const std::vector<std::string> &params, cxxopts::Opti
     if( params.size() > 1 )
     {
         int argc = (int) params.size();
-        char *argv[ argc ];
-        char **argvp = argv;
+        std::vector<char*> argv;
 
         for( int i = 0; i < argc; i++ )
         {
-            argv[ i ] = (char *) params[ i ].c_str();
+            argv.push_back( (char *) params[ i ].c_str() );
         }
 
+        char **argvp = argv.data();
         options.parse( argc, argvp );
     }
 }
