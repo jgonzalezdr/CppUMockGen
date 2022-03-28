@@ -351,7 +351,7 @@ void Parser::GenerateFileHeading( const std::string &genOpts, std::ostream &outp
     if( !genOpts.empty() )
     {
         output << " *" << std::endl;
-        output << " * Generation options: " << genOpts << std::endl;
+        output << " * " GENERATION_OPTIONS_LABEL " " << genOpts << std::endl;
     }
     output << " */" << std::endl;
     output << std::endl;

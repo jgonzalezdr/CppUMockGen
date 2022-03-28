@@ -28,7 +28,7 @@ if( BUILD_TESTING )
     # Test modules
 
     add_subdirectory( App )
-    add_subdirectory( ConfigFile )
+    add_subdirectory( Options )
     add_subdirectory( Parser )
     add_subdirectory( Config )
     add_subdirectory( Function_Mock_CPP )

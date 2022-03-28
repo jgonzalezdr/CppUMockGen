@@ -85,7 +85,7 @@ TEST_GROUP( OutputFileParser )
  *===========================================================================*/
 
 /*
- * Check that user code is obtained property from the file.
+ * Check that user code is obtained properly from the file.
  */
 TEST( OutputFileParser, UserCode_Simple )
 {
@@ -110,6 +110,8 @@ TEST( OutputFileParser, UserCode_Simple )
 
         // Verify
         STRCMP_EQUAL( "This is the user code\n", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -122,7 +124,7 @@ TEST( OutputFileParser, UserCode_Simple )
 }
 
 /*
- * Check that user code is obtained property from the file.
+ * Check that user code is obtained properly from the file.
  */
 TEST( OutputFileParser, UserCode_Complex )
 {
@@ -151,6 +153,7 @@ TEST( OutputFileParser, UserCode_Complex )
 
         // Verify
         STRCMP_EQUAL( "This is the user code\n...spanning more...\nthan one line\n", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -189,6 +192,7 @@ TEST( OutputFileParser, EmptyUserCode )
 
         // Verify
         STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -228,6 +232,7 @@ TEST( OutputFileParser, NoUserCode )
 
         // Verify
         STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -267,6 +272,7 @@ TEST( OutputFileParser, NoUserCodeBeginMark )
 
         // Verify
         STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -306,6 +312,125 @@ TEST( OutputFileParser, NoUserCodeEndMark )
 
         // Verify
         STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser instance deletion" )
+
+        // Exercise
+        delete( outputFileParser );
+
+    SUBTEST_END
+}
+
+/*
+ * Check that generation options are obtained properly from the file.
+ */
+TEST( OutputFileParser, GenerationOptions_Simple )
+{
+    SUBTEST_BEGIN( "OutputFileParser instance creation" )
+
+        // Exercise
+        OutputFileParser *outputFileParser = new OutputFileParser();
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser::Parse invocation" )
+
+        // Prepare
+        SimpleString fileContents =
+                "/*\n"
+                " * " GENERATION_OPTIONS_LABEL "These are the generation options\n"
+                " */\n";
+        SetupTempFile( fileContents );
+
+        // Exercise
+        outputFileParser->Parse( tempFilePath );
+
+        // Verify
+        STRCMP_EQUAL( "These are the generation options", outputFileParser->GetGenerationOptions().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser instance deletion" )
+
+        // Exercise
+        delete( outputFileParser );
+
+    SUBTEST_END
+}
+
+/*
+ * Check that generation options are obtained properly from the file.
+ */
+TEST( OutputFileParser, GenerationOptions_Complex )
+{
+    SUBTEST_BEGIN( "OutputFileParser instance creation" )
+
+        // Exercise
+        OutputFileParser *outputFileParser = new OutputFileParser();
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser::Parse invocation" )
+
+        // Prepare
+        SimpleString fileContents =
+                "Whatever\n"
+                "/*\n"
+                "  // " GENERATION_OPTIONS_LABEL " -f These are the generation options  \n"
+                " */\n";
+        SetupTempFile( fileContents );
+
+        // Exercise
+        outputFileParser->Parse( tempFilePath );
+
+        // Verify
+        STRCMP_EQUAL( " -f These are the generation options  ", outputFileParser->GetGenerationOptions().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser instance deletion" )
+
+        // Exercise
+        delete( outputFileParser );
+
+    SUBTEST_END
+}
+
+/*
+ * Check that generation options are obtained properly from the file.
+ */
+TEST( OutputFileParser, Combination )
+{
+    SUBTEST_BEGIN( "OutputFileParser instance creation" )
+
+        // Exercise
+        OutputFileParser *outputFileParser = new OutputFileParser();
+
+    SUBTEST_END
+
+    SUBTEST_BEGIN( "OutputFileParser::Parse invocation" )
+
+        // Prepare
+        SimpleString fileContents =
+                "/*\n"
+                " * " GENERATION_OPTIONS_LABEL "These are the generation options\n"
+                " */\n"
+                "// " USER_CODE_BEGIN "\n"
+                "This is the user code\n"
+                "// " USER_CODE_END "\n";
+        SetupTempFile( fileContents );
+
+        // Exercise
+        outputFileParser->Parse( tempFilePath );
+
+        // Verify
+        STRCMP_EQUAL( "This is the user code\n", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "These are the generation options", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 
@@ -337,6 +462,7 @@ TEST( OutputFileParser, NonExistingInputFile )
 
         // Verify
         STRCMP_EQUAL( "", outputFileParser->GetUserCode().c_str() );
+        STRCMP_EQUAL( "", outputFileParser->GetGenerationOptions().c_str() );
 
     SUBTEST_END
 

@@ -3,7 +3,7 @@
  *
  * Contents will NOT be preserved if it is regenerated!!!
  *
- * Generation options: -s c++17 -t "@std::string=String" -t "#const std::string &=String~$.c_str()" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
+ * Generation options: -s c++17 -t "#const std::string &=String~$.c_str()" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
  */
 
 #include <CppUMockGen.hpp>
@@ -23,7 +23,12 @@ MockExpectedCall& Parse(unsigned int __numCalls__, CppUMockGen::Parameter<const 
 } }
 
 namespace expect { namespace OutputFileParser$ {
-MockExpectedCall& GetUserCode(CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string & __return__);
-MockExpectedCall& GetUserCode(unsigned int __numCalls__, CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string & __return__);
+MockExpectedCall& GetUserCode(CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string * __return__);
+MockExpectedCall& GetUserCode(unsigned int __numCalls__, CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string * __return__);
+} }
+
+namespace expect { namespace OutputFileParser$ {
+MockExpectedCall& GetGenerationOptions(CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string * __return__);
+MockExpectedCall& GetGenerationOptions(unsigned int __numCalls__, CppUMockGen::Parameter<const OutputFileParser*> __object__, const std::string * __return__);
 } }
 

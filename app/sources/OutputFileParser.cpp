@@ -14,9 +14,9 @@
 
 static const std::regex g_userCodeBeginRegex( "(?:\\/\\/|\\/\\*)\\s*" USER_CODE_BEGIN );
 static const std::regex g_userCodeEndRegex( "(?:\\/\\/|\\/\\*)\\s*" USER_CODE_END );
+static const std::regex g_generationOptionsRegex( GENERATION_OPTIONS_LABEL "(.*)" );
 
 OutputFileParser::OutputFileParser()
-: m_captureUserCode( false )
 {
 }
 
@@ -25,8 +25,14 @@ const std::string& OutputFileParser::GetUserCode() const
     return m_userCode;
 }
 
+const std::string& OutputFileParser::GetGenerationOptions() const
+{
+    return m_generationOptions;
+}
+
 void OutputFileParser::Parse( const std::filesystem::path &filepath )
 {
+    bool captureUserCode;
     std::string line;
 
     std::ifstream outputFile( filepath );
@@ -34,29 +40,35 @@ void OutputFileParser::Parse( const std::filesystem::path &filepath )
     {
         while( getline( outputFile, line ) )
         {
-            ParseLine( line );
+            ParseLine( line, captureUserCode );
         }
         outputFile.close();
     }
 
-    if( m_captureUserCode )
+    if( captureUserCode )
     {
         // User code is not properly delimited => ignore it.
         m_userCode.clear();
     }
 }
 
-void OutputFileParser::ParseLine( const std::string &line )
+void OutputFileParser::ParseLine( const std::string &line, bool &captureUserCode )
 {
+    std::smatch regexMatch;
+
     if( std::regex_search( line, g_userCodeBeginRegex ) )
     {
-        m_captureUserCode = true;
+        captureUserCode = true;
     }
     else if( std::regex_search( line, g_userCodeEndRegex ) )
     {
-        m_captureUserCode = false;
+        captureUserCode = false;
     }
-    else if( m_captureUserCode )
+    else if( std::regex_search( line, regexMatch, g_generationOptionsRegex ) )
+    {
+        m_generationOptions = regexMatch[1].str();
+    }
+    else if( captureUserCode )
     {
         m_userCode += line + "\n";
     }

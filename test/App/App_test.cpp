@@ -14,6 +14,8 @@
 #include <map>
 #include <functional>
 
+#include "Options_expect.hpp"
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
 
@@ -99,6 +101,8 @@ static void CheckFileContains( const std::string &filepath, const std::string &c
     STRCMP_EQUAL( contents.c_str(), strStream.str().c_str() );
 }
 
+static const std::string EMPTY_STRING;
+
 /*===========================================================================
  *                          TEST GROUP DEFINITION
  *===========================================================================*/
@@ -148,17 +152,21 @@ TEST( App, Help )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-h" };
+    int argc = 33;
+    const char* argv[] = { "don't", "care" };
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetHelpText( IgnoreParameter::YES, "###HELP_TEXT###" );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
-    STRCMP_CONTAINS( "FooBar\nUsage:\n  CppUMockGenFoo", output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_CONTAINS( "###HELP_TEXT###", output.str().c_str() );
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -171,17 +179,21 @@ TEST( App, Version )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-v" };
+    int argc = 22;
+    const char* argv[] = { "don't", "care" };
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, true );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "CppUMockGenFoo vF.O.O", output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -194,20 +206,24 @@ TEST( App, NoInput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-x" };
+    int argc = 0;
+    const char* argv[] = { "don't", "care" };
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, "" );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( "No input file specified", error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", output.str().c_str() );
 }
 
 /*
@@ -220,21 +236,27 @@ TEST( App, NoOutput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str() };
+    int argc = 99;
+    const char* argv[] = { "don't", "care" };
 
-     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified",
                      error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", output.str().c_str() );
 }
 
 /*
@@ -253,8 +275,10 @@ TEST( App, MockOutput_OutDir_WithEndingPathSeparator )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 1;
+    const char* argv[] = { "don't", "care" };
+
     std::string outDirPathStr = outDirPath.generic_string();
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outDirPathStr.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -262,25 +286,41 @@ TEST( App, MockOutput_OutDir_WithEndingPathSeparator )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outDirPathStr.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, "" );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -299,35 +339,53 @@ TEST( App, MockOutput_OutDir_WithoutEndingPathSeparator )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outDirPathStr = outDirPath.generic_string();
     outDirPathStr.pop_back();
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outDirPathStr.c_str() };
-
+    
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####TEXT1#####";
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outDirPathStr.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, "" );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ( "Mock generated into '" + outputFilepath1 + "'" ).c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -348,7 +406,8 @@ TEST( App, MockOutput_NoOutFile )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename, "-m" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -357,25 +416,41 @@ TEST( App, MockOutput_NoOutFile )
 
     std::filesystem::current_path( tempDirPath );
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilename.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), "", &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilename + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -391,10 +466,11 @@ TEST( App, MockOutput_OutFile_CppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_mock.cpp" ).generic_string();
     std::filesystem::remove( outputFilepath1 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -403,25 +479,41 @@ TEST( App, MockOutput_OutFile_CppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -437,10 +529,11 @@ TEST( App, MockOutput_OutFile_CcExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_mock.cc" ).generic_string();
     std::filesystem::remove( outputFilepath1 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepath1.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -449,25 +542,41 @@ TEST( App, MockOutput_OutFile_CcExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -483,12 +592,13 @@ TEST( App, MockOutput_OutFile_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my_mock.hpp").generic_string();
 
     outputFilepath1 = (outDirPath / "my_mock.hpp.cpp" ).generic_string();
     std::filesystem::remove( outputFilepath1 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -497,25 +607,41 @@ TEST( App, MockOutput_OutFile_OtherExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -531,12 +657,13 @@ TEST( App, MockOutput_OutFile_NoExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my_mock").generic_string();
 
     outputFilepath1 = (outDirPath / "my_mock.cpp" ).generic_string();
     std::filesystem::remove( outputFilepath1 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -545,26 +672,42 @@ TEST( App, MockOutput_OutFile_NoExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
     //CHECK_EQUAL( 0, 1 );
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText );
-
-    // Cleanup
 }
 
 /*
@@ -580,25 +723,42 @@ TEST( App, MockOutput_ConsoleOutput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####TEXT4#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -614,27 +774,38 @@ TEST( App, MockOutput_CannotOpenFile )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::filesystem::path nonExistantDirPath = (outDirPath / "NonExistantDirectory123898876354874" / "");
     std::string nonExistantDirpathStr = nonExistantDirPath.generic_string();
     std::string outputFilepathStr = (nonExistantDirPath / mockOutputFilename).generic_string();
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", nonExistantDirpathStr.c_str() };
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, nonExistantDirpathStr.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
 
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepathStr.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, "" );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
    // Exercise
-   int ret = app.Execute( (int) args.size(), args.data() );
+   int ret = app.Execute( argc, argv );
 
    // Verify
    CHECK_EQUAL( 1, ret );
    STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
    STRCMP_CONTAINS( ("Mock output file '" + outputFilepathStr + "' could not be opened").c_str(), error.str().c_str() );
-   CHECK_EQUAL( 0, output.tellp() );
-
-    // Cleanup
+   STRCMP_EQUAL( "", output.str().c_str() );
 }
 
 /*
@@ -650,27 +821,44 @@ TEST( App, MockOutput_InterpretAsCpp_CppHeader )
     std::ostringstream error;
     App app( output, error );
 
-    std::string inputFilenameCpp = "foo.hpp";
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilenameCpp.c_str(), "-m", "@" };
+    std::string inputFilenameCpp = "foo.hpp";
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilenameCpp.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilenameCpp.c_str(), IgnoreParameter::YES, true, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -686,25 +874,42 @@ TEST( App, MockOutput_InterpretAsCpp_Forced )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "--cpp" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, true );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( true, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-x", "", "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -720,25 +925,42 @@ TEST( App, MockOutput_LanguageStandard )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "--std", "lang-std" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "lang-std" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "lang-std", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-s lang-std", "", "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -754,25 +976,42 @@ TEST( App, MockOutput_UseUnderlyingTypedefType )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-u" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, true );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", true, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-u", "", "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -788,31 +1027,48 @@ TEST( App, MockOutput_IncludePaths )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-I", "IncludePath1", "-I", "IncludePath2" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths = { "IncludePath1", "IncludePath2" };
     std::string outputText = "#####FOO#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
  * Check that include parameter override options are passed properly to the configuration
  */
-TEST( App, MockOutput_specificTypeOverrideOptions )
+TEST( App, MockOutput_TypeOverrideOptions )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -822,31 +1078,48 @@ TEST( App, MockOutput_specificTypeOverrideOptions )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-t", "foo#bar=String", "-t", "foo@=Int/&$" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
-    std::vector<std::string> typeOverrideOptions = { "foo#bar=String", "foo@=Int/&$" };
+    std::vector<std::string> typeOverrideOptions = { "foo#bar=String", "foo@=Int/&$", "#foo=String", "@const bar=Int/&$" };
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"foo#bar=String\" -t \"foo@=Int/&$\"", "", "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
- * Check that type parameter override options are passed properly to the configuration
+ * Check that generation options are passed for expectations generation.
  */
-TEST( App, MockOutput_genericTypeOverrideOptions )
+TEST( App, MockOutput_GenerationOptions )
 {
     // Prepare
     mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
@@ -856,29 +1129,46 @@ TEST( App, MockOutput_genericTypeOverrideOptions )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-t", "#foo=String", "-t", "@const bar=Int/&$" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
-    std::vector<std::string> typeOverrideOptions = { "#foo=String", "@const bar=Int/&$" };
+    std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText = "#####FOO#####";
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "-t ####SOME_OPTIONS#### -f whatever" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
-    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t \"#foo=String\" -t \"@const bar=Int/&$\"", "", "", &outputText );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "-t ####SOME_OPTIONS#### -f whatever", "", "", &outputText );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( outputText.c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
- * Check that mock generation is requested properly and printed to console
+ * Check that if the input file cannot be parsed successfully, an error is displayed
  */
 TEST( App, MockOutput_ParseError )
 {
@@ -890,25 +1180,42 @@ TEST( App, MockOutput_ParseError )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, false );
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 2, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Output could not be generated due to errors parsing the input file '" + inputFilename + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", output.str().c_str() );
 }
 
 /*
@@ -930,8 +1237,10 @@ TEST( App, ExpectationOutput_OutDir )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outDirPathStr = outDirPath.generic_string();
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outDirPathStr.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -940,6 +1249,24 @@ TEST( App, ExpectationOutput_OutDir )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outDirPathStr.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
@@ -947,17 +1274,15 @@ TEST( App, ExpectationOutput_OutDir )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -983,7 +1308,8 @@ TEST( App, ExpectationOutput_NoOutFile )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename, "-e" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -992,6 +1318,24 @@ TEST( App, ExpectationOutput_NoOutFile )
 
     std::filesystem::current_path( tempDirPath );
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText1 );
@@ -999,17 +1343,15 @@ TEST( App, ExpectationOutput_NoOutFile )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilename1 + "' and '" + outputFilename2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -1025,13 +1367,14 @@ TEST( App, ExpectationOutput_OutFile_HppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_expect.hpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
     outputFilepath2 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath2 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath1.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1040,6 +1383,24 @@ TEST( App, ExpectationOutput_OutFile_HppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
@@ -1047,17 +1408,15 @@ TEST( App, ExpectationOutput_OutFile_HppExtension )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -1073,13 +1432,14 @@ TEST( App, ExpectationOutput_OutFile_CppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_expect.hpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
     outputFilepath2 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath2 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath2.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1088,6 +1448,24 @@ TEST( App, ExpectationOutput_OutFile_CppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepath2.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText1 );
@@ -1095,17 +1473,15 @@ TEST( App, ExpectationOutput_OutFile_CppExtension )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -1121,6 +1497,9 @@ TEST( App, ExpectationOutput_OutFile_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my_expect.foo").generic_string();
 
     outputFilepath1 = (outDirPath / "my_expect.foo.hpp").generic_string();
@@ -1129,14 +1508,30 @@ TEST( App, ExpectationOutput_OutFile_OtherExtension )
     outputFilepath2 = (outDirPath / "my_expect.foo.cpp").generic_string();
     std::filesystem::remove( outputFilepath2 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1145,17 +1540,15 @@ TEST( App, ExpectationOutput_OutFile_OtherExtension )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -1171,6 +1564,9 @@ TEST( App, ExpectationOutput_OutFile_NoExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my_expect").generic_string();
 
     outputFilepath1 = (outDirPath / "my_expect.hpp").generic_string();
@@ -1179,14 +1575,30 @@ TEST( App, ExpectationOutput_OutFile_NoExtension )
     outputFilepath2 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath2 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT43#####";
     std::string outputText2 = "#####TEXT83#####";
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1195,17 +1607,15 @@ TEST( App, ExpectationOutput_OutFile_NoExtension )
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath1 + "' and '" + outputFilepath2 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
-
-    // Cleanup
 }
 
 /*
@@ -1221,12 +1631,31 @@ TEST( App, ExpectationOutput_ConsoleOutput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "@" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT4455#####";
     std::string outputText2 = "#####TEXT5642#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1234,14 +1663,12 @@ TEST( App, ExpectationOutput_ConsoleOutput )
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText2 );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( (outputText1 + outputText2).c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -1257,22 +1684,137 @@ TEST( App, ExpectationOutput_CannotOpenFile )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputDir = (outDirPath / "NonExistantDirectory123898876354874" / "").generic_string();
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputDir.c_str() };
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputDir.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
 
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Expectation header output file '" + outputDir + expectationHeaderOutputFilename + "' could not be opened").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
+}
 
-    // Cleanup
+/*
+ * Check that generation options are passed for expectations generation.
+ */
+TEST( App, ExpectationOutput_GenerationOptions )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####TEXT4455#####";
+    std::string outputText2 = "#####TEXT5642#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "-t ####SOME_OPTIONS#### -f whatever" );
+
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "-t ####SOME_OPTIONS#### -f whatever", "", &outputText1 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "-t ####SOME_OPTIONS#### -f whatever", "@", &outputText2 );
+
+    // Exercise
+    int ret = app.Execute( argc, argv );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_EQUAL( (outputText1 + outputText2).c_str(), output.str().c_str() );
+    STRCMP_EQUAL( "", error.str().c_str() );
+}
+
+/*
+ * Check that if the input file cannot be parsed successfully, an error is displayed
+ */
+TEST( App, ExpectationOutput_ParseError )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, false );
+    expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( argc, argv );
+
+    // Verify
+    CHECK_EQUAL( 2, ret );
+    STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Output could not be generated due to errors parsing the input file '" + inputFilename + "'").c_str(), error.str().c_str() );
+    STRCMP_EQUAL( "", output.str().c_str() );
 }
 
 /*
@@ -1288,6 +1830,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Both )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathMock = (outDirPath / "my_mock").generic_string();
     std::string outputFilepathExpect = (outDirPath / "my_expect").generic_string();
 
@@ -1300,8 +1845,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Both )
     outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-e", outputFilepathExpect.c_str(), "-m", outputFilepathMock.c_str(), "-i", inputFilename.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT0943#####";
@@ -1311,10 +1854,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Both )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathMock.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathExpect.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1322,19 +1883,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Both )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1360,8 +1919,10 @@ TEST( App, CombinedMockAndExpectationOutput_OutDir )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outDirPathStr = outDirPath.generic_string();
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outDirPathStr.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1372,10 +1933,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutDir )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outDirPathStr.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1383,19 +1962,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutDir )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1426,7 +2003,8 @@ TEST( App, CombinedMockAndExpectationOutput_NoOutFile )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename, "-e", "-m" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1437,10 +2015,28 @@ TEST( App, CombinedMockAndExpectationOutput_NoOutFile )
 
     std::filesystem::current_path( tempDirPath );
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilename1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename, IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), "", &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", "", &outputText2 );
@@ -1448,19 +2044,17 @@ TEST( App, CombinedMockAndExpectationOutput_NoOutFile )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilename1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilename2 + "' and '" + outputFilename3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1476,6 +2070,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_CppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
@@ -1484,8 +2081,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_CppExtension )
 
     outputFilepath3 = (outDirPath / "my_mock_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", outputFilepath1.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1496,10 +2091,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_CppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1507,19 +2120,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_CppExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1535,6 +2146,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_HppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_expect_mock.cpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
@@ -1543,8 +2157,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_HppExtension )
 
     outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepath2.c_str(), "-m" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1555,10 +2167,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_HppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepath2.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1566,19 +2196,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_HppExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1594,6 +2222,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_CppExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     outputFilepath1 = (outDirPath / "my_expect_mock.cpp").generic_string();
     std::filesystem::remove( outputFilepath1 );
 
@@ -1602,8 +2233,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_CppExtension )
 
     outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
-
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outputFilepath3.c_str() };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
@@ -1614,10 +2243,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_CppExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepath3.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1625,19 +2272,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_CppExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1653,6 +2298,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my.foo").generic_string();
 
     outputFilepath1 = (outDirPath / "my.foo.cpp").generic_string();
@@ -1664,8 +2312,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_OtherExtension )
     outputFilepath3 = (outDirPath / "my.foo_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", outputFilepathOther.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT743#####";
@@ -1675,10 +2321,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_OtherExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1686,19 +2350,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_OtherExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1714,6 +2376,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_NoExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my").generic_string();
 
     outputFilepath1 = (outDirPath / "my.cpp").generic_string();
@@ -1725,8 +2390,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_NoExtension )
     outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-e", "-i", inputFilename.c_str(), "-m", outputFilepathOther.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT043#####";
@@ -1736,10 +2399,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_NoExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1747,19 +2428,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Mock_NoExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1775,6 +2454,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_OtherExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my.foo").generic_string();
 
     outputFilepath1 = (outDirPath / "my.foo_mock.cpp").generic_string();
@@ -1786,8 +2468,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_OtherExtension )
     outputFilepath3 = (outDirPath / "my.foo.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", outputFilepathOther.c_str() };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT743A#####";
@@ -1797,10 +2477,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_OtherExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1808,19 +2506,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_OtherExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1836,6 +2532,9 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_NoExtension )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string outputFilepathOther = (outDirPath / "my").generic_string();
 
     outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
@@ -1847,8 +2546,6 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_NoExtension )
     outputFilepath3 = (outDirPath / "my.cpp").generic_string();
     std::filesystem::remove( outputFilepath3 );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", outputFilepathOther.c_str(), "-m" };
-
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT043#####";
@@ -1858,10 +2555,28 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_NoExtension )
 
     std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
 
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathOther.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::OutputFileParser$::OutputFileParser$ctor();
     expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
-    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, userCode );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &userCode );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
     expect::Parser$::GenerateMock( IgnoreParameter::YES, "", userCode.c_str(), expectedBaseDirPath.c_str(), &outputText1 );
     expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "", expectedBaseDirPath.c_str(), &outputText2 );
@@ -1869,19 +2584,17 @@ TEST( App, CombinedMockAndExpectationOutput_OutFile_Expect_NoExtension )
     expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
     STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
     STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
     CheckFileContains( outputFilepath1, outputText1 );
     CheckFileContains( outputFilepath2, outputText2 );
     CheckFileContains( outputFilepath3, outputText3 );
-
-    // Cleanup
 }
 
 /*
@@ -1897,13 +2610,32 @@ TEST( App, CombinedMockAndExpectationOutput_Mock_ConsoleOutput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "-m", "@" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT44553#####";
     std::string outputText2 = "#####TEXT56424#####";
     std::string outputText3 = "#####TEXT12345#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1912,14 +2644,12 @@ TEST( App, CombinedMockAndExpectationOutput_Mock_ConsoleOutput )
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -1935,13 +2665,32 @@ TEST( App, CombinedMockAndExpectationOutput_Expect_ConsoleOutput )
     std::ostringstream error;
     App app( output, error );
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-e", "@", "-m" };
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####TEXT453#####";
     std::string outputText2 = "#####TEXT524#####";
     std::string outputText3 = "#####TEXT125#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1950,14 +2699,12 @@ TEST( App, CombinedMockAndExpectationOutput_Expect_ConsoleOutput )
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -1973,15 +2720,34 @@ TEST( App, MockOutput_BaseDirectory )
     std::ostringstream error;
     App app( output, error );
 
-    std::string baseDirectory = outDirPath.parent_path().generic_string();
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "-e", "@", "-B", baseDirectory.c_str() };
+    std::string baseDirectory = outDirPath.parent_path().generic_string();
 
     std::vector<std::string> typeOverrideOptions;
     std::vector<std::string> includePaths;
     std::string outputText1 = "#####FOO1#####";
     std::string outputText2 = "#####FOO2#####";
     std::string outputText3 = "#####FOO3#####";
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, "@" );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, "" );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, baseDirectory.c_str() );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, false );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
 
     expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
     expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
@@ -1990,14 +2756,12 @@ TEST( App, MockOutput_BaseDirectory )
     expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", "@", &outputText3 );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 0, ret );
     STRCMP_EQUAL( (outputText1 + outputText2 + outputText3).c_str(), output.str().c_str() );
-    CHECK_EQUAL( 0, error.tellp() );
-
-    // Cleanup
+    STRCMP_EQUAL( "", error.str().c_str() );
 }
 
 /*
@@ -2013,20 +2777,280 @@ TEST( App, MockOutput_BaseDirectory_NotExists )
     std::ostringstream error;
     App app( output, error );
 
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
     std::string baseDirectory = ( outDirPath / "NonExistantDirectory123898876354874" ).generic_string();
 
-    std::vector<const char *> args = { "CppUMockGen.exe", "-i", inputFilename.c_str(), "-m", "@", "-B", baseDirectory.c_str() };
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, baseDirectory.c_str() );
 
     expect::ConsoleColorizer$::SetColor( 2, IgnoreParameter::YES, IgnoreParameter::YES );
 
     // Exercise
-    int ret = app.Execute( (int) args.size(), args.data() );
+    int ret = app.Execute( argc, argv );
 
     // Verify
     CHECK_EQUAL( 1, ret );
     STRCMP_CONTAINS( "ERROR:", error.str().c_str() );
     STRCMP_CONTAINS( ("Base directory path '" + baseDirectory + "' is not an existing directory").c_str(), error.str().c_str() );
-    CHECK_EQUAL( 0, output.tellp() );
+    STRCMP_EQUAL( "", output.str().c_str() );
+}
 
-    // Cleanup
+/*
+ * Check that regeneration is handled properly.
+ */
+TEST( App, Regeneration_FromMock )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
+    std::string outputFilepathMock = (outDirPath / "my_mock").generic_string();
+    std::string outputFilepathExpect = (outDirPath / "my_expect").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####FOO1#####";
+    std::string outputText2 = "#####FOO2#####";
+    std::string outputText3 = "#####FOO3#####";
+    std::string generationOptions = "~~~GENERATION OPTIONS 12344===";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathMock.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathExpect.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, true );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
+    expect::OutputFileParser$::OutputFileParser$ctor();
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &generationOptions );
+    expect::Options$::Parse( IgnoreParameter::YES, generationOptions.c_str() );
+
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "",  expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "",  expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( argc, argv );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    STRCMP_EQUAL( "", output.str().c_str() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+}
+
+/*
+ * Check that regeneration is handled properly.
+ */
+TEST( App, Regeneration_FromExpectationHeader )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
+    std::string outputFilepathMock = (outDirPath / "my_mock").generic_string();
+    std::string outputFilepathExpect = (outDirPath / "my_expect").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####FOO1#####";
+    std::string outputText2 = "#####FOO2#####";
+    std::string outputText3 = "#####FOO3#####";
+    std::string generationOptions = "~~~GENERATION OPTIONS 12344===";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathMock.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathExpect.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, true );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
+    expect::OutputFileParser$::OutputFileParser$ctor(2);
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath2.c_str() );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &generationOptions );
+    expect::Options$::Parse( IgnoreParameter::YES, generationOptions.c_str() );
+
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "",  expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "",  expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( argc, argv );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    STRCMP_EQUAL( "", output.str().c_str() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
+}
+
+/*
+ * Check that regeneration is handled properly.
+ */
+TEST( App, Regeneration_FromExpectationImpl )
+{
+    // Prepare
+    mock().installComparator( "std::vector<std::string>", stdVectorOfStringsComparator );
+    mock().installCopier( "std::ostream", stdOstreamCopier );
+
+    std::ostringstream output;
+    std::ostringstream error;
+    App app( output, error );
+
+    int argc = 2;
+    const char* argv[] = { "don't", "care" };
+
+    std::string outputFilepathMock = (outDirPath / "my_mock").generic_string();
+    std::string outputFilepathExpect = (outDirPath / "my_expect").generic_string();
+
+    outputFilepath1 = (outDirPath / "my_mock.cpp").generic_string();
+    std::filesystem::remove( outputFilepath1 );
+
+    outputFilepath2 = (outDirPath / "my_expect.hpp").generic_string();
+    std::filesystem::remove( outputFilepath2 );
+
+    outputFilepath3 = (outDirPath / "my_expect.cpp").generic_string();
+    std::filesystem::remove( outputFilepath3 );
+
+    std::vector<std::string> typeOverrideOptions;
+    std::vector<std::string> includePaths;
+    std::string outputText1 = "#####FOO1#####";
+    std::string outputText2 = "#####FOO2#####";
+    std::string outputText3 = "#####FOO3#####";
+    std::string generationOptions = "~~~GENERATION OPTIONS 12344===";
+
+    std::string expectedBaseDirPath = outDirPath.parent_path().generic_string();
+
+    expect::Options$::Options$ctor();
+    expect::Options$::Parse( IgnoreParameter::YES, argc, argv );
+    expect::Options$::IsHelpRequested( IgnoreParameter::YES, false );
+    expect::Options$::IsVersionRequested( IgnoreParameter::YES, false );
+    expect::Options$::GetInputPath( IgnoreParameter::YES, inputFilename.c_str() );
+    expect::Options$::IsMockRequested( IgnoreParameter::YES, true );
+    expect::Options$::IsExpectationsRequested( IgnoreParameter::YES, true );
+    expect::Options$::GetMockOutputPath( IgnoreParameter::YES, outputFilepathMock.c_str() );
+    expect::Options$::GetExpectationsOutputPath( IgnoreParameter::YES, outputFilepathExpect.c_str() );
+    expect::Options$::GetBaseDirectory( IgnoreParameter::YES, "" );
+    expect::Options$::IsRegenerationRequested( IgnoreParameter::YES, true );
+    expect::Options$::InterpretAsCpp( IgnoreParameter::YES, false );
+    expect::Options$::GetLanguageStandard( IgnoreParameter::YES, "" );
+    expect::Options$::UseUnderlyingTypedef( IgnoreParameter::YES, false );
+    expect::Options$::GetTypeOverrides( IgnoreParameter::YES, typeOverrideOptions );
+    expect::Options$::GetIncludePaths( IgnoreParameter::YES, includePaths );
+    expect::Options$::GetGenerationOptions( IgnoreParameter::YES, "" );
+
+    expect::OutputFileParser$::OutputFileParser$ctor(3);
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath1.c_str() );
+    expect::OutputFileParser$::GetUserCode( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath2.c_str() );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &EMPTY_STRING );
+    expect::OutputFileParser$::Parse( IgnoreParameter::YES, outputFilepath3.c_str() );
+    expect::OutputFileParser$::GetGenerationOptions( IgnoreParameter::YES, &generationOptions );
+    expect::Options$::Parse( IgnoreParameter::YES, generationOptions.c_str() );
+
+    expect::Config$::Config$ctor( false, "", false, typeOverrideOptions );
+    expect::Parser$::Parse( IgnoreParameter::YES, inputFilename.c_str(), IgnoreParameter::YES, false, includePaths, &error, true );
+    expect::Parser$::GenerateMock( IgnoreParameter::YES, "", "",  expectedBaseDirPath.c_str(), &outputText1 );
+    expect::Parser$::GenerateExpectationHeader( IgnoreParameter::YES, "",  expectedBaseDirPath.c_str(), &outputText2 );
+    expect::Parser$::GenerateExpectationImpl( IgnoreParameter::YES, "", outputFilepath2.c_str(), &outputText3 );
+    expect::ConsoleColorizer$::SetColor( 4, IgnoreParameter::YES, IgnoreParameter::YES );
+
+    // Exercise
+    int ret = app.Execute( argc, argv );
+
+    // Verify
+    CHECK_EQUAL( 0, ret );
+    STRCMP_CONTAINS( "SUCCESS:", error.str().c_str() );
+    STRCMP_CONTAINS( ("Mock generated into '" + outputFilepath1 + "'").c_str(), error.str().c_str() );
+    STRCMP_CONTAINS( ("Expectations generated into '" + outputFilepath2 + "' and '" + outputFilepath3 + "'").c_str(), error.str().c_str() );
+    STRCMP_EQUAL( "", output.str().c_str() );
+    CheckFileContains( outputFilepath1, outputText1 );
+    CheckFileContains( outputFilepath2, outputText2 );
+    CheckFileContains( outputFilepath3, outputText3 );
 }

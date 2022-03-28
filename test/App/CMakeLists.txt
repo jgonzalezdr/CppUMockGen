@@ -12,12 +12,13 @@ include_directories(
 set( PROD_SRC_FILES
      ${PROD_SOURCE_DIR}/sources/App.cpp
      ${PROD_SOURCE_DIR}/sources/FileHelper.cpp
-     ${PROD_SOURCE_DIR}/sources/ConfigFile.cpp
      ${PROD_SOURCE_DIR}/sources/StringHelper.cpp
 )
 
 set( TEST_SRC_FILES
      App_test.cpp
+     ${MOCKS_DIR}/Options_mock.cpp
+     ${EXPECTATIONS_DIR}/Options_expect.cpp
      ${MOCKS_DIR}/Parser_mock.cpp
      ${EXPECTATIONS_DIR}/Parser_expect.cpp
      ${MOCKS_DIR}/ConsoleColorizer_mock.cpp

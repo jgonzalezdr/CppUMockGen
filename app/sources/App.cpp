@@ -15,13 +15,11 @@
 #include <set>
 #include <filesystem>
 
-#include <cxxopts.hpp>
-
-#include "Parser.hpp"
+#include "Options.hpp"
 #include "Config.hpp"
+#include "Parser.hpp"
 #include "ConsoleColorizer.hpp"
 #include "FileHelper.hpp"
-#include "ConfigFile.hpp"
 #include "OutputFileParser.hpp"
 
 #include "VersionInfo.h"
@@ -42,51 +40,6 @@ void App::PrintError( const char *msg ) noexcept
     m_cerr << "ERROR: ";
     cerrColorizer.SetColor( ConsoleColorizer::Color::RESET );
     m_cerr << msg << std::endl;
-}
-
-static std::string QuotifyOption( const std::string &option ) noexcept
-{
-    if( option.find_first_of(" \t=&|,;^%@$!#*?(){}[]<>\\") != std::string::npos )
-    {
-        return "\"" + option + "\"";
-    }
-    else
-    {
-        return option;
-    }
-}
-
-static std::string GetGenerationOptions( cxxopts::Options &options ) noexcept
-{
-    std::string ret;
-
-    if( options["cpp"].as<bool>() )
-    {
-        ret += "-x ";
-    }
-
-    if( ( options["std"].count() > 0 ) && !options["std"].as<std::string>().empty() )
-    {
-        ret += "-s " + QuotifyOption( options["std"].as<std::string>() ) + " ";
-    }
-
-    if( options["underlying-typedef"].as<bool>() )
-    {
-        ret += "-u ";
-    }
-
-    for( auto typeOverride : options["type-override"].as<std::vector<std::string>>() )
-    {
-        ret += "-t " + QuotifyOption( typeOverride ) + " ";
-    }
-
-    // Delete the trailing whitespace
-    if( !ret.empty() )
-    {
-        ret.pop_back();
-    }
-
-    return ret;
 }
 
 static std::filesystem::path CombinePath( const std::filesystem::path &path, const char* fileSuffix )
@@ -117,82 +70,49 @@ int App::Execute( int argc, const char* argv[] ) noexcept
 {
     int returnCode = 0;
 
-    cxxopts::Options options( PRODUCT_NAME, PRODUCT_FILE_DESCRIPTION );
-
-    options.add_options()
-        ( "i,input", "Input file path", cxxopts::value<std::string>(), "<input>" )
-        ( "m,mock-output", "Mock output directory or file path", cxxopts::value<std::string>()->implicit_value( "" ), "<mock-output>" )
-        ( "e,expect-output", "Expectation output directory or file path", cxxopts::value<std::string>()->implicit_value( "" ), "<expect-output>" )
-        ( "x,cpp", "Force interpretation of the input file as C++", cxxopts::value<bool>(), "<force-cpp>" )
-        ( "s,std", "Set language standard", cxxopts::value<std::string>(), "<standard>" )
-        ( "u,underlying-typedef", "Use underlying typedef type", cxxopts::value<bool>(), "<underlying-typedef>" )
-        ( "I,include-path", "Include path", cxxopts::value<std::vector<std::string>>(), "<path>" )
-        ( "B,base-directory", "Base directory path", cxxopts::value<std::string>(), "<path>" )
-        ( "t,type-override", "Type override", cxxopts::value<std::vector<std::string>>(), "<expr>" )
-        ( "f,config-file", "Config file", cxxopts::value<std::vector<std::string>>(), "<file-path>" )
-        ( "v,version", "Print version" )
-        ( "h,help", "Print help" );
-
-    options.positional_help( "<input>" );
-    options.parse_positional( std::vector<std::string> { "input" } );
+    Options options;
 
     try
     {
-        options.parse( argc, const_cast<char**&>(argv) );
+        options.Parse( argc, argv );
 
-        ProcessConfigFiles( options );
-
-        if( options.count("help") > 0 )
+        if( options.IsHelpRequested() )
         {
-            m_cout << options.help(); // LCOV_EXCL_BR_LINE: False positive
+            m_cout << options.GetHelpText();
             return 0;
         }
 
-        if( options.count("version") > 0  )
+        if( options.IsVersionRequested() )
         {
             m_cout << PRODUCT_NAME " v" PRODUCT_VERSION_STR << std::endl;
             return 0;
         }
 
-        if( options.count( "input" ) <= 0 )
+        std::filesystem::path inputFilePath = options.GetInputPath();
+        if( inputFilePath.empty() )
         {
             throw std::runtime_error( "No input file specified." );
         }
 
-        std::filesystem::path inputFilePath = options["input"].as<std::string>();
-
-        if( ( options.count( "mock-output" ) + options.count( "expect-output" ) ) <= 0 )
+        bool generateMock = options.IsMockRequested();
+        bool generateExpectation = options.IsExpectationsRequested();
+        if( !( generateMock || generateExpectation ) )
         {
             throw std::runtime_error( "At least the mock generation option (-m) or the expectation generation option (-e) must be specified." );
         }
 
-        std::filesystem::path baseDirPath;
-        if( options.count( "base-directory" ) > 0 )
+        std::filesystem::path baseDirPath = options.GetBaseDirectory();
+        if( !baseDirPath.empty() && !IsDirPath( baseDirPath ) )
         {
-            baseDirPath = options["base-directory"].as<std::string>();
-            if( !IsDirPath( baseDirPath ) )
-            {
-                std::string errorMsg = "Base directory path '" + baseDirPath.generic_string() + "' is not an existing directory.";
-                throw std::runtime_error( errorMsg );
-            }
+            std::string errorMsg = "Base directory path '" + baseDirPath.generic_string() + "' is not an existing directory.";
+            throw std::runtime_error( errorMsg );
         }
 
-        bool generateMock = false;
-        std::filesystem::path mockOutputFilePath;
-        if( options.count( "mock-output" ) > 0 )
-        {
-            mockOutputFilePath = options["mock-output"].as<std::string>();
-            generateMock = true;
-        }
+        bool regenerate = options.IsRegenerationRequested();
+        std::string regenerateOptions;
 
-        bool generateExpectation = false;
-        std::filesystem::path expectationHeaderOutputFilePath;
-        if( options.count( "expect-output" ) > 0 )
-        {
-            expectationHeaderOutputFilePath = options["expect-output"].as<std::string>();
-            generateExpectation = true;
-        }
-
+        std::filesystem::path mockOutputFilePath = options.GetMockOutputPath();
+        std::filesystem::path expectationHeaderOutputFilePath = options.GetExpectationsOutputPath();
         if( generateMock && generateExpectation )
         {
             // Use common mock/expection generation path if one is passed explicitly but not the other.
@@ -226,6 +146,10 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                 OutputFileParser outputFileParser;
                 outputFileParser.Parse( mockOutputFilePath );
                 mockUserCode = outputFileParser.GetUserCode();
+                if( regenerate )
+                {
+                    regenerateOptions = outputFileParser.GetGenerationOptions();
+                }
 
                 mockOutputStream.open( mockOutputFilePath );
                 if( !mockOutputStream.is_open() )
@@ -270,6 +194,20 @@ int App::Execute( int argc, const char* argv[] ) noexcept
                     throw std::runtime_error( errorMsg );
                 }
 
+                if( regenerate && regenerateOptions.empty() )
+                {
+                    OutputFileParser headerFileParser;
+                    headerFileParser.Parse( expectationHeaderOutputFilePath );
+                    regenerateOptions = headerFileParser.GetGenerationOptions();
+
+                    if( regenerateOptions.empty() )
+                    {
+                        OutputFileParser implFileParser;
+                        implFileParser.Parse( expectationImplOutputFilePath );
+                        regenerateOptions = implFileParser.GetGenerationOptions();
+                    }
+                }
+
                 expectationImplOutputStream.open( expectationImplOutputFilePath );
                 // LCOV_EXCL_START: Defensive
                 if( !expectationImplOutputStream.is_open() )
@@ -281,18 +219,23 @@ int App::Execute( int argc, const char* argv[] ) noexcept
             }
         }
 
+        if( regenerate )
+        {
+            options.Parse( regenerateOptions );
+        }
+
         bool isCppHeader = HasCppHeaderExtension( inputFilePath );
 
-        Config config( options["cpp"].as<bool>(),
-                       options["std"].as<std::string>(),
-                       options["underlying-typedef"].as<bool>(),
-                       options["type-override"].as<std::vector<std::string>>() );
+        Config config( options.InterpretAsCpp(),
+                       options.GetLanguageStandard(),
+                       options.UseUnderlyingTypedef(),
+                       options.GetTypeOverrides() );
 
-        std::string genOpts = GetGenerationOptions( options );
+        std::string genOpts = options.GetGenerationOptions();
 
         Parser parser;
 
-        if( parser.Parse( inputFilePath, config, isCppHeader, options["include-path"].as<std::vector<std::string>>(), m_cerr ) )
+        if( parser.Parse( inputFilePath, config, isCppHeader, options.GetIncludePaths(), m_cerr ) )
         {
             if( generateMock )
             {

@@ -13,8 +13,9 @@
 #include <filesystem>
 #include <string>
 
-#define USER_CODE_BEGIN "CPPUMOCKGEN_USER_CODE_BEGIN"
-#define USER_CODE_END   "CPPUMOCKGEN_USER_CODE_END"
+#define USER_CODE_BEGIN             "CPPUMOCKGEN_USER_CODE_BEGIN"
+#define USER_CODE_END               "CPPUMOCKGEN_USER_CODE_END"
+#define GENERATION_OPTIONS_LABEL    "Generation options:"
 
 class OutputFileParser
 {
@@ -25,11 +26,13 @@ public:
 
     const std::string& GetUserCode() const;
 
-private:
-    void ParseLine( const std::string &line );
+    const std::string& GetGenerationOptions() const;
 
-    bool m_captureUserCode;
+private:
+    void ParseLine( const std::string &line, bool &captureUserCode );
+
     std::string m_userCode;
+    std::string m_generationOptions;
 };
 
 #endif // header guard

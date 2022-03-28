@@ -3,7 +3,7 @@
  *
  * Only contents in the user code section will be preserved if it is regenerated!!!
  *
- * Generation options: -s c++17 -t "@std::string=String" -t "#const std::string &=String~$.c_str()" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
+ * Generation options: -s c++17 -t "#const std::string &=String~$.c_str()" -t "#const std::filesystem::path &=String~$.generic_string().c_str()"
  */
 
 #include "OutputFileParser.hpp"
@@ -26,5 +26,10 @@ void OutputFileParser::Parse(const std::filesystem::path & filepath)
 const std::string & OutputFileParser::GetUserCode() const
 {
     return *static_cast<const std::string*>(mock().actualCall("OutputFileParser::GetUserCode").onObject(this).returnConstPointerValue());
+}
+
+const std::string & OutputFileParser::GetGenerationOptions() const
+{
+    return *static_cast<const std::string*>(mock().actualCall("OutputFileParser::GetGenerationOptions").onObject(this).returnConstPointerValue());
 }
 

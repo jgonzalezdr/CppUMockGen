@@ -25,7 +25,7 @@ set( SRC_LIST
      sources/ConsoleColorizer.cpp
      sources/Config.cpp
      sources/FileHelper.cpp
-     sources/ConfigFile.cpp
+     sources/Options.cpp
      sources/StringHelper.cpp
      sources/OutputFileParser.cpp
 )
@@ -41,7 +41,7 @@ set( INC_LIST
      sources/ConsoleColorizer.hpp
      sources/Config.hpp
      sources/FileHelper.hpp
-     sources/ConfigFile.hpp
+     sources/Options.hpp
      sources/StringHelper.hpp
      sources/OutputFileParser.hpp
      include/CppUMockGen.hpp
