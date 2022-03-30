@@ -5,6 +5,8 @@
 # Load functions from the helper file
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path) 'appveyor_helpers.ps1')
 
+$ExitCode = 0
+
 function Publish-TestResults($files)
 {
     $anyFailures = $FALSE
@@ -42,7 +44,7 @@ function Publish-TestResults($files)
     if ($anyFailures -eq $TRUE)
     {
         Write-Host -ForegroundColor Red "Failing build as there are broken tests"
-        $host.SetShouldExit(1)
+        Set-Variable -Name ExitCode -Scope script -Value 1
     }
 }
 
@@ -113,3 +115,6 @@ if (!($env:Test -eq 'False'))
         Write-Host "Tests Ran: $TestCount"
     }
 }
+
+$host.SetShouldExit($ExitCode)
+exit $ExitCode

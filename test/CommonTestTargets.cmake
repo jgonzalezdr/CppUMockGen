@@ -1,5 +1,9 @@
 if( CI_MODE OR MSVC )
-    set( IGNORE_ERROR || exit /b 0 )
+    if( WIN32 )
+        set( IGNORE_ERROR || exit /b 0 )
+    else()
+        set( IGNORE_ERROR || true )
+    endif()
 endif()
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/" )
