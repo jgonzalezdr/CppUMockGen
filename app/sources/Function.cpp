@@ -1607,7 +1607,6 @@ ArgumentStandard* ArgumentParser::ProcessTypePointer( const CXType &argType, con
             switch( underlyingPointeeType.kind )
             {
                 case CXType_Void:
-                case CXType_Pointer: // TODO: Remove, should be output
                     ret = new ArgumentPointer( false );
                     break;
 
