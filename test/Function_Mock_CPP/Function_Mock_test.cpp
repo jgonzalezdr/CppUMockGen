@@ -328,7 +328,7 @@ TEST_EX( Generic, NoReturnExplicitVoidParameter )
 //*************************************************************************************************
 
 //*************************************************************************************************
-//                                          Basic Return
+//                                        Simple Return
 //*************************************************************************************************
 
 /*
@@ -530,7 +530,7 @@ TEST_EX( Return, Struct )
 }
 
 //*************************************************************************************************
-//                                       Basic Typedef Return
+//                                     Simple Typedef Return
 //*************************************************************************************************
 
 /*
@@ -727,7 +727,7 @@ TEST_EX( Return, TypedefForStruct )
 }
 
 //*************************************************************************************************
-//                                       Basic Pointer Return
+//                                     Simple Pointer Return
 //*************************************************************************************************
 
 /*
@@ -1067,7 +1067,87 @@ TEST_EX( Return, PointerToConstStruct )
 }
 
 //*************************************************************************************************
-//                                   Left-Value Reference Return
+//                                     Pointer to Pointer Return
+//*************************************************************************************************
+
+/*
+ * Check mock generation of a function without parameters and returning a non-const pointer to a pointer.
+ */
+TEST_EX( Return, PointerToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "@%s **", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "%s* *function1();", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "%s ** function1()\n{\n"
+            "    return static_cast<%s **>(mock().actualCall(\"function1\").returnPointerValue());\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a const pointer to a pointer.
+ */
+TEST_EX( Return, ConstPointerToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "@%s *const *", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "%s* const *function1();", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "%s *const * function1()\n{\n"
+            "    return static_cast<%s *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
+//                               Simple Left-Value Reference Return
 //*************************************************************************************************
 
 #ifndef INTERPRET_C
@@ -1331,6 +1411,86 @@ TEST_EX( Return, LVReferenceToConstStruct )
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
+}
+
+//*************************************************************************************************
+//                             Left-Value Reference to Pointer Return
+//*************************************************************************************************
+
+/*
+ * Check mock generation of a function without parameters and returning a left-value reference to a non-const pointer.
+ */
+TEST_EX( Return, LVReferenceToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "@%s *&", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "%s* &function1();", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "%s *& function1()\n{\n"
+            "    return *static_cast<%s **>(mock().actualCall(\"function1\").returnPointerValue());\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function without parameters and returning a left-value reference to a const pointer.
+ */
+TEST_EX( Return, LVReferenceToConstPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "@%s *const &", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1@", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "%s* const &function1();", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "%s *const & function1()\n{\n"
+            "    return *static_cast<%s *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
+            "}\n", type.c_str(), type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
 }
 
 //*************************************************************************************************
@@ -2254,157 +2414,7 @@ TEST_EX( Return, TypedefForRVReferenceToPrimitiveType )
 #endif
 
 //*************************************************************************************************
-//                                     Pointer to Pointer Return
-//*************************************************************************************************
-
-/*
- * Check mock generation of a function without parameters and returning a non-const pointer to a non-const pointer.
- */
-TEST_EX( Return, PointerToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "@int **", nullptr );
-
-    SimpleString testHeader = "int* *function1();";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "int ** function1()\n{\n"
-                  "    return static_cast<int **>(mock().actualCall(\"function1\").returnPointerValue());\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function without parameters and returning a non-const pointer to a const pointer.
- */
-TEST_EX( Return, PointerToConstPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "@const unsigned char **", nullptr );
-
-    SimpleString testHeader = "const unsigned char* *function1();";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "const unsigned char ** function1()\n{\n"
-                  "    return static_cast<const unsigned char **>(mock().actualCall(\"function1\").returnPointerValue());\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function without parameters and returning a const pointer to a non-const pointer.
- */
-TEST_EX( Return, ConstPointerToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "@short *const *", nullptr );
-
-    SimpleString testHeader = "short* const *function1();";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "short *const * function1()\n{\n"
-                  "    return static_cast<short *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-//*************************************************************************************************
-//                             Left-Value Reference to Pointer Return
-//*************************************************************************************************
-
-#ifndef INTERPRET_C
-/*
- * Check mock generation of a function without parameters and returning a left-value reference to a non-const pointer.
- */
-TEST_EX( Return, LVReferenceToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "@double *&", nullptr );
-
-    SimpleString testHeader = "double* &function1();";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "double *& function1()\n{\n"
-                  "    return *static_cast<double **>(mock().actualCall(\"function1\").returnPointerValue());\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function without parameters and returning a left-value reference to a const pointer.
- */
-TEST_EX( Return, LVReferenceToConstPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1@", nullptr );
-    expect::Config$::GetTypeOverride( config, "@bool *const &", nullptr );
-
-    SimpleString testHeader = "bool* const &function1();";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "bool *const & function1()\n{\n"
-                  "    return *static_cast<bool *const*>(mock().actualCall(\"function1\").returnConstPointerValue());\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-#endif
-
-//*************************************************************************************************
-//                                Typedef for Basic Typedef Return
+//                                Typedef for Simple Typedef Return
 //*************************************************************************************************
 
 /*
@@ -3577,6 +3587,86 @@ TEST_EX( Parameter, PointerToConstStruct )
 }
 
 //*************************************************************************************************
+//                                 Pointer to Pointer Parameters
+//*************************************************************************************************
+
+/*
+ * Check mock generation of a function with a pointer to a pointer parameter and without return value.
+ */
+TEST_EX( Parameter, PointerToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "#%s **", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#param", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* * param);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "void function1(%s ** param)\n{\n"
+            "    mock().actualCall(\"function1\").withOutputParameter(\"param\", param);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function with a const pointer to a pointer parameter and without return value.
+ */
+TEST_EX( Parameter, ConstPointerToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "#%s *const *", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "functionY#arg", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void functionY(%s* const * arg);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "void functionY(%s *const * arg)\n{\n"
+            "    mock().actualCall(\"functionY\").withConstPointerParameter(\"arg\", arg);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
 //                              Simple Array Parameters
 //*************************************************************************************************
 
@@ -3691,6 +3781,86 @@ TEST_EX( Parameter, ArrayOfConstTypes )
             "    mock().actualCall(\"function1\").withConstPointerParameter(\"p\", p);\n"
             "}\n", typeData.mockedType.c_str() );
         STRCMP_EQUAL( expectedResult.asCharString(), results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+//*************************************************************************************************
+//                           Array of Pointers Parameters
+//*************************************************************************************************
+
+/*
+ * Check mock generation of a function with an array of pointer parameters and without return value.
+ */
+TEST_EX( Parameter, ArrayOfPointers )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        auto typeOverride = StringFromFormat( "#%s *[]", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
+        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* i[]);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "void function1(%s * i[])\n{\n"
+            "    mock().actualCall(\"function1\").withOutputParameter(\"i\", i);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function with an array of const pointers parameter and without return value.
+ */
+TEST_EX( Parameter, ArrayOfConstPointers )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        auto typeOverride = StringFromFormat( "#%s *const []", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
+        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* const j[]);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat( 
+            "void function1(%s *const j[])\n{\n"
+            "    mock().actualCall(\"function1\").withConstPointerParameter(\"j\", j);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
         CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
         // Cleanup
@@ -3973,6 +4143,86 @@ TEST_EX( Parameter, LVReferenceToConstStruct )
     CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
 
     // Cleanup
+}
+
+//*************************************************************************************************
+//                           Left-Value Reference to Pointer Parameters
+//*************************************************************************************************
+
+/*
+ * Check mock generation of a function with a left-value reference to a pointer parameter and without return value.
+ */
+TEST_EX( Parameter, LVReferenceToPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "#%s *&", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* &i);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "void function1(%s *& i)\n{\n"
+            "    mock().actualCall(\"function1\").withOutputParameter(\"i\", &i);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
+}
+
+/*
+ * Check mock generation of a function with a left-value reference to a const pointer parameter and without return value.
+ */
+TEST_EX( Parameter, LVReferenceToConstPointer )
+{
+    const std::vector<std::string> types = { "void", "const void", "int", "const int", "struct ExternStruct", "const struct ExternStruct" };
+
+    for( auto type : types )
+    {
+        // Prepare
+        SimpleString typeKey = StringFromFormat( "#%s *const &", type.c_str() );
+
+        Config* config = GetMockConfig();
+        expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
+        expect::Config$::GetTypeOverride( config, typeKey.asCharString(), nullptr );
+
+        SimpleString testHeader = StringFromFormat( "void function1(%s* const &j);", type.c_str() );
+
+        // Exercise
+        std::vector<std::string> results;
+        unsigned int functionCount = ParseHeader( testHeader, *config, results );
+
+        // Verify
+        mock().checkExpectations();
+        CHECK_EQUAL( 1, functionCount );
+        CHECK_EQUAL( 1, results.size() );
+        STRCMP_EQUAL( StringFromFormat(
+            "void function1(%s *const & j)\n{\n"
+            "    mock().actualCall(\"function1\").withConstPointerParameter(\"j\", &j);\n"
+            "}\n", type.c_str() ).asCharString(),
+            results[0].c_str() );
+        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
+
+        // Cleanup
+        mock().clear();
+    }
 }
 
 //*************************************************************************************************
@@ -5136,237 +5386,7 @@ TEST_EX( Parameter, TypedefForReferenceToPrimitiveType )
 #endif
 
 //*************************************************************************************************
-//                                 Pointer to Pointer Parameters
-//*************************************************************************************************
-
-/*
- * Check mock generation of a function with a pointer to a pointer parameter and without return value.
- */
-TEST_EX( Parameter, PointerToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1#param", nullptr );
-    expect::Config$::GetTypeOverride( config, "#int **", nullptr );
-
-    SimpleString testHeader = "void function1(signed int* * param);";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(int ** param)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"param\", param);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function with a pointer to a const pointer parameter and without return value.
- */
-TEST_EX( Parameter, PointerToConstPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "functionX#x", nullptr );
-    expect::Config$::GetTypeOverride( config, "#const struct ExternStruct **", nullptr );
-
-    SimpleString testHeader = "void functionX(const struct ExternStruct* *x);";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void functionX(const struct ExternStruct ** x)\n{\n"
-                  "    mock().actualCall(\"functionX\").withPointerParameter(\"x\", x);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function with a const pointer to a pointer parameter and without return value.
- */
-TEST_EX( Parameter, ConstPointerToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "functionY#arg", nullptr );
-    expect::Config$::GetTypeOverride( config, "#short *const *", nullptr );
-
-    SimpleString testHeader = "void functionY(short* const * arg);";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void functionY(short *const * arg)\n{\n"
-                  "    mock().actualCall(\"functionY\").withConstPointerParameter(\"arg\", arg);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-//*************************************************************************************************
-//                           Array of Pointers Parameters
-//*************************************************************************************************
-
-/*
- * Check mock generation of a function with an array of pointer parameters and without return value.
- */
-TEST_EX( Parameter, ArrayOfPointers )
-{
-    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
-
-    for( auto type : types )
-    {
-        // Prepare
-        auto typeOverride = StringFromFormat( "#%s *[]", type.c_str() );
-
-        Config* config = GetMockConfig();
-        expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
-        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
-
-        SimpleString testHeader = StringFromFormat( "void function1(%s* i[]);", type.c_str() );
-
-        // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-        // Verify
-        mock().checkExpectations();
-        CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( StringFromFormat(
-            "void function1(%s * i[])\n{\n"
-            "    mock().actualCall(\"function1\").withOutputParameter(\"i\", i);\n"
-            "}\n", type.c_str() ).asCharString(),
-            results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-        // Cleanup
-        mock().clear();
-    }
-}
-
-/*
- * Check mock generation of a function with an array of const pointers parameter and without return value.
- */
-TEST_EX( Parameter, ArrayOfConstPointers )
-{
-    const std::vector<std::string> types = { "void", "const void", "int", "const int" };
-
-    for( auto type : types )
-    {
-        // Prepare
-        auto typeOverride = StringFromFormat( "#%s *const []", type.c_str() );
-
-        Config* config = GetMockConfig();
-        expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
-        expect::Config$::GetTypeOverride( config, typeOverride.asCharString(), nullptr );
-
-        SimpleString testHeader = StringFromFormat( "void function1(%s* const j[]);", type.c_str() );
-
-        // Exercise
-        std::vector<std::string> results;
-        unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-        // Verify
-        mock().checkExpectations();
-        CHECK_EQUAL( 1, functionCount );
-        CHECK_EQUAL( 1, results.size() );
-        STRCMP_EQUAL( StringFromFormat( 
-            "void function1(%s *const j[])\n{\n"
-            "    mock().actualCall(\"function1\").withConstPointerParameter(\"j\", j);\n"
-            "}\n", type.c_str() ).asCharString(),
-            results[0].c_str() );
-        CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-        // Cleanup
-        mock().clear();
-    }
-}
-
-//*************************************************************************************************
-//                           Left-Value Reference to Pointer Parameters
-//*************************************************************************************************
-
-#ifndef INTERPRET_C
-/*
- * Check mock generation of a function with a left-value reference to a pointer parameter and without return value.
- */
-TEST_EX( Parameter, LVReferenceToPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1#i", nullptr );
-    expect::Config$::GetTypeOverride( config, "#double *&", nullptr );
-
-    SimpleString testHeader = "void function1(double* &i);";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(double *& i)\n{\n"
-                  "    mock().actualCall(\"function1\").withPointerParameter(\"i\", &i);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-
-/*
- * Check mock generation of a function with a left-value reference to a const pointer parameter and without return value.
- */
-TEST_EX( Parameter, LVReferenceToConstPointer )
-{
-    // Prepare
-    Config* config = GetMockConfig();
-    expect::Config$::GetTypeOverride( config, "function1#j", nullptr );
-    expect::Config$::GetTypeOverride( config, "#bool *const &", nullptr );
-
-    SimpleString testHeader = "void function1(bool* const &j);";
-
-    // Exercise
-    std::vector<std::string> results;
-    unsigned int functionCount = ParseHeader( testHeader, *config, results );
-
-    // Verify
-    mock().checkExpectations();
-    CHECK_EQUAL( 1, functionCount );
-    CHECK_EQUAL( 1, results.size() );
-    STRCMP_EQUAL( "void function1(bool *const & j)\n{\n"
-                  "    mock().actualCall(\"function1\").withConstPointerParameter(\"j\", &j);\n"
-                  "}\n", results[0].c_str() );
-    CHECK_TRUE( ClangCompileHelper::CheckMockCompilation( testHeader.asCharString(), results[0] ) );
-
-    // Cleanup
-}
-#endif
-
-//*************************************************************************************************
-//                                Typedef for Basic Typedef Parameters
+//                                Typedef for Simple Typedef Parameters
 //*************************************************************************************************
 
 /*
