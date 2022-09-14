@@ -1,10 +1,10 @@
-
 CppUMockGen
 ===========
 Mock generator for [CppUTest/CppUMock](http://cpputest.github.io/).
 
 [![Build status](https://ci.appveyor.com/api/projects/status/3ch50mcu29pgv5st/branch/master?svg=true)](https://ci.appveyor.com/project/jgonzalezdr/cppumockgen/branch/master)
 [![codecov](https://codecov.io/gh/jgonzalezdr/CppUMockGen/branch/master/graph/badge.svg)](https://codecov.io/gh/jgonzalezdr/CppUMockGen)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjgonzalezdr%2FCppUMockGen.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjgonzalezdr%2FCppUMockGen?ref=badge_shield)
 
 ## What is CppUMockGen?
 
@@ -238,3 +238,7 @@ If during configuration CMake cannot find some dependencies, their installation 
   - libClang: `-DLibClang_HOME=<Path to LLVM top directory>`
   - CppUTest: `-DCppUTest_HOME=<Path to CppUTest top directory>`
   - LCOV: `-Dlcov_HOME=<Path to LCOV top directory>`
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjgonzalezdr%2FCppUMockGen.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjgonzalezdr%2FCppUMockGen?ref=badge_large)
